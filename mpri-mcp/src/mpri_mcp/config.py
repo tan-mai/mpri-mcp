@@ -67,6 +67,9 @@ class Settings(BaseSettings):
     openai_temperature: float | None = None
 
     anthropic_api_key: SecretStr | None = None
+    anthropic_effort: str | None = Field(
+        "low", description="output_config.effort for Claude models; empty to omit (older models)."
+    )
 
     # --- Auth -----------------------------------------------------------------
     session_secret: SecretStr | None = Field(
@@ -97,6 +100,7 @@ class Settings(BaseSettings):
         "google_cloud_project",
         "openai_base_url",
         "database_url",
+        "anthropic_effort",
         mode="before",
     )
     @classmethod
