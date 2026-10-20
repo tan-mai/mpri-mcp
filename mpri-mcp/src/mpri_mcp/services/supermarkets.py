@@ -7,6 +7,7 @@ from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlalchemy import case, func, select
+from sqlalchemy.orm import selectinload
 
 from mpri_mcp.crawler.config import CrawlConfig
 from mpri_mcp.db import Database
@@ -162,3 +163,16 @@ async def delete_supermarket(db: Database, supermarket_id: str) -> None:
         if market is None:
             raise NotFoundError(f"Supermarket '{supermarket_id}' not found.")
         await s.delete(market)
+
+
+async def market_urls(db: Database, supermarket_id: str) -> list[ProductUrl]:
+    async with db.session() as s:
+        return list(
+            (
+                await s.scalars(
+                    select(ProductUrl)
+                    .where(ProductUrl.supermarket_id == supermarket_id)
+                    .options(selectinload(ProductUrl.product))
+                )
+            ).all()
+        )

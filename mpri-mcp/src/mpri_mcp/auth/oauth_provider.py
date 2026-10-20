@@ -31,7 +31,7 @@ from mcp.shared.auth import (
 )
 from mcp.shared.auth import OAuthToken as OAuthTokenResponse
 from pydantic import AnyUrl
-from sqlalchemy import delete, or_, update
+from sqlalchemy import delete, func, or_, select, update
 
 from mpri_mcp.config import Settings
 from mpri_mcp.db import Database
@@ -92,6 +92,17 @@ class MpriClient(OAuthClientInformationFull):
         if unknown:
             raise InvalidScopeError(f"Client was not registered with scope {' '.join(unknown)}")
         return requested
+
+
+@dataclass
+class ClientSummary:
+    client_id: str
+    name: str
+    redirect_uris: list[str]
+    created_at: datetime
+    last_used_at: datetime | None
+    revoked_at: datetime | None
+    active_grants: int
 
 
 @dataclass
@@ -429,6 +440,39 @@ class SqliteOAuthProvider:
                 await self._revoke_family(s, row.family_id)
 
     # ------------------------------------------------------------------ admin
+    async def list_clients(self) -> list[ClientSummary]:
+        now = utcnow()
+        async with self._db.session() as s:
+            clients = (
+                await s.scalars(select(OAuthClient).order_by(OAuthClient.created_at.desc()))
+            ).all()
+            active = dict(
+                (
+                    await s.execute(
+                        select(OAuthToken.client_id, func.count())
+                        .where(
+                            OAuthToken.kind == "refresh",
+                            OAuthToken.revoked_at.is_(None),
+                            OAuthToken.used_at.is_(None),
+                            OAuthToken.expires_at > now,
+                        )
+                        .group_by(OAuthToken.client_id)
+                    )
+                ).all()
+            )
+        return [
+            ClientSummary(
+                client_id=c.client_id,
+                name=c.client_name or "(unnamed)",
+                redirect_uris=list(c.info.get("redirect_uris") or []),
+                created_at=c.created_at,
+                last_used_at=c.last_used_at,
+                revoked_at=c.revoked_at,
+                active_grants=active.get(c.client_id, 0),
+            )
+            for c in clients
+        ]
+
     async def revoke_client(self, client_id: str) -> None:
         async with self._db.session() as s:
             row = await s.get(OAuthClient, client_id)

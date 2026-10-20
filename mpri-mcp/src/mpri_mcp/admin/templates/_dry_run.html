@@ -1,0 +1,29 @@
+{% if error %}
+<p class="form-error">{{ error }}</p>
+{% elif result %}
+<article>
+  {% if result.ok %}
+  <p><span class="badge badge-ok">extracted</span> <small class="muted">nothing was saved</small></p>
+  <table>
+    <tbody>
+      <tr><th>Current price</th><td class="num"><strong>{{ result.price.current_price | vnd }}</strong></td></tr>
+      <tr><th>Original price</th><td class="num">{{ result.price.original_price | vnd }}</td></tr>
+      <tr><th>Member price</th><td class="num">{{ result.price.member_price | vnd }}</td></tr>
+      <tr><th>In stock</th><td>{% if result.price.in_stock is none %}unknown{% elif result.price.in_stock %}yes{% else %}no{% endif %}</td></tr>
+    </tbody>
+  </table>
+  {% for note in result.notes %}<p><small class="muted">{{ note }}</small></p>{% endfor %}
+  {% else %}
+  <p><span class="badge badge-bad">failed</span> {{ result.error }}</p>
+  {% endif %}
+  {% if result.provider %}
+  <p><small class="muted">{{ result.provider }}/{{ result.model }} · {{ result.input_tokens | num }} in / {{ result.output_tokens | num }} out tokens{% if result.latency_ms %} · {{ result.latency_ms }} ms{% endif %}</small></p>
+  {% endif %}
+  {% if result.extraction %}
+  <details><summary><small>Raw AI answer</small></summary><pre class="result-box">{{ result.extraction | tojson(indent=2) }}</pre></details>
+  {% endif %}
+  {% if result.digest %}
+  <details><summary><small>What was sent to the AI ({{ result.digest.to_prompt() | length }} characters)</small></summary><pre class="result-box">{{ result.digest.to_prompt() }}</pre></details>
+  {% endif %}
+</article>
+{% endif %}

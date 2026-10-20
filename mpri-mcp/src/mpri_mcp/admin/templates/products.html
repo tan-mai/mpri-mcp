@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% set nav = "products" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<h2>Products</h2>
+<form method="get" action="/admin/products" role="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search, accents optional — e.g. sua th it duong" aria-label="Search products">
+</form>
+
+{% if items %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Product</th><th>Category</th><th class="num">Supermarkets</th><th>Added</th></tr></thead>
+    <tbody>
+    {% for i in items %}
+      <tr>
+        <td><a href="/admin/products/{{ i.product.id }}">{{ i.product.name }}</a></td>
+        <td>{{ i.product.category or "" }}</td>
+        <td class="num">{{ i.url_count }}</td>
+        <td class="nowrap">{{ i.product.created_at | dt("%Y-%m-%d") }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% elif q %}
+<p class="muted">No product matches "{{ q }}".</p>
+{% else %}
+<p class="muted">No products tracked yet.</p>
+{% endif %}
+
+<article>
+  <header><h3>Track a product</h3></header>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  {% if markets %}
+  <form method="post" action="/admin/products">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+    <div class="grid-2">
+      <label>Product name <input type="text" name="name" value="{{ form.get('name', '') }}" required placeholder="Thùng Sữa TH True Milk Ít Đường 110ml"></label>
+      <label>Category <input type="text" name="category" value="{{ form.get('category', '') }}" placeholder="optional"></label>
+    </div>
+    <p class="muted"><small>Paste the product page at each supermarket that sells it; leave the others empty.</small></p>
+    {% for m in markets %}
+    <label>{{ m.name }} <input type="url" name="url__{{ m.id }}" value="{{ form.get('url__' ~ m.id, '') }}" placeholder="{{ m.base_url }}/…"></label>
+    {% endfor %}
+    <button type="submit">Track product</button>
+  </form>
+  {% else %}
+  <p>Add a <a href="/admin/supermarkets">supermarket</a> first.</p>
+  {% endif %}
+</article>
+{% endblock %}

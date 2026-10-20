@@ -169,6 +169,11 @@ async def list_products(db: Database, query: str | None = None) -> list[ProductL
     return items
 
 
+async def count_products(db: Database) -> int:
+    async with db.session() as s:
+        return await s.scalar(select(func.count()).select_from(Product)) or 0
+
+
 async def update_product(
     db: Database, product_id: int, *, name: str, category: str | None
 ) -> Product:

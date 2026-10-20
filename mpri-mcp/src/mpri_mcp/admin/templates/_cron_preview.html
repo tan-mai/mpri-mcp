@@ -1,0 +1,3 @@
+{% if error %}<small class="form-error">{{ error }}</small>
+{% elif times %}<small>Next runs: {{ times | join(" · ") }}</small>
+{% else %}<small class="muted">Type a cron expression to preview it.</small>{% endif %}
