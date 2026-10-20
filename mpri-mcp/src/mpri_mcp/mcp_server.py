@@ -9,6 +9,7 @@ from pydantic import AnyHttpUrl
 
 from mpri_mcp import __version__
 from mpri_mcp.auth.oauth_provider import DbTokenVerifier, SqliteOAuthProvider
+from mpri_mcp.auth.oauth_routes import issuer_url
 from mpri_mcp.config import Settings
 from mpri_mcp.container import Container
 from mpri_mcp.tools.analytics_tools import register_analytics_tools
@@ -33,7 +34,7 @@ def build_mcp_server(container: Container, provider: SqliteOAuthProvider) -> MCP
         version=__version__,
         token_verifier=DbTokenVerifier(provider),
         auth=AuthSettings(
-            issuer_url=AnyHttpUrl(settings.issuer_url),
+            issuer_url=issuer_url(settings),
             resource_server_url=AnyHttpUrl(settings.mcp_resource_url),
             required_scopes=[settings.oauth_scope],
             validate_token_resource=True,

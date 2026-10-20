@@ -132,11 +132,11 @@ def test_unauthenticated_mcp_gets_401_with_metadata_pointer(client):
 def test_discovery_documents(client):
     prm = client.get("/.well-known/oauth-protected-resource/mcp").json()
     assert prm["resource"] == f"{BASE}/mcp"
-    assert prm["authorization_servers"][0].rstrip("/") == BASE
+    assert prm["authorization_servers"] == [BASE]  # exact: issuers compare as strings
     assert prm["scopes_supported"] == ["mpri"]
 
     meta = client.get("/.well-known/oauth-authorization-server").json()
-    assert meta["issuer"].rstrip("/") == BASE
+    assert meta["issuer"] == BASE
     assert meta["registration_endpoint"] == f"{BASE}/register"
     assert meta["code_challenge_methods_supported"] == ["S256"]
     assert "none" in meta["token_endpoint_auth_methods_supported"]
@@ -156,7 +156,7 @@ def test_full_flow_and_mcp_access(client):
     do_setup(client)
     reg, _, query, tokens = full_flow(client)
     assert query["state"] == ["state-123"]
-    assert query["iss"][0].rstrip("/") == BASE
+    assert query["iss"] == [BASE]
     assert tokens["token_type"] == "Bearer" and tokens["refresh_token"]
     assert tokens["scope"] == "mpri"
 
