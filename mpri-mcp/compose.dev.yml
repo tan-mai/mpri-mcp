@@ -1,0 +1,20 @@
+# Local development: the app alone on http://localhost:8000 (no TLS proxy).
+#   docker compose -f compose.dev.yml up --build
+services:
+  mpri-mcp:
+    build: .
+    env_file: .env
+    environment:
+      PUBLIC_BASE_URL: http://localhost:8000
+      LOG_JSON: "false"
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp-sa.json
+    ports:
+      - "8000:8000"
+    volumes:
+      - mpri_dev_data:/app/data
+      - ./secrets:/run/secrets:ro
+    init: true
+    shm_size: "1gb"
+
+volumes:
+  mpri_dev_data:
