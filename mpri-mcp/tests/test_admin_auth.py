@@ -82,7 +82,8 @@ def test_setup_once_then_dashboard(client):
     resp = do_setup(client)
     assert resp.status_code == 303 and resp.headers["location"] == "/admin"
     page = client.get("/admin")
-    assert page.status_code == 200 and "Signed in as tan" in page.text
+    assert page.status_code == 200 and "<h2>Overview</h2>" in page.text
+    assert ">tan</a>" in page.text  # signed-in admin shown in the nav
     assert "admin account is ready" in page.text  # flash message
     assert client.get("/admin/setup").status_code == 404
     assert client.post("/admin/setup", data={}).status_code == 404
