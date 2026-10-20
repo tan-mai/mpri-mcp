@@ -19,7 +19,14 @@ from starlette.responses import Response
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from mpri_mcp import __version__
-from mpri_mcp.admin import routes_auth, routes_consent, routes_pages
+from mpri_mcp.admin import (
+    routes_ai,
+    routes_auth,
+    routes_consent,
+    routes_markets,
+    routes_pages,
+    routes_products,
+)
 from mpri_mcp.admin.web import (
     STATIC_DIR,
     LoginRequired,
@@ -36,6 +43,7 @@ from mpri_mcp.container import Container
 from mpri_mcp.db import Database
 from mpri_mcp.log import configure_logging
 from mpri_mcp.mcp_server import build_mcp_server, transport_security
+from mpri_mcp.services.errors import NotFoundError
 
 log = logging.getLogger(__name__)
 
@@ -168,6 +176,10 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     async def _login_required(request: Request, exc: LoginRequired) -> Response:
         return RedirectResponse(login_redirect_url(exc.next_url), status_code=303)
 
+    @app.exception_handler(NotFoundError)
+    async def _not_found(request: Request, exc: NotFoundError) -> Response:
+        return render(request, "error.html", status_code=404, title="Not found", message=str(exc))
+
     @app.exception_handler(HTTPException)
     async def _http_error(request: Request, exc: HTTPException) -> Response:
         if request.url.path.startswith(_HTML_PREFIXES):
@@ -193,6 +205,9 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(routes_auth.router)
     app.include_router(routes_consent.router)
     app.include_router(routes_pages.router)
+    app.include_router(routes_markets.router)
+    app.include_router(routes_products.router)
+    app.include_router(routes_ai.router)
 
     @app.api_route("/admin/{rest:path}", methods=["GET", "POST"], include_in_schema=False)
     @app.api_route("/oauth/{rest:path}", methods=["GET", "POST"], include_in_schema=False)

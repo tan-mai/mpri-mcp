@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import run_badge, duration %}
+{% set nav = "runs" %}
+{% block title %}Run #{{ run.id }}{% endblock %}
+{% block content %}
+<hgroup>
+  <h2>Run #{{ run.id }} · {{ market.name }}</h2>
+  <p>{{ run_badge(run.status) }} {{ run.trigger }} · started {{ run.started_at | dt("%Y-%m-%d %H:%M:%S") }} · {{ duration(run) }} · {{ run.urls_ok }} ok, {{ run.urls_failed }} failed of {{ run.urls_total }}</p>
+</hgroup>
+{% if run.error %}<p class="form-error">{{ run.error }}</p>{% endif %}
+{% if items %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Status</th><th>URL</th><th>Error</th><th class="num">Time</th><th>AI</th><th class="num">Tokens in / out</th></tr></thead>
+    <tbody>
+    {% for i in items %}
+      <tr>
+        <td>{{ run_badge(i.status) }}</td>
+        <td><a href="{{ i.url }}" rel="noopener noreferrer" target="_blank"><small class="mono">{{ i.url | truncate(60) }}</small></a></td>
+        <td><small>{{ i.error or "" }}</small></td>
+        <td class="num">{% if i.duration_ms %}{{ (i.duration_ms / 1000) | round(1) }}s{% endif %}</td>
+        <td><small>{% if i.provider %}{{ i.provider }}/{{ i.model }}{% endif %}</small></td>
+        <td class="num">{% if i.input_tokens is not none %}{{ i.input_tokens | num }} / {{ i.output_tokens | num }}{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="muted">{% if run.status == "running" %}In progress — refresh to see results.{% else %}No URLs were crawled.{% endif %}</p>
+{% endif %}
+<p><a href="/admin/supermarkets/{{ market.id }}">← {{ market.name }}</a></p>
+{% endblock %}

@@ -21,6 +21,11 @@
 .site-header .main-nav li { padding-block: .35rem; }
 .site-header a[aria-current="page"] { font-weight: 700; text-decoration: underline; }
 .brand { text-decoration: none; }
+@media (max-width: 760px) {
+  .site-header nav { flex-direction: column; align-items: flex-start; }
+  .site-header .main-nav { justify-content: flex-start; margin-inline: 0; }
+  .site-header .main-nav li:first-child { padding-left: 0; }
+}
 .site-footer { padding-block: 1rem 2rem; }
 
 .inline-form { display: inline; margin: 0; }
@@ -37,9 +42,9 @@
 .form-error { color: var(--bad); font-weight: 600; }
 
 .grid-2 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
-.tiles { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); margin-bottom: 1.5rem; }
+.tiles { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); margin-bottom: 1.5rem; }
 .tile { margin: 0; padding: 1rem; }
-.tile .value { font-size: 1.6rem; font-weight: 700; display: block; font-variant-numeric: tabular-nums; }
+.tile .value { font-size: 1.6rem; font-weight: 700; display: block; }
 .tile .label { color: var(--pico-muted-color); font-size: .85rem; }
 
 .table-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
@@ -55,8 +60,46 @@ td, th { vertical-align: top; }
 .badge-failed, .badge-timeout, .badge-bad { color: var(--bad); }
 .badge-off, .badge-idle { color: var(--idle); }
 
-.chart-box { position: relative; height: 18rem; }
-.chart-box canvas { width: 100% !important; }
+/* Chart tokens: categorical slots validated (dataviz validator) on Pico's surfaces —
+   light #ffffff, dark #13171f. Light slots 3–5 are < 3:1, so the chart also ships a
+   table view and end-of-line labels. Colors follow the supermarket, never its rank. */
+.chart-root {
+  --chart-surface: #ffffff;
+  --chart-text: #0b0b0b;
+  --chart-text-secondary: #52514e;
+  --chart-muted: #898781;
+  --chart-grid: #e1e0d9;
+  --chart-axis: #c3c2b7;
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+  --series-5: #e87ba4; --series-6: #008300; --series-7: #6250d6; --series-8: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .chart-root {
+    --chart-surface: #13171f;
+    --chart-text: #f0efec;
+    --chart-text-secondary: #c3c2b7;
+    --chart-muted: #898781;
+    --chart-grid: #2c2c2a;
+    --chart-axis: #383835;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+    --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
+  }
+}
+:root[data-theme="dark"] .chart-root {
+  --chart-surface: #13171f;
+  --chart-text: #f0efec;
+  --chart-text-secondary: #c3c2b7;
+  --chart-muted: #898781;
+  --chart-grid: #2c2c2a;
+  --chart-axis: #383835;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+  --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
+}
+.chart-box { position: relative; height: 20rem; }
+.chart-range { display: flex; gap: .5rem; margin-bottom: .75rem; flex-wrap: wrap; }
+.chart-range button { width: auto; padding: .25rem .75rem; font-size: .85rem; margin: 0; }
+.chart-range button[aria-pressed="true"] { font-weight: 700; }
+.chart-empty { padding: 3rem 0; text-align: center; }
 details.config summary { font-weight: 600; }
 textarea.code { font-family: var(--pico-font-family-monospace); font-size: .85rem; min-height: 10rem; }
 .htmx-indicator { display: none; }

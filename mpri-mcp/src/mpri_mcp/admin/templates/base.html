@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="/static/pico.min.css">
   <link rel="stylesheet" href="/static/app.css">
   <script src="/static/htmx.min.js" defer></script>
+  {% block head_scripts %}{% endblock %}
+  <script src="/static/app.js" defer></script>
 </head>
 <body{% if admin %} hx-headers='{"X-CSRF-Token": "{{ csrf_token(request) }}"}'{% endif %}>
   <header class="container site-header">

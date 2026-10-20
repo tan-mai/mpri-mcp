@@ -178,9 +178,27 @@ def fmt_pct(value: float | None) -> str:
     return "—" if value is None else f"{value:g}%"
 
 
+def fmt_usd(value: float | None) -> str:
+    if value is None:
+        return "—"
+    if value == 0:
+        return "$0"
+    if value < 0.01:
+        return "<$0.01"
+    return f"${value:,.2f}"
+
+
 def fmt_int(value: int | None) -> str:
     return "—" if value is None else f"{value:,}"
 
 
 templates.env.globals.update(csrf_token=csrf_token, pop_flashes=pop_flashes)
-templates.env.filters.update(vnd=fmt_vnd, dt=fmt_dt, ago=fmt_ago, pct=fmt_pct, num=fmt_int)
+templates.env.filters.update(
+    vnd=fmt_vnd, dt=fmt_dt, ago=fmt_ago, pct=fmt_pct, num=fmt_int, usd=fmt_usd
+)
+
+
+async def form_data(request: Request) -> dict[str, str]:
+    """String fields of the submitted form (file uploads are ignored)."""
+    form = await request.form()
+    return {k: v for k, v in form.items() if isinstance(v, str)}

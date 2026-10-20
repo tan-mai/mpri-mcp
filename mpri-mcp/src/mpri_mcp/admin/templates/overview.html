@@ -1,7 +1,91 @@
 {% extends "base.html" %}
+{% from "_macros.html" import run_badge, schedule_badge, duration %}
 {% set nav = "overview" %}
 {% block title %}Overview{% endblock %}
 {% block content %}
 <h2>Overview</h2>
-<p class="muted">Signed in as {{ admin.username }}.</p>
+
+{% if not connected %}
+<article>
+  <header><strong>Connect Claude</strong></header>
+  <p>In claude.ai open <em>Settings → Connectors → Add custom connector</em>, paste this URL, and sign in with this admin account when asked:</p>
+  <p><code class="mono">{{ connector_url }}</code></p>
+  <p class="muted">Connected apps appear under <a href="/admin/apps">Connected apps</a>.</p>
+</article>
+{% endif %}
+
+<div class="tiles">
+  <article class="tile"><span class="value">{{ summaries | length }}</span><span class="label">Supermarkets</span></article>
+  <article class="tile"><span class="value">{{ product_count }}</span><span class="label">Products tracked</span></article>
+  <article class="tile"><span class="value">{{ url_count }}</span><span class="label">Product URLs</span></article>
+  <article class="tile"><span class="value">{{ failing | length }}</span><span class="label">Failing URLs</span></article>
+  <article class="tile"><span class="value">{{ usage.calls | num }}</span><span class="label">AI calls, last 7 days</span></article>
+  <article class="tile"><span class="value">{{ usage.cost | usd }}</span><span class="label">Est. AI cost, last 7 days{% if usage.unpriced %}*{% endif %}</span></article>
+</div>
+{% if usage.unpriced %}<p class="muted"><small>* No price set for {{ usage.unpriced | join(", ") }} — add it under <a href="/admin/ai">AI</a>.</small></p>{% endif %}
+
+<h3>Supermarkets</h3>
+{% if summaries %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Name</th><th>Schedule</th><th>Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
+    <tbody>
+    {% for s in summaries %}
+      {% set m = s.supermarket %}
+      <tr>
+        <td><a href="/admin/supermarkets/{{ m.id }}">{{ m.name }}</a><br><small class="muted mono">{{ m.id }}</small></td>
+        <td>{{ schedule_badge(m, scheduler.is_running(m.id)) }}{% if m.cron_expression %}<br><small class="mono">{{ m.cron_expression }}</small>{% endif %}</td>
+        <td class="nowrap">{{ scheduler.next_run_time(m.id) | dt }}</td>
+        <td>{% if s.last_run %}<a href="/admin/runs/{{ s.last_run.id }}">{{ run_badge(s.last_run.status) }}</a><br><small class="muted">{{ s.last_run.started_at | ago }}</small>{% else %}<span class="muted">never</span>{% endif %}</td>
+        <td class="num">{{ s.active_url_count }}{% if s.failing_url_count %} <span class="badge badge-bad">{{ s.failing_url_count }} failing</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>No supermarkets yet. <a href="/admin/supermarkets">Add one</a>, or ask Claude: <em>"Add Lotte Mart, domain lottemart.vn."</em></p>
+{% endif %}
+
+<div class="grid-2">
+  <section>
+    <h3>Recent crawls</h3>
+    {% if recent %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Run</th><th>Supermarket</th><th>Status</th><th class="num">OK / failed</th></tr></thead>
+        <tbody>
+        {% for r in recent %}
+          <tr>
+            <td><a href="/admin/runs/{{ r.id }}">#{{ r.id }}</a><br><small class="muted">{{ r.started_at | ago }} · {{ r.trigger }}</small></td>
+            <td>{{ names.get(r.supermarket_id, r.supermarket_id) }}</td>
+            <td>{{ run_badge(r.status) }}</td>
+            <td class="num">{{ r.urls_ok }} / {{ r.urls_failed }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p><a href="/admin/runs">All runs →</a></p>
+    {% else %}<p class="muted">No crawls yet.</p>{% endif %}
+  </section>
+  <section>
+    <h3>Failing URLs</h3>
+    {% if failing %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Product</th><th>Error</th></tr></thead>
+        <tbody>
+        {% for u in failing %}
+          <tr>
+            <td><a href="/admin/products/{{ u.product_id }}">{{ u.product.name }}</a><br><small class="muted">{{ u.supermarket.name }} · ×{{ u.consecutive_failures }}</small></td>
+            <td><small>{{ u.last_error }}</small></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="muted">Nothing failing.</p>{% endif %}
+  </section>
+</div>
 {% endblock %}

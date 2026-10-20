@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_macros.html" import run_badge, schedule_badge %}
+{% set nav = "supermarkets" %}
+{% block title %}Supermarkets{% endblock %}
+{% block content %}
+<h2>Supermarkets</h2>
+{% if summaries %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Name</th><th>Website</th><th>Schedule</th><th>Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
+    <tbody>
+    {% for s in summaries %}
+      {% set m = s.supermarket %}
+      <tr>
+        <td><a href="/admin/supermarkets/{{ m.id }}">{{ m.name }}</a><br><small class="muted mono">{{ m.id }}</small></td>
+        <td><small class="mono">{{ m.base_url }}</small></td>
+        <td>{{ schedule_badge(m, scheduler.is_running(m.id)) }}{% if m.cron_expression %}<br><small class="mono">{{ m.cron_expression }}</small>{% endif %}</td>
+        <td class="nowrap">{{ scheduler.next_run_time(m.id) | dt }}</td>
+        <td>{% if s.last_run %}{{ run_badge(s.last_run.status) }} <small class="muted">{{ s.last_run.started_at | ago }}</small>{% else %}<span class="muted">never</span>{% endif %}</td>
+        <td class="num">{{ s.active_url_count }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="muted">No supermarkets yet.</p>
+{% endif %}
+
+<article class="narrow">
+  <header><h3>Add a supermarket</h3></header>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <form method="post" action="/admin/supermarkets">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+    <label>Name <input type="text" name="name" value="{{ form.get('name', '') }}" required placeholder="Lotte Mart"></label>
+    <label>Website <input type="text" name="base_url" value="{{ form.get('base_url', '') }}" required placeholder="lottemart.vn"></label>
+    <button type="submit">Add supermarket</button>
+  </form>
+</article>
+{% endblock %}

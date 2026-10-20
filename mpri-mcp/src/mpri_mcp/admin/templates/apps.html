@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% set nav = "apps" %}
+{% block title %}Connected apps{% endblock %}
+{% block content %}
+<h2>Connected apps</h2>
+<article>
+  <header><strong>Connect Claude</strong></header>
+  <ol>
+    <li>In claude.ai open <em>Settings → Connectors → Add custom connector</em>.</li>
+    <li>Name it (e.g. <em>MPRI</em>) and paste this URL: <code class="mono">{{ connector_url }}</code></li>
+    <li>Click <em>Connect</em>. You'll land on this server's sign-in page — sign in as the admin and click <em>Allow</em>.</li>
+  </ol>
+  <p class="muted"><small>Claude Code: <code>claude mcp add --transport http mpri {{ connector_url }}</code> (it opens the same sign-in in your browser).</small></p>
+</article>
+
+{% if clients %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>App</th><th>Returns to</th><th>Registered</th><th>Last used</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for c in clients %}
+      <tr>
+        <td>{{ c.name }}<br><small class="mono muted">{{ c.client_id }}</small></td>
+        <td>{% for u in c.redirect_uris %}<small class="mono">{{ u }}</small><br>{% endfor %}</td>
+        <td class="nowrap">{{ c.created_at | dt }}</td>
+        <td class="nowrap">{{ c.last_used_at | ago }}</td>
+        <td>{% if c.revoked_at %}<span class="badge badge-off">revoked</span>{% elif c.active_grants %}<span class="badge badge-ok">connected</span>{% else %}<span class="badge badge-idle">not signed in</span>{% endif %}</td>
+        <td>{% if not c.revoked_at %}
+          <form method="post" action="/admin/apps/{{ c.client_id }}/revoke" data-confirm="Revoke {{ c.name }}? It will have to connect and be approved again.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+            <button type="submit" class="secondary outline small">Revoke</button>
+          </form>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="muted">No apps have registered yet.</p>
+{% endif %}
+{% endblock %}

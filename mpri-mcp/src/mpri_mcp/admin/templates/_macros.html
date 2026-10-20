@@ -1,0 +1,21 @@
+{% macro run_badge(status) -%}
+<span class="badge badge-{{ status }}">{{ status }}</span>
+{%- endmacro %}
+
+{% macro schedule_badge(market, running=False) -%}
+{% if running %}<span class="badge badge-running">crawling…</span>
+{%- elif market.cron_enabled and market.cron_expression %}<span class="badge badge-on">scheduled</span>
+{%- elif market.cron_expression %}<span class="badge badge-off">paused</span>
+{%- else %}<span class="badge badge-off">no schedule</span>{% endif %}
+{%- endmacro %}
+
+{% macro url_status(u) -%}
+{% if not u.is_active %}<span class="badge badge-off">inactive</span>
+{%- elif u.consecutive_failures %}<span class="badge badge-bad" title="{{ u.last_error or '' }}">failing ×{{ u.consecutive_failures }}</span>
+{%- elif u.last_success_at %}<span class="badge badge-ok">ok</span>
+{%- else %}<span class="badge badge-idle">not crawled yet</span>{% endif %}
+{%- endmacro %}
+
+{% macro duration(run) -%}
+{% if run.finished_at %}{{ ((run.finished_at - run.started_at).total_seconds()) | round(0) | int }}s{% else %}—{% endif %}
+{%- endmacro %}
