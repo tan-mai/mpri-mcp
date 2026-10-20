@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from mcp.server.auth.handlers.metadata import MetadataHandler
 from mcp.server.auth.routes import build_metadata, cors_middleware, create_auth_routes
-from mcp.server.auth.settings import ClientRegistrationOptions, RevocationOptions
+from mcp.server.auth.settings import AuthSettings, ClientRegistrationOptions, RevocationOptions
 from pydantic import AnyHttpUrl
 from starlette.routing import Route
 
@@ -14,8 +14,18 @@ from mpri_mcp.config import Settings
 METADATA_PATH = "/.well-known/oauth-authorization-server"
 
 
+def issuer_url(settings: Settings) -> AnyHttpUrl:
+    """The issuer as a URL object *without* the trailing slash pydantic adds to bare hosts.
+
+    RFC 8414 (metadata) and RFC 9207 (`iss` on redirects) compare issuers as exact strings,
+    so the metadata, the protected-resource document and the redirects must all say
+    "https://host", never "https://host/". Built through AuthSettings, whose model keeps
+    empty paths empty."""
+    return AuthSettings(issuer_url=settings.issuer_url, resource_server_url=None).issuer_url
+
+
 def build_oauth_routes(settings: Settings, provider: SqliteOAuthProvider) -> list[Route]:
-    issuer = AnyHttpUrl(settings.issuer_url)
+    issuer = issuer_url(settings)
     registration = ClientRegistrationOptions(
         enabled=True,
         valid_scopes=[settings.oauth_scope, OFFLINE_ACCESS],
