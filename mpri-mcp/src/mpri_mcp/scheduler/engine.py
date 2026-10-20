@@ -68,7 +68,7 @@ class SchedulerEngine:
                     self._run_backup,
                     trigger=trigger,
                     id="backup",
-                    name="sqlite backup",
+                    name="daily housekeeping",
                     replace_existing=True,
                 )
 

@@ -19,7 +19,7 @@ from starlette.responses import Response
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from mpri_mcp import __version__
-from mpri_mcp.admin import routes_auth, routes_pages
+from mpri_mcp.admin import routes_auth, routes_consent, routes_pages
 from mpri_mcp.admin.web import (
     STATIC_DIR,
     LoginRequired,
@@ -29,10 +29,13 @@ from mpri_mcp.admin.web import (
     render,
 )
 from mpri_mcp.auth.admin import LoginRateLimiter, SetupTokenManager, admin_count
+from mpri_mcp.auth.oauth_provider import SqliteOAuthProvider
+from mpri_mcp.auth.oauth_routes import build_oauth_routes
 from mpri_mcp.config import Settings, get_settings
 from mpri_mcp.container import Container
 from mpri_mcp.db import Database
 from mpri_mcp.log import configure_logging
+from mpri_mcp.mcp_server import build_mcp_server, transport_security
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +57,10 @@ class AppState:
     @property
     def db(self) -> Database:
         return self.container.db
+
+    @property
+    def oauth(self) -> SqliteOAuthProvider:
+        return self.container.oauth
 
 
 class SecurityHeadersMiddleware:
@@ -110,6 +117,15 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         login_limiter=LoginRateLimiter(),
     )
 
+    mcp = build_mcp_server(container, container.oauth)
+    # Stateless JSON mode: every request stands alone, which suits a reverse proxy and keeps
+    # Claude's connection working across restarts. Must be built before the lifespan runs.
+    mcp_app = mcp.streamable_http_app(
+        json_response=True,
+        stateless_http=True,
+        transport_security=transport_security(settings),
+    )
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await container.start()
@@ -117,7 +133,9 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         if not st.admin_exists:
             st.setup_tokens.issue()
         try:
-            yield
+            # Mounting disables the MCP app's own lifespan; run its session manager here.
+            async with mcp.session_manager.run():
+                yield
         finally:
             await container.stop()
 
@@ -173,5 +191,16 @@ def create_app(settings: Settings | None = None, container: Container | None = N
 
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(routes_auth.router)
+    app.include_router(routes_consent.router)
     app.include_router(routes_pages.router)
+
+    @app.api_route("/admin/{rest:path}", methods=["GET", "POST"], include_in_schema=False)
+    @app.api_route("/oauth/{rest:path}", methods=["GET", "POST"], include_in_schema=False)
+    async def _html_not_found(rest: str) -> Response:
+        # Without this, unknown dashboard paths would fall through to the MCP mount below.
+        raise HTTPException(status_code=404)
+
+    app.router.routes.extend(build_oauth_routes(settings, container.oauth))
+    # Last: the MCP app answers /mcp and /.well-known/oauth-protected-resource/mcp.
+    app.mount("/", mcp_app)
     return app
