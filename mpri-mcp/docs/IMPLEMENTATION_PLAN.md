@@ -137,6 +137,23 @@ provider is tried. Every call records provider, model and token usage.
 | 9 | Local end-to-end | spec §5 scenario passes |
 | 10 | VPS deployment | first-run setup on VPS, claude.ai connector works |
 
+## Status (2026-10-21)
+
+Phases 0–9 are implemented and committed. The automated suite covers services, scheduler,
+AI adapters, crawler, admin auth, the full OAuth flow and the MCP tools. A local end-to-end
+run (real uvicorn, real Playwright crawl of the MM Mega Market test pages, OAuth, official
+MCP client) passed. Phase 10 files (compose.yaml, Caddyfile, deploy/VPS_SETUP.md) are
+written; the Docker image build and the claude.ai connection are verified on the VPS once the
+domain is registered.
+
+Deviations from the plan, all minor:
+- The OAuth endpoints reuse the MCP SDK's standards-compliant handlers with our own SQLite
+  provider (instead of hand-written handlers); the MCP endpoint is still a separate resource
+  server that only verifies tokens.
+- APScheduler 3 treats cron weekday 0 as Monday; expressions are translated so 0/7 mean
+  Sunday, as in standard cron.
+- Docker could not be run on the development machine; local work used uv directly.
+
 ## Risks
 
 - VN supermarket sites may block or geo-price the Malaysian VPS IP → per-market

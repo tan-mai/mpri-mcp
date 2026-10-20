@@ -1,0 +1,51 @@
+# Production: mpri-mcp behind Caddy (automatic HTTPS via Let's Encrypt).
+# Step-by-step guide: deploy/VPS_SETUP.md
+#   docker compose up -d --build
+services:
+  mpri-mcp:
+    build: .
+    image: mpri-mcp:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /app/data
+      LOG_JSON: "true"
+      # The app port is not published — only Caddy can reach it — so trusting its
+      # X-Forwarded-* headers is safe (needed for real client IPs and https URLs).
+      FORWARDED_ALLOW_IPS: "*"
+      # Vertex AI service-account key (see deploy/VPS_SETUP.md). Ignored by other providers.
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp-sa.json
+    volumes:
+      - mpri_data:/app/data          # SQLite DB, backups, generated session secret
+      - ./secrets:/run/secrets:ro
+    expose:
+      - "8000"
+    init: true                       # reaps Chromium child processes
+    shm_size: "1gb"                  # Chromium needs more than Docker's 64 MB default
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - mpri-mcp
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data             # certificates — keep this volume
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  mpri_data:
+  caddy_data:
+  caddy_config:
