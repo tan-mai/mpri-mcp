@@ -1,0 +1,15 @@
+.venv
+.git
+.env
+.env.*
+!.env.example
+data
+secrets
+tests
+docs
+deploy
+**/__pycache__
+.pytest_cache
+.ruff_cache
+compose*.yml
+compose*.yaml

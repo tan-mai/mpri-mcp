@@ -1,0 +1,5 @@
+# Keep LF line endings in the repo and working tree — the app is built and run on Linux.
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.woff2 binary
