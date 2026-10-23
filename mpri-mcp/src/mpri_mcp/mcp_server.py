@@ -13,6 +13,7 @@ from mpri_mcp.auth.oauth_routes import issuer_url
 from mpri_mcp.config import Settings
 from mpri_mcp.container import Container
 from mpri_mcp.tools.analytics_tools import register_analytics_tools
+from mpri_mcp.tools.common import ToolContext
 from mpri_mcp.tools.setup_tools import register_setup_tools
 
 INSTRUCTIONS = """\
@@ -22,6 +23,8 @@ Typical setup: get_supermarkets -> add_supermarket -> setup_supermarket_cron_tas
 Analysis: get_product_price_comparison, get_price_history, get_deep_discount_items. \
 Product names are matched fuzzily and without accents. A product has no price until its \
 supermarket has been crawled at least once.
+This server's messages, errors and dates are in English unless the user picked Vietnamese for \
+this connection; if the user wants Vietnamese (tiếng Việt), call set_response_language("vi").
 """
 
 
@@ -40,8 +43,9 @@ def build_mcp_server(container: Container, provider: SqliteOAuthProvider) -> MCP
             validate_token_resource=True,
         ),
     )
-    register_setup_tools(mcp, container)
-    register_analytics_tools(mcp, container)
+    ctx = ToolContext(container)
+    register_setup_tools(mcp, container, ctx)
+    register_analytics_tools(mcp, container, ctx)
     return mcp
 
 

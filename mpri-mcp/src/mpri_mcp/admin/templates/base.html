@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ current_language() }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
-  <title>{% block title %}Admin{% endblock %} · MPRI</title>
+  <title>{% block title %}{{ _("Admin") }}{% endblock %} · MPRI</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/static/pico.min.css">
   <link rel="stylesheet" href="/static/app.css">
@@ -16,21 +16,30 @@
   <header class="container site-header">
     <nav>
       <ul>
-        <li><a href="/admin" class="brand"><strong>MPRI</strong> <span class="muted">price tracker</span></a></li>
+        <li><a href="/admin" class="brand"><strong>MPRI</strong> <span class="muted">{{ _("price tracker") }}</span></a></li>
+        <li>
+          <form method="post" action="/admin/language" class="inline-form lang-switch" aria-label="{{ _('Language') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+            <input type="hidden" name="next" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">
+            {% for code, label in LANGUAGES.items() %}
+            <button type="submit" name="lang" value="{{ code }}" class="secondary outline small" title="{{ label }}" lang="{{ code }}" aria-pressed="{{ 'true' if current_language() == code else 'false' }}">{{ code | upper }}</button>
+            {% endfor %}
+          </form>
+        </li>
       </ul>
       {% if admin %}
       <ul class="main-nav">
-        <li><a href="/admin" {% if nav == "overview" %}aria-current="page"{% endif %}>Overview</a></li>
-        <li><a href="/admin/supermarkets" {% if nav == "supermarkets" %}aria-current="page"{% endif %}>Supermarkets</a></li>
-        <li><a href="/admin/products" {% if nav == "products" %}aria-current="page"{% endif %}>Products</a></li>
-        <li><a href="/admin/runs" {% if nav == "runs" %}aria-current="page"{% endif %}>Runs</a></li>
-        <li><a href="/admin/ai" {% if nav == "ai" %}aria-current="page"{% endif %}>AI</a></li>
-        <li><a href="/admin/apps" {% if nav == "apps" %}aria-current="page"{% endif %}>Connected apps</a></li>
+        <li><a href="/admin" {% if nav == "overview" %}aria-current="page"{% endif %}>{{ _("Overview") }}</a></li>
+        <li><a href="/admin/supermarkets" {% if nav == "supermarkets" %}aria-current="page"{% endif %}>{{ _("Supermarkets") }}</a></li>
+        <li><a href="/admin/products" {% if nav == "products" %}aria-current="page"{% endif %}>{{ _("Products") }}</a></li>
+        <li><a href="/admin/runs" {% if nav == "runs" %}aria-current="page"{% endif %}>{{ _("Runs") }}</a></li>
+        <li><a href="/admin/ai" {% if nav == "ai" %}aria-current="page"{% endif %}>{{ _("AI") }}</a></li>
+        <li><a href="/admin/apps" {% if nav == "apps" %}aria-current="page"{% endif %}>{{ _("Connected apps") }}</a></li>
         <li><a href="/admin/account" {% if nav == "account" %}aria-current="page"{% endif %}>{{ admin.username }}</a></li>
         <li>
           <form method="post" action="/admin/logout" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-            <button type="submit" class="secondary outline small">Log out</button>
+            <button type="submit" class="secondary outline small">{{ _("Log out") }}</button>
           </form>
         </li>
       </ul>
@@ -43,7 +52,7 @@
     {% endfor %}
     {% block content %}{% endblock %}
   </main>
-  <footer class="container site-footer"><small class="muted">mpri-mcp · times shown in {{ request.app.state.mpri.settings.scheduler_timezone }}</small></footer>
+  <footer class="container site-footer"><small class="muted">{{ _("mpri-mcp · times shown in %(tz)s", tz=request.app.state.mpri.settings.scheduler_timezone) }}</small></footer>
   {% block scripts %}{% endblock %}
 </body>
 </html>

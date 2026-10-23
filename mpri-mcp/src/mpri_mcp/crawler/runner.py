@@ -21,6 +21,7 @@ from mpri_mcp.crawler.digest import PageDigest, build_digest
 from mpri_mcp.crawler.extractor import ExtractionRejected, PriceExtractor
 from mpri_mcp.db import Database
 from mpri_mcp.db.models import CrawlRun, CrawlRunItem, PriceRecord, ProductUrl, Supermarket
+from mpri_mcp.i18n import N_
 from mpri_mcp.services.settings import get_ai_settings
 from mpri_mcp.services.supermarkets import get_supermarket
 from mpri_mcp.utils.time import utcnow
@@ -48,7 +49,7 @@ class DryRunResult:
 
 def _error_text(exc: BaseException) -> str:
     if isinstance(exc, TimeoutError):
-        return "Timed out"
+        return N_("Timed out")
     msg = str(exc).strip().splitlines()[0] if str(exc).strip() else type(exc).__name__
     return msg[:500]
 
@@ -123,7 +124,7 @@ class CrawlRunner:
                     (f"Run exceeded JOB_TIMEOUT_SECONDS={self._settings.job_timeout_seconds}"),
                 )
             except asyncio.CancelledError:
-                status, error = "failed", "Cancelled (server shutting down)"
+                status, error = "failed", N_("Cancelled (server shutting down)")
                 raise
             except Exception as e:
                 log.exception("Crawl #%s of %s crashed", run.id, market.id)

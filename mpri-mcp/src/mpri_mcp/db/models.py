@@ -257,6 +257,23 @@ class OAuthToken(Base):
     last_used_at: Mapped[datetime | None]
 
 
+class OAuthGrant(Base):
+    """One connection (one approved authorization, i.e. one token family) and its preferences.
+
+    A new table rather than columns on existing ones, so older databases need no migration."""
+
+    __tablename__ = "oauth_grants"
+
+    family_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    client_id: Mapped[str] = mapped_column(
+        ForeignKey("oauth_clients.client_id", ondelete="CASCADE"), index=True
+    )
+    subject: Mapped[str | None] = mapped_column(String(100))
+    language: Mapped[str] = mapped_column(String(8), default="en")
+    created_at: Mapped[datetime] = mapped_column(default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=utcnow, onupdate=utcnow)
+
+
 # --------------------------------------------------------------------------- Settings
 
 

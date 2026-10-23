@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     database_url: str | None = None
     log_level: str = "INFO"
     log_json: bool = False
+    default_language: Literal["en", "vi"] = Field(
+        "en",
+        description="Language for the dashboard and MCP text until a user picks another one.",
+    )
 
     # --- Scheduler / crawler -----------------------------------------------
     scheduler_timezone: str = "Asia/Ho_Chi_Minh"

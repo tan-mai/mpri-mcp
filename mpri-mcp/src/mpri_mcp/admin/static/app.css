@@ -21,6 +21,8 @@
 .site-header .main-nav li { padding-block: .35rem; }
 .site-header a[aria-current="page"] { font-weight: 700; text-decoration: underline; }
 .brand { text-decoration: none; }
+.lang-switch { display: inline-flex; gap: .25rem; }
+.lang-switch button[aria-pressed="true"] { font-weight: 700; border-width: 2px; }
 @media (max-width: 760px) {
   .site-header nav { flex-direction: column; align-items: flex-start; }
   .site-header .main-nav { justify-content: flex-start; margin-inline: 0; }

@@ -1,0 +1,1510 @@
+# Translations template for mpri-mcp.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the mpri-mcp project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mpri-mcp 0.1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-10-23 15:56+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: src/mpri_mcp/admin/routes_ai.py
+#, python-brace-format
+msgid "Unknown provider '{name}'."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_ai.py
+msgid "AI settings saved. They apply from the next crawl."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_ai.py
+#, python-brace-format
+msgid "Not saved — use {example}: {error}"
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_ai.py
+msgid "Price table saved."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_ai.py
+msgid "Enter a full http(s) URL."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_auth.py
+msgid "Too many attempts. Wait 15 minutes and try again."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_auth.py
+msgid "The setup token is wrong. Copy it from the server logs."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_auth.py
+#, python-brace-format
+msgid "Welcome, {name}. Your admin account is ready."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_auth.py
+msgid "Too many failed attempts. Wait 15 minutes and try again."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_auth.py
+msgid "Invalid username or password."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_auth.py
+msgid "Current password is wrong."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_auth.py
+msgid "Password changed. Other sessions have been signed out."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_consent.py
+msgid "Authorization request expired"
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_consent.py
+msgid "This connection request is no longer valid. Start connecting again from Claude."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_consent.py
+msgid "An unnamed application"
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+#, python-brace-format
+msgid "Added {name} (ID {id}). Set a crawl schedule below."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py src/mpri_mcp/admin/routes_products.py
+msgid "Saved."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+msgid "Schedule paused."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+#, python-brace-format
+msgid "Schedule set to '{cron}'. Next run: {next}."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/supermarkets.html src/mpri_mcp/i18n/__init__.py
+msgid "never"
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+msgid "Crawl started in the background — refresh in a minute."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py src/mpri_mcp/tools/setup_tools.py
+msgid "A crawl of this supermarket is already running."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+msgid "crawl settings must be a JSON object"
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+msgid "Crawl settings saved."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+#, python-brace-format
+msgid "Not saved: {error}"
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+#, python-brace-format
+msgid "Unknown AI provider '{name}'."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+msgid "AI override saved."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+msgid "Type the supermarket ID to confirm deletion."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_markets.py
+#, python-brace-format
+msgid "Deleted supermarket '{id}' and its price history."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_pages.py
+msgid "That connection no longer exists."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_pages.py
+#, python-brace-format
+msgid "Language for that connection set to {language}."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_pages.py
+msgid "Connection ended. That Claude connection must sign in again."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_pages.py
+msgid "Access revoked. That app must be connected again to be used."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_products.py
+#, python-brace-format
+msgid "Added '{name}'."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_products.py
+#, python-brace-format
+msgid "Updated '{name}'."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_products.py
+msgid "Product deleted with its price history."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_products.py
+msgid "Could not add URL."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_products.py
+msgid "URL added."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_products.py
+msgid "URL saved."
+msgstr ""
+
+#: src/mpri_mcp/admin/routes_products.py
+#, python-brace-format
+msgid "Stopped tracking at {name}."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_cron_preview.html
+#, python-format
+msgid "Next runs: %(times)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_cron_preview.html
+msgid "Type a cron expression to preview it."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "extracted"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "nothing was saved"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "Current price"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "Original price"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "Member price"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "In stock"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "unknown"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "yes"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "no"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "failed"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+#, python-format
+msgid "%(provider)s/%(model)s · %(input)s in / %(output)s out tokens"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+msgid "Raw AI answer"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_dry_run.html
+#, python-format
+msgid "What was sent to the AI (%(n)s characters)"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "success"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "partial"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "timeout"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "running"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "ok"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "manual"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "scheduled"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "crawling…"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "paused"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "no schedule"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "inactive"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+#, python-format
+msgid "failing ×%(n)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/_macros.html
+msgid "not crawled yet"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/account.html
+msgid "Account"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/account.html
+msgid "Change password"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/account.html
+msgid "Current password"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/account.html
+msgid "New password"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/account.html
+msgid "Confirm new password"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/account.html
+msgid "Sessions"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/account.html
+#, python-format
+msgid "Signed in as <strong>%(name)s</strong>. Last sign-in %(when)s."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/account.html
+msgid "Signing out everywhere ends every dashboard session, including this one. Claude's connection is managed under <a href=\"/admin/apps\">Connected apps</a>."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/account.html
+msgid "Sign out everywhere"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "AI settings"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+#, python-format
+msgid "Price extraction currently uses <strong class=\"mono\">%(model)s</strong>, falling back to <strong class=\"mono\">%(fallback)s</strong>."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+#, python-format
+msgid "Price extraction currently uses <strong class=\"mono\">%(model)s</strong>."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "A supermarket can override this on its own page."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Providers"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Setup"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Default model"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Provider"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html src/mpri_mcp/admin/templates/apps.html
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/run_detail.html
+#: src/mpri_mcp/admin/templates/runs.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Status"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "configured"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "not configured"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "API keys and credentials are read from the server's <code>.env</code> only; they are never stored here."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+#, python-format
+msgid "— from .env (%(name)s) —"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "(not configured)"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Model"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Fallback provider"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "— none —"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Fallback model"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "provider default"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html src/mpri_mcp/admin/templates/apps.html
+#: src/mpri_mcp/admin/templates/product_detail.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Save"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Test extraction"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Fetches one page and asks the chosen model for its prices. Nothing is saved."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Product page URL"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Use crawl settings of"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "current"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Run test"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "fetching and extracting…"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Usage, last 7 days"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Day"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Calls"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Input tokens"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Output tokens"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Est. cost"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "no price"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Total"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "No AI calls in the last 7 days."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Price table for cost estimates"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "USD per 1 million tokens, per model. Only used for the estimates on this dashboard — check your provider's console for real billing."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Model prices (JSON)"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/ai.html
+msgid "Save prices"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+#: src/mpri_mcp/admin/templates/base.html
+msgid "Connected apps"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "Connect Claude"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "In claude.ai open <em>Settings → Connectors → Add custom connector</em>."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+#, python-format
+msgid "Name it (e.g. <em>MPRI</em>) and paste this URL: <code class=\"mono\">%(url)s</code>"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Click <em>Connect</em>. You'll land on this server's sign-in page — sign in as the admin, choose the language for messages, and click <em>Allow</em>."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+#, python-format
+msgid "Claude Code: <code>claude mcp add --transport http mpri %(url)s</code> (it opens the same sign-in in your browser)."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Active connections"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Each time someone clicks Connect in Claude, a connection appears here. Its language applies to the messages, errors and dates this server sends to Claude; users can also switch by asking Claude, e.g. \"chuyển sang tiếng Việt\"."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Connected"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+#: src/mpri_mcp/admin/templates/base.html
+msgid "Language"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "App"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Last used"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+#, python-format
+msgid "signed in as %(name)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "End this connection? Claude will have to sign in again."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Disconnect"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "No active connections."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Registered apps"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Returns to"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Registered"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "revoked"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "connected"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "not signed in"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+#, python-format
+msgid "Revoke %(name)s? It will have to connect and be approved again."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "Revoke"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/apps.html
+msgid "No apps have registered yet."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/base.html
+msgid "Admin"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/base.html
+msgid "price tracker"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/base.html
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "Overview"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/base.html
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/products.html
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "Supermarkets"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/base.html
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Products"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/base.html
+msgid "Runs"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/base.html
+#: src/mpri_mcp/admin/templates/run_detail.html
+msgid "AI"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/base.html
+msgid "Log out"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/base.html
+#, python-format
+msgid "mpri-mcp · times shown in %(tz)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "Authorize access"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "Allow access to MPRI?"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+#, python-format
+msgid "<strong>%(app)s</strong> wants to use this price tracker on your behalf. After you allow it, you'll be sent back to:"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "This is an address on your own computer (used by Claude Code or developer tools). Only allow it if you started this connection yourself."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "It will be able to:"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "read tracked products, prices and history"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "add supermarkets and products, change crawl schedules and start crawls"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+#, python-format
+msgid "Access is for <span class=\"mono\">%(resource)s</span>. You can revoke it any time under Connected apps."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "Language of messages and dates for this connection"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "You can change it later by asking Claude, or under Connected apps."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "Allow"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/consent.html
+msgid "Deny"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/error.html
+msgid "Back to the dashboard"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/login.html
+msgid "Sign in"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/login.html
+#: src/mpri_mcp/admin/templates/setup.html
+msgid "Username"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/login.html
+#: src/mpri_mcp/admin/templates/setup.html
+msgid "Password"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "In claude.ai open <em>Settings → Connectors → Add custom connector</em>, paste this URL, and sign in with this admin account when asked:"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "Connected apps appear under <a href=\"/admin/apps\">Connected apps</a>."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "Products tracked"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "Product URLs"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "Failing URLs"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "AI calls, last 7 days"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "Est. AI cost, last 7 days"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#, python-format
+msgid "* No price set for %(models)s — add it under <a href=\"/admin/ai\">AI</a>."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/product_detail.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "Name"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "Schedule"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "Next run"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "Last run"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "URLs"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#, python-format
+msgid "%(n)s failing"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "No supermarkets yet. <a href=\"/admin/supermarkets\">Add one</a>, or ask Claude: <em>\"Add Lotte Mart, domain lottemart.vn.\"</em>"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Recent crawls"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/product_detail.html
+#: src/mpri_mcp/admin/templates/runs.html
+msgid "Supermarket"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/runs.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Run"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/runs.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "OK / failed"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "All runs →"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "No crawls yet."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/products.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Product"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+#: src/mpri_mcp/admin/templates/run_detail.html
+#: src/mpri_mcp/admin/templates/runs.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Error"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/overview.html
+msgid "Nothing failing."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "No category"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+#, python-format
+msgid "tracked since %(date)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Latest prices"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Price"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Original"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Member"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Discount"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Checked"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "cheapest"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "stale"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "no data yet"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Not tracked at any supermarket yet — add a URL below."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "was"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "member"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Date"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Price history"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Time range"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "30 days"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "90 days"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "1 year"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Daily price per supermarket, in VND"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "No prices collected in this period yet."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Show as table"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Supermarket URLs"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "URL and status"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Actions"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+#, python-format
+msgid "checked %(when)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+#, python-format
+msgid "URL at %(name)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Active"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Re-test"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "fetching…"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+#, python-format
+msgid "Stop tracking at %(name)s? Its price history is deleted."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Remove"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Add a supermarket URL"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Add URL"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Edit product"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Category"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#, python-format
+msgid "Delete %(name)s and all its price history?"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/product_detail.html
+msgid "Delete product"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Search, accents optional — e.g. sua th it duong"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Search products"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Added"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+#, python-format
+msgid "No product matches \"%(q)s\"."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "No products tracked yet."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Track a product"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Product name"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "optional"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Paste the product page at each supermarket that sells it; leave the others empty."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Track product"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/products.html
+msgid "Add a <a href=\"/admin/supermarkets\">supermarket</a> first."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/run_detail.html
+#, python-format
+msgid "Run #%(id)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/run_detail.html
+#, python-format
+msgid "Run #%(id)s · %(name)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/run_detail.html
+#, python-format
+msgid "started %(when)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/run_detail.html
+#, python-format
+msgid "%(ok)s ok, %(failed)s failed of %(total)s"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/run_detail.html
+msgid "Time"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/run_detail.html
+msgid "Tokens in / out"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/run_detail.html
+msgid "In progress — refresh to see results."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/run_detail.html
+msgid "No URLs were crawled."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/runs.html
+msgid "Crawl runs"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/runs.html
+msgid "All supermarkets"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/runs.html
+msgid "Filter"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/runs.html
+msgid "Trigger"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/runs.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Started"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/runs.html
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Duration"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/runs.html
+msgid "No crawl runs yet."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/setup.html
+msgid "First-run setup"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/setup.html
+msgid "Create the admin account"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/setup.html
+msgid "This server has no admin yet. The admin signs in to this dashboard and approves Claude's connection."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/setup.html
+msgid "Setup token"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/setup.html
+msgid "Printed in the server logs at startup — run <code>docker compose logs mpri-mcp | grep -A2 SETUP</code>. Or the value of <code>ADMIN_SETUP_TOKEN</code>."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/setup.html
+#, python-format
+msgid "At least %(n)s characters. A passphrase works well."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/setup.html
+msgid "Confirm password"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/setup.html
+msgid "Create admin account"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Crawl schedule"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#, python-format
+msgid "Next run <strong>%(when)s</strong> (%(relative)s)."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#, python-format
+msgid "Cron expression (%(tz)s)"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "minute hour day month weekday — <code>0 3 * * *</code> 03:00 daily · <code>30 6 * * 1-5</code> 06:30 Mon–Fri · weekday 0/7 = Sunday."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Save schedule"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Pause"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Crawl now"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#, python-format
+msgid "Visits all %(n)s active URLs in the background."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Details"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "Website"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#, python-format
+msgid "Tracked products (%(n)s)"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Last checked"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Last error"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "No products at this supermarket yet. Add them on the <a href=\"/admin/products\">Products</a> page or ask Claude."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "AI model for this supermarket"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Leave empty to use the global setting from the AI page. Useful when one site needs a stronger model."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "— global setting —"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Crawl settings"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#, python-brace-format
+msgid "Optional JSON: wait for a selector, limit the text area, set cookies (e.g. a store), run setup clicks, or use a proxy. Leave <code>{}</code> for defaults."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Crawl settings (JSON)"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Save crawl settings"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Example"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Keys: <code>wait_for_selector</code>, <code>wait_ms</code>, <code>text_selector</code>, <code>max_chars</code>, <code>cookies</code>, <code>extra_headers</code>, <code>proxy</code> (<code>server</code>, <code>username</code>, <code>password</code>), <code>block_resources</code>, <code>setup_url</code>, <code>setup_actions</code> (<code>goto</code>/<code>click</code>/<code>fill</code>/<code>press</code>/<code>wait</code>/<code>wait_for</code>)."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Delete supermarket"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#, python-format
+msgid "Removes %(name)s, its schedule, its product URLs and all their price history. This cannot be undone."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+#, python-format
+msgid "Type <code>%(id)s</code> to confirm"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarket_detail.html
+msgid "Delete permanently"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "No supermarkets yet."
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "Add a supermarket"
+msgstr ""
+
+#: src/mpri_mcp/admin/templates/supermarkets.html
+msgid "Add supermarket"
+msgstr ""
+
+#: src/mpri_mcp/admin/web.py
+msgid "Form expired or invalid. Reload the page."
+msgstr ""
+
+#: src/mpri_mcp/app.py
+msgid "Not found"
+msgstr ""
+
+#: src/mpri_mcp/app.py
+msgid "Not allowed"
+msgstr ""
+
+#: src/mpri_mcp/app.py
+msgid "Something went wrong"
+msgstr ""
+
+#: src/mpri_mcp/app.py
+msgid "This page does not exist."
+msgstr ""
+
+#: src/mpri_mcp/auth/passwords.py
+msgid "Username must be 3–50 characters: letters, digits, dot, dash or underscore."
+msgstr ""
+
+#: src/mpri_mcp/auth/passwords.py
+#, python-brace-format
+msgid "Password must be at least {n} characters."
+msgstr ""
+
+#: src/mpri_mcp/auth/passwords.py
+msgid "Passwords do not match."
+msgstr ""
+
+#: src/mpri_mcp/auth/passwords.py
+msgid "Password must not be the same as the username."
+msgstr ""
+
+#: src/mpri_mcp/crawler/extractor.py
+msgid "Not a product page (or no price shown)"
+msgstr ""
+
+#: src/mpri_mcp/crawler/extractor.py
+msgid "No current price found on the page"
+msgstr ""
+
+#: src/mpri_mcp/crawler/runner.py
+msgid "Timed out"
+msgstr ""
+
+#: src/mpri_mcp/crawler/runner.py
+msgid "Cancelled (server shutting down)"
+msgstr ""
+
+#: src/mpri_mcp/i18n/__init__.py
+msgid "just now"
+msgstr ""
+
+#: src/mpri_mcp/services/analytics.py
+msgid "min_discount_percentage must be between 1 and 99."
+msgstr ""
+
+#: src/mpri_mcp/services/analytics.py
+#, python-brace-format
+msgid "days must be between 1 and {max}."
+msgstr ""
+
+#: src/mpri_mcp/services/products.py
+msgid "Product name is required."
+msgstr ""
+
+#: src/mpri_mcp/services/products.py
+#, python-brace-format
+msgid "Product name is too long (max {max} characters)."
+msgstr ""
+
+#: src/mpri_mcp/services/products.py
+msgid "Product name must contain letters or digits."
+msgstr ""
+
+#: src/mpri_mcp/services/products.py
+#, python-brace-format
+msgid "Unknown supermarket_id '{id}'."
+msgstr ""
+
+#: src/mpri_mcp/services/products.py
+#, python-brace-format
+msgid "URL host does not match {name} ({url})."
+msgstr ""
+
+#: src/mpri_mcp/services/products.py
+#, python-brace-format
+msgid "No tracked product matches '{query}'. Add it first with add_product_with_urls."
+msgstr ""
+
+#: src/mpri_mcp/services/products.py
+#, python-brace-format
+msgid "Product #{id} not found."
+msgstr ""
+
+#: src/mpri_mcp/services/products.py
+#, python-brace-format
+msgid "Another product is already named '{name}'."
+msgstr ""
+
+#: src/mpri_mcp/services/products.py
+#, python-brace-format
+msgid "URL #{id} not found."
+msgstr ""
+
+#: src/mpri_mcp/services/runs.py
+#, python-brace-format
+msgid "Run #{id} not found."
+msgstr ""
+
+#: src/mpri_mcp/services/schedules.py
+#, python-brace-format
+msgid "Invalid cron expression: {error}"
+msgstr ""
+
+#: src/mpri_mcp/services/schedules.py
+#, python-brace-format
+msgid "Supermarket '{id}' has no active product URLs to crawl yet."
+msgstr ""
+
+#: src/mpri_mcp/services/supermarkets.py
+#, python-brace-format
+msgid "Supermarket '{id}' not found. Use get_supermarkets to list valid IDs."
+msgstr ""
+
+#: src/mpri_mcp/services/supermarkets.py
+msgid "Supermarket name is required."
+msgstr ""
+
+#: src/mpri_mcp/services/supermarkets.py
+#, python-brace-format
+msgid "Supermarket name is too long (max {max} characters)."
+msgstr ""
+
+#: src/mpri_mcp/services/supermarkets.py
+#, python-brace-format
+msgid "Supermarket '{name}' already exists with ID '{id}'."
+msgstr ""
+
+#: src/mpri_mcp/services/supermarkets.py
+#, python-brace-format
+msgid "Cannot edit fields: {fields}"
+msgstr ""
+
+#: src/mpri_mcp/services/supermarkets.py
+#, python-brace-format
+msgid "Supermarket '{id}' not found."
+msgstr ""
+
+#: src/mpri_mcp/services/supermarkets.py
+#, python-brace-format
+msgid "Another supermarket is already named '{name}'."
+msgstr ""
+
+#: src/mpri_mcp/services/supermarkets.py
+#, python-brace-format
+msgid "Invalid crawl settings: {error}"
+msgstr ""
+
+#: src/mpri_mcp/services/supermarkets.py
+#, python-brace-format
+msgid "Unknown timezone '{tz}'."
+msgstr ""
+
+#: src/mpri_mcp/tools/setup_tools.py
+msgid "From now on, this connection gets messages, errors and dates in English."
+msgstr ""
+
+#: src/mpri_mcp/tools/setup_tools.py
+msgid "From now on, this connection gets messages, errors and dates in Vietnamese."
+msgstr ""
+
+#: src/mpri_mcp/tools/setup_tools.py
+#, python-brace-format
+msgid "Added {name} with ID '{id}'. It has no crawl schedule yet."
+msgstr ""
+
+#: src/mpri_mcp/tools/setup_tools.py
+#, python-brace-format
+msgid "Crawl schedule for {name} set to '{cron}'."
+msgstr ""
+
+#: src/mpri_mcp/tools/setup_tools.py
+#, python-brace-format
+msgid "Paused the crawl schedule for {name}."
+msgstr ""
+
+#: src/mpri_mcp/tools/setup_tools.py
+msgid "Crawl started in the background."
+msgstr ""
+
+#: src/mpri_mcp/tools/setup_tools.py
+#, python-brace-format
+msgid "Now tracking '{name}' at {count} supermarket(s)."
+msgstr ""
+
+#: src/mpri_mcp/tools/setup_tools.py
+#, python-brace-format
+msgid "Updated '{name}': tracked at {count} supermarket(s) from this request."
+msgstr ""
+
+#: src/mpri_mcp/tools/setup_tools.py
+msgid "This connection is not signed in through OAuth, so a language preference can't be saved."
+msgstr ""
+
+#: src/mpri_mcp/utils/text.py
+msgid "URL is empty."
+msgstr ""
+
+#: src/mpri_mcp/utils/text.py
+#, python-brace-format
+msgid "'{url}' is not a valid http(s) URL."
+msgstr ""
+

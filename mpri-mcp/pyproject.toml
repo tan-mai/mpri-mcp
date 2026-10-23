@@ -9,6 +9,7 @@ dependencies = [
     "anthropic>=1.15.0",
     "apscheduler>=3.10,<4",
     "argon2-cffi>=25.1.0",
+    "babel>=2.18.0",
     "beautifulsoup4>=4.15.0",
     "fastapi>=0.154.0",
     "google-genai>=2.31.0",

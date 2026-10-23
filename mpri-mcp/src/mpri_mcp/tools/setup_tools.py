@@ -1,15 +1,18 @@
-"""MCP tools for configuration: supermarkets, schedules, products."""
+"""MCP tools for configuration: supermarkets, schedules, products, response language."""
 
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from mcp.server import MCPServer
+from mcp.server.auth.middleware.auth_context import get_access_token
+from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 from pydantic import BaseModel, Field
 
 from mpri_mcp.container import Container
+from mpri_mcp.i18n import N_, _, translate_stored, use_language
 from mpri_mcp.services import products, schedules, supermarkets
 from mpri_mcp.services.products import UrlInput
-from mpri_mcp.tools.common import Clock, drop_none, service_errors
+from mpri_mcp.tools.common import ToolContext, drop_none
 
 _WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, openWorldHint=False)
 _WRITE_IDEMPOTENT = ToolAnnotations(
@@ -17,17 +20,22 @@ _WRITE_IDEMPOTENT = ToolAnnotations(
 )
 _READ = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
 
+_LANGUAGE_SET = {
+    "en": N_("From now on, this connection gets messages, errors and dates in English."),
+    "vi": N_("From now on, this connection gets messages, errors and dates in Vietnamese."),
+}
+
 
 class ProductUrlInput(BaseModel):
     supermarket_id: str = Field(description="ID from get_supermarkets, e.g. 'winmart'.")
     url: str = Field(description="Full product page URL at that supermarket.")
 
 
-def register_setup_tools(mcp: MCPServer, c: Container) -> None:
-    clock = Clock(c.settings.scheduler_timezone)
+def register_setup_tools(mcp: MCPServer, c: Container, ctx: ToolContext) -> None:
+    clock = ctx.clock
 
     @mcp.tool(title="List supermarkets", annotations=_READ)
-    @service_errors
+    @ctx.tool
     async def get_supermarkets() -> dict[str, Any]:
         """List every configured supermarket with its ID, crawl schedule (cron task) status,
         next run time, number of tracked product URLs, and the result of the last crawl."""
@@ -56,7 +64,7 @@ def register_setup_tools(mcp: MCPServer, c: Container) -> None:
                             "started_at": clock.human(run.started_at),
                             "urls_ok": run.urls_ok,
                             "urls_failed": run.urls_failed,
-                            "error": run.error,
+                            "error": translate_stored(run.error),
                         }
                     )
                     if run
@@ -66,7 +74,7 @@ def register_setup_tools(mcp: MCPServer, c: Container) -> None:
         return {"supermarkets": result, "timezone": clock.name}
 
     @mcp.tool(title="Add supermarket", annotations=_WRITE)
-    @service_errors
+    @ctx.tool
     async def add_supermarket(
         name: Annotated[str, Field(description="Display name, e.g. 'Lotte Mart'.")],
         base_url: Annotated[str, Field(description="Website domain or URL, e.g. 'lottemart.vn'.")],
@@ -78,11 +86,13 @@ def register_setup_tools(mcp: MCPServer, c: Container) -> None:
             "id": m.id,
             "name": m.name,
             "base_url": m.base_url,
-            "message": f"Added {m.name} with ID '{m.id}'. It has no crawl schedule yet.",
+            "message": _("Added {name} with ID '{id}'. It has no crawl schedule yet.").format(
+                name=m.name, id=m.id
+            ),
         }
 
     @mcp.tool(title="Set crawl schedule", annotations=_WRITE_IDEMPOTENT)
-    @service_errors
+    @ctx.tool
     async def setup_supermarket_cron_task(
         supermarket_id: Annotated[str, Field(description="Supermarket ID from get_supermarkets.")],
         cron_expression: Annotated[
@@ -104,11 +114,13 @@ def register_setup_tools(mcp: MCPServer, c: Container) -> None:
             "cron_expression": r.cron_expression,
             "timezone": r.timezone,
             "next_runs": [clock.human(t) for t in r.next_runs],
-            "message": f"Crawl schedule for {r.supermarket.name} set to '{r.cron_expression}'.",
+            "message": _("Crawl schedule for {name} set to '{cron}'.").format(
+                name=r.supermarket.name, cron=r.cron_expression
+            ),
         }
 
     @mcp.tool(title="Pause crawl schedule", annotations=_WRITE_IDEMPOTENT)
-    @service_errors
+    @ctx.tool
     async def disable_supermarket_cron_task(
         supermarket_id: Annotated[str, Field(description="Supermarket ID from get_supermarkets.")],
     ) -> dict[str, Any]:
@@ -119,14 +131,14 @@ def register_setup_tools(mcp: MCPServer, c: Container) -> None:
             "supermarket_id": m.id,
             "cron_expression": m.cron_expression,
             "enabled": False,
-            "message": f"Paused the crawl schedule for {m.name}.",
+            "message": _("Paused the crawl schedule for {name}.").format(name=m.name),
         }
 
     @mcp.tool(
         title="Crawl now",
         annotations=ToolAnnotations(readOnlyHint=False, destructiveHint=False, openWorldHint=True),
     )
-    @service_errors
+    @ctx.tool
     async def trigger_crawl_now(
         supermarket_id: Annotated[str, Field(description="Supermarket ID from get_supermarkets.")],
     ) -> dict[str, Any]:
@@ -136,13 +148,13 @@ def register_setup_tools(mcp: MCPServer, c: Container) -> None:
         return {
             "supermarket_id": supermarket_id,
             "started": started,
-            "message": "Crawl started in the background."
+            "message": _("Crawl started in the background.")
             if started
-            else "A crawl of this supermarket is already running.",
+            else _("A crawl of this supermarket is already running."),
         }
 
     @mcp.tool(title="Track product", annotations=_WRITE_IDEMPOTENT)
-    @service_errors
+    @ctx.tool
     async def add_product_with_urls(
         name: Annotated[
             str, Field(description="Product name, e.g. 'Thùng Sữa TH True Milk Ít Đường 110ml'.")
@@ -161,6 +173,11 @@ def register_setup_tools(mcp: MCPServer, c: Container) -> None:
             c.db, name, category, [UrlInput(u.supermarket_id, u.url) for u in urls]
         )
         ok = [u for u in r.urls if u.status != "error"]
+        message = (
+            _("Now tracking '{name}' at {count} supermarket(s).")
+            if r.created
+            else _("Updated '{name}': tracked at {count} supermarket(s) from this request.")
+        )
         return {
             "product_id": r.product.id,
             "name": r.product.name,
@@ -178,8 +195,29 @@ def register_setup_tools(mcp: MCPServer, c: Container) -> None:
                 )
                 for u in r.urls
             ],
-            "message": (
-                f"{'Now tracking' if r.created else 'Updated'} '{r.product.name}' at "
-                f"{len(ok)} supermarket(s)."
-            ),
+            "message": message.format(name=r.product.name, count=len(ok)),
         }
+
+    @mcp.tool(title="Set response language", annotations=_WRITE_IDEMPOTENT)
+    @ctx.tool
+    async def set_response_language(
+        language: Annotated[
+            Literal["en", "vi"],
+            Field(description="'en' for English, 'vi' for Vietnamese (tiếng Việt)."),
+        ],
+    ) -> dict[str, Any]:
+        """Choose the language of this server's own text (messages, error explanations and
+        dates) for the current connection. Call it when the user asks to switch between
+        English and Vietnamese, e.g. 'switch to Vietnamese' or 'chuyển sang tiếng Việt'.
+        It does not change the language you reply in: keep answering in the language the
+        user writes in. The choice is saved for this connection and survives token refreshes."""
+        token = get_access_token()
+        if token is None or not await c.oauth.set_language_for_token(token.token, language):
+            raise ToolError(
+                _(
+                    "This connection is not signed in through OAuth, so a language preference "
+                    "can't be saved."
+                )
+            )
+        with use_language(language):
+            return {"language": language, "message": _(_LANGUAGE_SET[language])}

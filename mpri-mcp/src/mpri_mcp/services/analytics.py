@@ -13,6 +13,7 @@ from sqlalchemy.orm import selectinload
 
 from mpri_mcp.db import Database
 from mpri_mcp.db.models import CrawlRunItem, PriceRecord, Product, ProductUrl
+from mpri_mcp.i18n import _
 from mpri_mcp.services.errors import ValidationError
 from mpri_mcp.services.products import resolve_product
 from mpri_mcp.utils.text import FuzzyMatch
@@ -192,9 +193,9 @@ async def deep_discounts(
     db: Database, min_discount_percentage: float, days: int = 7, limit: int = 50
 ) -> list[DiscountItem]:
     if not 0 < min_discount_percentage < 100:
-        raise ValidationError("min_discount_percentage must be between 1 and 99.")
+        raise ValidationError(_("min_discount_percentage must be between 1 and 99."))
     if not 1 <= days <= 365:
-        raise ValidationError("days must be between 1 and 365.")
+        raise ValidationError(_("days must be between 1 and {max}.").format(max=365))
     since = utcnow() - timedelta(days=days)
     async with db.session() as s:
         latest = await _latest_records(s, since=since)
@@ -243,7 +244,7 @@ async def product_history(
     tz: str = "Asia/Ho_Chi_Minh",
 ) -> History:
     if not 1 <= days <= 730:
-        raise ValidationError("days must be between 1 and 730.")
+        raise ValidationError(_("days must be between 1 and {max}.").format(max=730))
     zone = ZoneInfo(tz)
     since = utcnow() - timedelta(days=days)
     urls = [u for u in product.urls if supermarket_id in (None, u.supermarket_id)]

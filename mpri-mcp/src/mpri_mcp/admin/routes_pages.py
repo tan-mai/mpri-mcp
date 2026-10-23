@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from starlette.responses import Response
 
-from mpri_mcp.admin.web import flash, render, require_admin, state, verify_csrf
+from mpri_mcp.admin.web import flash, form_data, render, require_admin, state, verify_csrf
+from mpri_mcp.i18n import LANGUAGES, _, normalize_language
 from mpri_mcp.services import analytics, products, runs, supermarkets
 from mpri_mcp.services.settings import estimate_cost, get_prices
 
@@ -85,13 +86,42 @@ async def apps(request: Request) -> Response:
         request,
         "apps.html",
         clients=await st.oauth.list_clients(),
+        connections=await st.oauth.list_connections(),
         connector_url=st.settings.mcp_resource_url,
     )
+
+
+@router.post("/admin/connections/{family_id}/language")
+async def connection_language(request: Request, family_id: str) -> Response:
+    await verify_csrf(request)
+    form = await form_data(request)
+    language = normalize_language(form.get("language"))
+    if language is None or not await state(request).oauth.set_connection_language(
+        family_id, language
+    ):
+        flash(request, _("That connection no longer exists."), "error")
+    else:
+        flash(
+            request,
+            _("Language for that connection set to {language}.").format(
+                language=LANGUAGES[language]
+            ),
+            "success",
+        )
+    return RedirectResponse("/admin/apps", status_code=303)
+
+
+@router.post("/admin/connections/{family_id}/disconnect")
+async def connection_disconnect(request: Request, family_id: str) -> Response:
+    await verify_csrf(request)
+    await state(request).oauth.disconnect(family_id)
+    flash(request, _("Connection ended. That Claude connection must sign in again."), "success")
+    return RedirectResponse("/admin/apps", status_code=303)
 
 
 @router.post("/admin/apps/{client_id}/revoke")
 async def revoke_app(request: Request, client_id: str) -> Response:
     await verify_csrf(request)
     await state(request).oauth.revoke_client(client_id)
-    flash(request, "Access revoked. That app must be connected again to be used.", "success")
+    flash(request, _("Access revoked. That app must be connected again to be used."), "success")
     return RedirectResponse("/admin/apps", status_code=303)
