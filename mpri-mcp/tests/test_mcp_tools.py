@@ -53,6 +53,7 @@ async def test_tool_list_and_annotations(mcp):
         "get_product_price_comparison",
         "get_deep_discount_items",
         "get_price_history",
+        "set_response_language",
     }
     assert tools["get_supermarkets"].annotations.read_only_hint is True
     assert tools["add_supermarket"].annotations.read_only_hint is False

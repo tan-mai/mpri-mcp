@@ -6,75 +6,76 @@
 {% block content %}
 <hgroup>
   <h2>{{ product.name }}</h2>
-  <p>{{ product.category or "No category" }} · tracked since {{ product.created_at | dt("%Y-%m-%d") }}</p>
+  <p>{{ product.category or _("No category") }} · {{ _("tracked since %(date)s", date=product.created_at | dt("%d/%m/%Y")) }}</p>
 </hgroup>
 
-<h3>Latest prices</h3>
+<h3>{{ _("Latest prices") }}</h3>
 {% if prices %}
 <div class="table-wrap">
   <table>
-    <thead><tr><th>Supermarket</th><th class="num">Price</th><th class="num">Original</th><th class="num">Member</th><th class="num">Discount</th><th>Checked</th></tr></thead>
+    <thead><tr><th>{{ _("Supermarket") }}</th><th class="num">{{ _("Price") }}</th><th class="num">{{ _("Original") }}</th><th class="num">{{ _("Member") }}</th><th class="num">{{ _("Discount") }}</th><th>{{ _("Checked") }}</th></tr></thead>
     <tbody>
     {% for p in prices %}
       <tr>
-        <td>{{ p.supermarket_name }}{% if loop.first and p.current_price %} <span class="badge badge-ok">cheapest</span>{% endif %}</td>
+        <td>{{ p.supermarket_name }}{% if loop.first and p.current_price %} <span class="badge badge-ok">{{ _("cheapest") }}</span>{% endif %}</td>
         <td class="num"><strong>{{ p.current_price | vnd }}</strong></td>
         <td class="num">{% if p.original_price and p.original_price != p.current_price %}{{ p.original_price | vnd }}{% else %}—{% endif %}</td>
         <td class="num">{{ p.member_price | vnd }}</td>
         <td class="num">{% if p.discount_pct %}−{{ p.discount_pct | pct }}{% else %}—{% endif %}</td>
-        <td class="nowrap">{% if p.crawled_at %}{{ p.crawled_at | ago }}{% if p.is_stale %} <span class="badge badge-warn">stale</span>{% endif %}{% else %}<span class="muted">no data yet</span>{% endif %}</td>
+        <td class="nowrap">{% if p.crawled_at %}{{ p.crawled_at | ago }}{% if p.is_stale %} <span class="badge badge-warn">{{ _("stale") }}</span>{% endif %}{% else %}<span class="muted">{{ _("no data yet") }}</span>{% endif %}</td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
 {% else %}
-<p class="muted">Not tracked at any supermarket yet — add a URL below.</p>
+<p class="muted">{{ _("Not tracked at any supermarket yet — add a URL below.") }}</p>
 {% endif %}
 
-<section id="price-chart" class="chart-root" data-src="/admin/products/{{ product.id }}/history.json" data-days="90">
-  <h3>Price history</h3>
-  <div class="chart-range" role="group" aria-label="Time range">
-    <button type="button" class="secondary outline" data-days="30" aria-pressed="false">30 days</button>
-    <button type="button" class="secondary outline" data-days="90" aria-pressed="true">90 days</button>
-    <button type="button" class="secondary outline" data-days="365" aria-pressed="false">1 year</button>
+<section id="price-chart" class="chart-root" data-src="/admin/products/{{ product.id }}/history.json" data-days="90"
+         data-label-was="{{ _('was') }}" data-label-member="{{ _('member') }}" data-label-date="{{ _('Date') }}">
+  <h3>{{ _("Price history") }}</h3>
+  <div class="chart-range" role="group" aria-label="{{ _('Time range') }}">
+    <button type="button" class="secondary outline" data-days="30" aria-pressed="false">{{ _("30 days") }}</button>
+    <button type="button" class="secondary outline" data-days="90" aria-pressed="true">{{ _("90 days") }}</button>
+    <button type="button" class="secondary outline" data-days="365" aria-pressed="false">{{ _("1 year") }}</button>
   </div>
   <div class="chart-box">
-    <canvas aria-label="Daily price per supermarket, in VND" role="img"></canvas>
-    <p class="chart-empty muted" hidden>No prices collected in this period yet.</p>
+    <canvas aria-label="{{ _('Daily price per supermarket, in VND') }}" role="img"></canvas>
+    <p class="chart-empty muted" hidden>{{ _("No prices collected in this period yet.") }}</p>
   </div>
   <details>
-    <summary>Show as table</summary>
+    <summary>{{ _("Show as table") }}</summary>
     <div id="price-table"></div>
   </details>
 </section>
 
-<h3>Supermarket URLs</h3>
+<h3>{{ _("Supermarket URLs") }}</h3>
 {% if urls %}
 <div class="table-wrap">
   <table>
-    <thead><tr><th>Supermarket</th><th>URL &amp; status</th><th>Actions</th></tr></thead>
+    <thead><tr><th>{{ _("Supermarket") }}</th><th>{{ _("URL and status") }}</th><th>{{ _("Actions") }}</th></tr></thead>
     <tbody>
     {% for u in urls %}
       <tr>
-        <td>{{ u.supermarket.name }}<br>{{ url_status(u) }}<br><small class="muted">checked {{ u.last_crawled_at | ago }}</small></td>
+        <td>{{ u.supermarket.name }}<br>{{ url_status(u) }}<br><small class="muted">{{ _("checked %(when)s", when=u.last_crawled_at | ago) }}</small></td>
         <td>
           <form method="post" action="/admin/urls/{{ u.id }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-            <input type="url" name="url" value="{{ u.url }}" required aria-label="URL at {{ u.supermarket.name }}">
-            <label><input type="checkbox" name="is_active" {% if u.is_active %}checked{% endif %}> Active</label>
-            <button type="submit" class="secondary small">Save</button>
+            <input type="url" name="url" value="{{ u.url }}" required aria-label="{{ _('URL at %(name)s', name=u.supermarket.name) }}">
+            <label><input type="checkbox" name="is_active" {% if u.is_active %}checked{% endif %}> {{ _("Active") }}</label>
+            <button type="submit" class="secondary small">{{ _("Save") }}</button>
           </form>
-          {% if u.last_error %}<small class="form-error">{{ u.last_error }}</small>{% endif %}
+          {% if u.last_error %}<small class="form-error">{{ u.last_error | tr }}</small>{% endif %}
           <div id="test-{{ u.id }}"></div>
         </td>
         <td>
           <div class="actions">
-            <button type="button" class="small" hx-post="/admin/urls/{{ u.id }}/test" hx-target="#test-{{ u.id }}" hx-indicator="#test-spin-{{ u.id }}">Re-test</button>
-            <span id="test-spin-{{ u.id }}" class="htmx-indicator muted"><small>fetching…</small></span>
-            <form method="post" action="/admin/urls/{{ u.id }}/delete" data-confirm="Stop tracking at {{ u.supermarket.name }}? Its price history is deleted.">
+            <button type="button" class="small" hx-post="/admin/urls/{{ u.id }}/test" hx-target="#test-{{ u.id }}" hx-indicator="#test-spin-{{ u.id }}">{{ _("Re-test") }}</button>
+            <span id="test-spin-{{ u.id }}" class="htmx-indicator muted"><small>{{ _("fetching…") }}</small></span>
+            <form method="post" action="/admin/urls/{{ u.id }}/delete" data-confirm="{{ _('Stop tracking at %(name)s? Its price history is deleted.', name=u.supermarket.name) }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-              <button type="submit" class="secondary outline small">Remove</button>
+              <button type="submit" class="secondary outline small">{{ _("Remove") }}</button>
             </form>
           </div>
         </td>
@@ -88,31 +89,31 @@
 <div class="grid-2">
   {% if untracked %}
   <article>
-    <header><h3>Add a supermarket URL</h3></header>
+    <header><h3>{{ _("Add a supermarket URL") }}</h3></header>
     <form method="post" action="/admin/products/{{ product.id }}/urls">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <label>Supermarket
+      <label>{{ _("Supermarket") }}
         <select name="supermarket_id" required>
           {% for m in untracked %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}
         </select>
       </label>
-      <label>Product page URL <input type="url" name="url" required></label>
-      <button type="submit" class="secondary">Add URL</button>
+      <label>{{ _("Product page URL") }} <input type="url" name="url" required></label>
+      <button type="submit" class="secondary">{{ _("Add URL") }}</button>
     </form>
   </article>
   {% endif %}
   <article>
-    <header><h3>Edit product</h3></header>
+    <header><h3>{{ _("Edit product") }}</h3></header>
     <form method="post" action="/admin/products/{{ product.id }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <label>Name <input type="text" name="name" value="{{ product.name }}" required></label>
-      <label>Category <input type="text" name="category" value="{{ product.category or '' }}"></label>
-      <button type="submit" class="secondary">Save</button>
+      <label>{{ _("Name") }} <input type="text" name="name" value="{{ product.name }}" required></label>
+      <label>{{ _("Category") }} <input type="text" name="category" value="{{ product.category or '' }}"></label>
+      <button type="submit" class="secondary">{{ _("Save") }}</button>
     </form>
     <hr>
-    <form method="post" action="/admin/products/{{ product.id }}/delete" data-confirm="Delete {{ product.name }} and all its price history?">
+    <form method="post" action="/admin/products/{{ product.id }}/delete" data-confirm="{{ _('Delete %(name)s and all its price history?', name=product.name) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <button type="submit" class="secondary outline">Delete product</button>
+      <button type="submit" class="secondary outline">{{ _("Delete product") }}</button>
     </form>
   </article>
 </div>

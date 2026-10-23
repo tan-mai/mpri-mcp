@@ -10,6 +10,8 @@ from urllib.parse import urlparse
 
 from rapidfuzz import fuzz
 
+from mpri_mcp.i18n import _
+
 _NON_ALNUM = re.compile(r"[^a-z0-9]+")
 
 
@@ -33,12 +35,12 @@ def normalize_base_url(url: str) -> str:
     """'lottemart.vn' -> 'https://lottemart.vn'. Raises ValueError for anything unusable."""
     url = url.strip()
     if not url:
-        raise ValueError("URL is empty")
+        raise ValueError(_("URL is empty."))
     if "://" not in url:
         url = f"https://{url}"
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https") or not parsed.netloc or "." not in parsed.netloc:
-        raise ValueError(f"'{url}' is not a valid http(s) URL")
+        raise ValueError(_("'{url}' is not a valid http(s) URL.").format(url=url))
     return f"{parsed.scheme}://{parsed.netloc.lower()}{parsed.path.rstrip('/')}"
 
 
@@ -46,7 +48,7 @@ def validate_page_url(url: str) -> str:
     url = url.strip()
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https") or not parsed.netloc:
-        raise ValueError(f"'{url}' is not a valid http(s) URL")
+        raise ValueError(_("'{url}' is not a valid http(s) URL.").format(url=url))
     return url
 
 

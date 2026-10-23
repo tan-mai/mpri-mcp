@@ -7,10 +7,12 @@ from fastapi.responses import RedirectResponse
 from starlette.responses import Response
 
 from mpri_mcp.admin.web import (
+    LANGUAGE_COOKIE,
     admin_exists,
     client_ip,
     current_admin,
     flash,
+    form_data,
     login_session,
     logout_session,
     render,
@@ -33,6 +35,7 @@ from mpri_mcp.auth.passwords import (
     verify_password,
 )
 from mpri_mcp.db.models import AdminUser
+from mpri_mcp.i18n import _, default_language, normalize_language
 
 router = APIRouter()
 
@@ -40,6 +43,25 @@ router = APIRouter()
 def _form_str(form: object, key: str) -> str:
     value = form.get(key)  # type: ignore[attr-defined]
     return value if isinstance(value, str) else ""
+
+
+# --------------------------------------------------------------------------- language
+@router.post("/admin/language")
+async def switch_language(request: Request) -> Response:
+    """EN | VI switch in the header. Works before login too (setup, login, consent pages)."""
+    await verify_csrf(request)
+    form = await form_data(request)
+    language = normalize_language(form.get("lang")) or default_language()
+    response = RedirectResponse(safe_next(form.get("next")), status_code=303)
+    response.set_cookie(
+        LANGUAGE_COOKIE,
+        language,
+        max_age=365 * 86400,
+        httponly=True,
+        samesite="lax",
+        secure=state(request).settings.is_https,
+    )
+    return response
 
 
 # --------------------------------------------------------------------------- setup
@@ -72,10 +94,10 @@ async def setup_submit(request: Request) -> Response:
         )
 
     if st.login_limiter.blocked(ip_key):
-        return fail("Too many attempts. Wait 15 minutes and try again.")
+        return fail(_("Too many attempts. Wait 15 minutes and try again."))
     if not st.setup_tokens.verify(token):
         st.login_limiter.record_failure(ip_key)
-        return fail("The setup token is wrong. Copy it from the server logs.")
+        return fail(_("The setup token is wrong. Copy it from the server logs."))
     error = validate_username(username) or validate_new_password(password, confirm, username)
     if error:
         return fail(error)
@@ -86,7 +108,11 @@ async def setup_submit(request: Request) -> Response:
     st.admin_exists = True
     st.setup_tokens.clear()
     login_session(request, user)
-    flash(request, f"Welcome, {user.username}. Your admin account is ready.", "success")
+    flash(
+        request,
+        _("Welcome, {name}. Your admin account is ready.").format(name=user.username),
+        "success",
+    )
     return RedirectResponse("/admin", status_code=303)
 
 
@@ -118,7 +144,7 @@ async def login_submit(request: Request) -> Response:
             status_code=429,
             next=next_url,
             username=username,
-            error="Too many failed attempts. Wait 15 minutes and try again.",
+            error=_("Too many failed attempts. Wait 15 minutes and try again."),
         )
     user = await authenticate(st.db, username, password)
     if user is None:
@@ -129,7 +155,7 @@ async def login_submit(request: Request) -> Response:
             status_code=401,
             next=next_url,
             username=username,
-            error="Invalid username or password.",
+            error=_("Invalid username or password."),
         )
     st.login_limiter.reset(*keys)
     login_session(request, user)
@@ -157,7 +183,7 @@ async def change_password(request: Request, admin: AdminUser = Depends(require_a
     confirm = _form_str(form, "confirm")
     error = None
     if not verify_password(admin.password_hash, current):
-        error = "Current password is wrong."
+        error = _("Current password is wrong.")
     else:
         error = validate_new_password(new, confirm, admin.username)
     if error:
@@ -166,7 +192,7 @@ async def change_password(request: Request, admin: AdminUser = Depends(require_a
         )
     user = await set_password(state(request).db, username=admin.username, password=new)
     login_session(request, user)  # keep this browser signed in; all others are logged out
-    flash(request, "Password changed. Other sessions have been signed out.", "success")
+    flash(request, _("Password changed. Other sessions have been signed out."), "success")
     return RedirectResponse("/admin/account", status_code=303)
 
 

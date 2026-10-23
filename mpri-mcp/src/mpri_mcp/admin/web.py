@@ -11,13 +11,23 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import quote, urlparse
 from zoneinfo import ZoneInfo
 
+from babel.numbers import format_decimal
 from fastapi import HTTPException, Request
 from fastapi.templating import Jinja2Templates
 from starlette.responses import Response
 
 from mpri_mcp.auth.admin import admin_count, get_admin
 from mpri_mcp.db.models import AdminUser
-from mpri_mcp.utils.time import utcnow
+from mpri_mcp.i18n import (
+    LANGUAGES,
+    _,
+    format_relative,
+    format_weekday_datetime,
+    get_language,
+    gettext,
+    ngettext,
+    translate_stored,
+)
 
 if TYPE_CHECKING:
     from mpri_mcp.app import AppState
@@ -25,7 +35,12 @@ if TYPE_CHECKING:
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 STATIC_DIR = Path(__file__).parent / "static"
 
+LANGUAGE_COOKIE = "mpri_lang"
+
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
+templates.env.add_extension("jinja2.ext.i18n")
+# newstyle: _("Hi %(name)s", name=x) formats and escapes the variables.
+templates.env.install_gettext_callables(gettext, ngettext, newstyle=True)  # type: ignore[attr-defined]
 
 
 class SetupRequired(Exception):
@@ -55,7 +70,7 @@ async def verify_csrf(request: Request) -> None:
     sent = form.get("csrf_token") or request.headers.get("x-csrf-token") or ""
     expected = request.session.get("csrf") or ""
     if not (isinstance(sent, str) and sent and hmac.compare_digest(sent, expected)):
-        raise HTTPException(status_code=403, detail="Form expired or invalid. Reload the page.")
+        raise HTTPException(status_code=403, detail=_("Form expired or invalid. Reload the page."))
 
 
 def login_session(request: Request, user: AdminUser) -> None:
@@ -159,23 +174,17 @@ def fmt_dt(value: datetime | None, fmt: str = "%Y-%m-%d %H:%M") -> str:
     return value.astimezone(_display.tz).strftime(fmt)
 
 
+def fmt_dt_weekday(value: datetime | None) -> str:
+    """'Sat 24/10/2026 03:00' / 'Thứ Bảy, 24/10/2026 03:00'."""
+    return format_weekday_datetime(value, _display.tz.key) or "—"
+
+
 def fmt_ago(value: datetime | None) -> str:
-    if value is None:
-        return "never"
-    seconds = int((utcnow() - value).total_seconds())
-    if seconds < 0:
-        seconds = -seconds
-        prefix, suffix = "in ", ""
-    else:
-        prefix, suffix = "", " ago"
-    for unit, size in (("d", 86400), ("h", 3600), ("m", 60)):
-        if seconds >= size:
-            return f"{prefix}{seconds // size}{unit}{suffix}"
-    return "just now" if not prefix else "in <1m"
+    return format_relative(value)
 
 
 def fmt_pct(value: float | None) -> str:
-    return "—" if value is None else f"{value:g}%"
+    return "—" if value is None else format_decimal(value, locale=get_language()) + "%"
 
 
 def fmt_usd(value: float | None) -> str:
@@ -184,17 +193,36 @@ def fmt_usd(value: float | None) -> str:
     if value == 0:
         return "$0"
     if value < 0.01:
-        return "<$0.01"
-    return f"${value:,.2f}"
+        return "<$" + format_decimal(0.01, format="0.00", locale=get_language())
+    return "$" + format_decimal(value, format="#,##0.00", locale=get_language())
+
+
+def fmt_usd4(value: float | None) -> str:
+    if value is None:
+        return "—"
+    return "$" + format_decimal(value, format="#,##0.0000", locale=get_language())
 
 
 def fmt_int(value: int | None) -> str:
-    return "—" if value is None else f"{value:,}"
+    return "—" if value is None else format_decimal(value, locale=get_language())
 
 
-templates.env.globals.update(csrf_token=csrf_token, pop_flashes=pop_flashes)
+templates.env.globals.update(
+    csrf_token=csrf_token,
+    pop_flashes=pop_flashes,
+    current_language=get_language,
+    LANGUAGES=LANGUAGES,
+)
 templates.env.filters.update(
-    vnd=fmt_vnd, dt=fmt_dt, ago=fmt_ago, pct=fmt_pct, num=fmt_int, usd=fmt_usd
+    vnd=fmt_vnd,
+    dt=fmt_dt,
+    dtw=fmt_dt_weekday,
+    ago=fmt_ago,
+    pct=fmt_pct,
+    num=fmt_int,
+    usd=fmt_usd,
+    usd4=fmt_usd4,
+    tr=translate_stored,
 )
 
 

@@ -12,6 +12,7 @@ from sqlalchemy.orm import selectinload
 from mpri_mcp.crawler.config import CrawlConfig
 from mpri_mcp.db import Database
 from mpri_mcp.db.models import CrawlRun, ProductUrl, Supermarket
+from mpri_mcp.i18n import _
 from mpri_mcp.services.errors import ConflictError, NotFoundError, ValidationError
 from mpri_mcp.utils.text import normalize_base_url, normalize_name, slugify
 
@@ -32,7 +33,9 @@ async def get_supermarket(db: Database, supermarket_id: str) -> Supermarket:
         market = await s.get(Supermarket, supermarket_id)
     if market is None:
         raise NotFoundError(
-            f"Supermarket '{supermarket_id}' not found. Use get_supermarkets to list valid IDs."
+            _("Supermarket '{id}' not found. Use get_supermarkets to list valid IDs.").format(
+                id=supermarket_id
+            )
         )
     return market
 
@@ -79,9 +82,11 @@ async def list_supermarkets(db: Database) -> list[SupermarketSummary]:
 async def add_supermarket(db: Database, name: str, base_url: str) -> Supermarket:
     name = " ".join(name.split())
     if not name:
-        raise ValidationError("Supermarket name is required.")
+        raise ValidationError(_("Supermarket name is required."))
     if len(name) > 200:
-        raise ValidationError("Supermarket name is too long (max 200 characters).")
+        raise ValidationError(
+            _("Supermarket name is too long (max {max} characters).").format(max=200)
+        )
     try:
         base = normalize_base_url(base_url)
     except ValueError as e:
@@ -92,7 +97,11 @@ async def add_supermarket(db: Database, name: str, base_url: str) -> Supermarket
         wanted = normalize_name(name)
         for m in existing:
             if normalize_name(m.name) == wanted:
-                raise ConflictError(f"Supermarket '{m.name}' already exists with ID '{m.id}'.")
+                raise ConflictError(
+                    _("Supermarket '{name}' already exists with ID '{id}'.").format(
+                        name=m.name, id=m.id
+                    )
+                )
         taken = {m.id for m in existing}
         base_slug = slugify(name)[:60] or "market"
         slug, n = base_slug, 2
@@ -106,20 +115,24 @@ async def add_supermarket(db: Database, name: str, base_url: str) -> Supermarket
 async def update_supermarket(db: Database, supermarket_id: str, **changes: Any) -> Supermarket:
     unknown = set(changes) - EDITABLE_FIELDS
     if unknown:
-        raise ValidationError(f"Cannot edit fields: {', '.join(sorted(unknown))}")
+        raise ValidationError(
+            _("Cannot edit fields: {fields}").format(fields=", ".join(sorted(unknown)))
+        )
     async with db.session() as s:
         market = await s.get(Supermarket, supermarket_id)
         if market is None:
-            raise NotFoundError(f"Supermarket '{supermarket_id}' not found.")
+            raise NotFoundError(_("Supermarket '{id}' not found.").format(id=supermarket_id))
         if "name" in changes:
             name = " ".join(str(changes["name"]).split())
             if not name:
-                raise ValidationError("Supermarket name is required.")
+                raise ValidationError(_("Supermarket name is required."))
             others = (
                 await s.scalars(select(Supermarket).where(Supermarket.id != supermarket_id))
             ).all()
             if any(normalize_name(o.name) == normalize_name(name) for o in others):
-                raise ConflictError(f"Another supermarket is already named '{name}'.")
+                raise ConflictError(
+                    _("Another supermarket is already named '{name}'.").format(name=name)
+                )
             market.name = name
         if "base_url" in changes:
             try:
@@ -132,7 +145,7 @@ async def update_supermarket(db: Database, supermarket_id: str, **changes: Any) 
                     changes["crawl_config"] or {}
                 ).model_dump(exclude_defaults=True)
             except ValueError as e:
-                raise ValidationError(f"Invalid crawl_config: {e}") from e
+                raise ValidationError(_("Invalid crawl settings: {error}").format(error=e)) from e
         for key in ("ai_provider", "ai_model"):
             if key in changes:
                 setattr(market, key, (changes[key] or None))
@@ -140,7 +153,9 @@ async def update_supermarket(db: Database, supermarket_id: str, **changes: Any) 
             try:
                 ZoneInfo(changes["timezone"])
             except (ZoneInfoNotFoundError, ValueError) as e:
-                raise ValidationError(f"Unknown timezone '{changes['timezone']}'.") from e
+                raise ValidationError(
+                    _("Unknown timezone '{tz}'.").format(tz=changes["timezone"])
+                ) from e
             market.timezone = changes["timezone"]
     return market
 
@@ -151,7 +166,7 @@ async def set_schedule_fields(
     async with db.session() as s:
         market = await s.get(Supermarket, supermarket_id)
         if market is None:
-            raise NotFoundError(f"Supermarket '{supermarket_id}' not found.")
+            raise NotFoundError(_("Supermarket '{id}' not found.").format(id=supermarket_id))
         market.cron_expression = cron_expression
         market.cron_enabled = cron_enabled
     return market
@@ -161,7 +176,7 @@ async def delete_supermarket(db: Database, supermarket_id: str) -> None:
     async with db.session() as s:
         market = await s.get(Supermarket, supermarket_id)
         if market is None:
-            raise NotFoundError(f"Supermarket '{supermarket_id}' not found.")
+            raise NotFoundError(_("Supermarket '{id}' not found.").format(id=supermarket_id))
         await s.delete(market)
 
 

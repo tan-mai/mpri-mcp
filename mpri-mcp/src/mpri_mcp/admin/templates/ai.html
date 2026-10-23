@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% set nav = "ai" %}
-{% block title %}AI settings{% endblock %}
+{% block title %}{{ _("AI settings") }}{% endblock %}
 {% block content %}
-<h2>AI settings</h2>
-<p>Price extraction currently uses <strong class="mono">{{ effective }}</strong>{% if fallback %}, falling back to <strong class="mono">{{ fallback }}</strong>{% endif %}. A supermarket can override this on its own page.</p>
+<h2>{{ _("AI settings") }}</h2>
+<p>{% if fallback %}{{ _("Price extraction currently uses <strong class=\"mono\">%(model)s</strong>, falling back to <strong class=\"mono\">%(fallback)s</strong>.", model=effective, fallback=fallback) }}{% else %}{{ _("Price extraction currently uses <strong class=\"mono\">%(model)s</strong>.", model=effective) }}{% endif %} {{ _("A supermarket can override this on its own page.") }}</p>
 
-<h3>Providers</h3>
+<h3>{{ _("Providers") }}</h3>
 <div class="table-wrap">
   <table>
-    <thead><tr><th>Provider</th><th>Status</th><th>Default model</th><th>Setup</th></tr></thead>
+    <thead><tr><th>{{ _("Provider") }}</th><th>{{ _("Status") }}</th><th>{{ _("Default model") }}</th><th>{{ _("Setup") }}</th></tr></thead>
     <tbody>
     {% for p in providers %}
       <tr>
         <td>{{ p.label }}<br><small class="mono muted">{{ p.name }}</small></td>
-        <td>{% if p.configured %}<span class="badge badge-ok">configured</span>{% else %}<span class="badge badge-off">not configured</span>{% endif %}</td>
+        <td>{% if p.configured %}<span class="badge badge-ok">{{ _("configured") }}</span>{% else %}<span class="badge badge-off">{{ _("not configured") }}</span>{% endif %}</td>
         <td class="mono"><small>{{ p.default_model }}</small></td>
         <td><small class="muted">{{ p.hint }}</small></td>
       </tr>
@@ -21,97 +21,97 @@
     </tbody>
   </table>
 </div>
-<p class="muted"><small>API keys and credentials are read from the server's <code>.env</code> only; they are never stored here.</small></p>
+<p class="muted"><small>{{ _("API keys and credentials are read from the server's <code>.env</code> only; they are never stored here.") }}</small></p>
 
 <div class="grid-2">
   <article>
-    <header><h3>Default model</h3></header>
+    <header><h3>{{ _("Default model") }}</h3></header>
     <form method="post" action="/admin/ai">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <label>Provider
+      <label>{{ _("Provider") }}
         <select name="provider">
-          <option value="">— from .env ({{ env.provider }}) —</option>
-          {% for p in providers %}<option value="{{ p.name }}" {% if ai.provider == p.name %}selected{% endif %}>{{ p.label }}{% if not p.configured %} (not configured){% endif %}</option>{% endfor %}
+          <option value="">{{ _("— from .env (%(name)s) —", name=env.provider) }}</option>
+          {% for p in providers %}<option value="{{ p.name }}" {% if ai.provider == p.name %}selected{% endif %}>{{ p.label }}{% if not p.configured %} {{ _("(not configured)") }}{% endif %}</option>{% endfor %}
         </select>
       </label>
-      <label>Model
+      <label>{{ _("Model") }}
         <input type="text" name="model" value="{{ ai.model or '' }}" list="ai-models" placeholder="{{ env.model }}">
       </label>
-      <label>Fallback provider
+      <label>{{ _("Fallback provider") }}
         <select name="fallback_provider">
-          <option value="">— {% if env.fallback_provider %}from .env ({{ env.fallback_provider }}){% else %}none{% endif %} —</option>
+          <option value="">{% if env.fallback_provider %}{{ _("— from .env (%(name)s) —", name=env.fallback_provider) }}{% else %}{{ _("— none —") }}{% endif %}</option>
           {% for p in providers %}<option value="{{ p.name }}" {% if ai.fallback_provider == p.name %}selected{% endif %}>{{ p.label }}</option>{% endfor %}
         </select>
       </label>
-      <label>Fallback model
-        <input type="text" name="fallback_model" value="{{ ai.fallback_model or '' }}" list="ai-models" placeholder="{{ env.fallback_model or 'provider default' }}">
+      <label>{{ _("Fallback model") }}
+        <input type="text" name="fallback_model" value="{{ ai.fallback_model or '' }}" list="ai-models" placeholder="{{ env.fallback_model or _('provider default') }}">
       </label>
       <datalist id="ai-models">
         {% for p in providers %}{% for m in p.suggested_models %}<option value="{{ m }}">{% endfor %}{% endfor %}
       </datalist>
-      <button type="submit">Save</button>
+      <button type="submit">{{ _("Save") }}</button>
     </form>
   </article>
 
   <article>
-    <header><h3>Test extraction</h3></header>
-    <p class="muted"><small>Fetches one page and asks the chosen model for its prices. Nothing is saved.</small></p>
+    <header><h3>{{ _("Test extraction") }}</h3></header>
+    <p class="muted"><small>{{ _("Fetches one page and asks the chosen model for its prices. Nothing is saved.") }}</small></p>
     <form hx-post="/admin/ai/test" hx-target="#ai-test-result" hx-indicator="#ai-test-spin">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <label>Product page URL <input type="url" name="url" required placeholder="https://online.mmvietnam.com/product/…"></label>
-      <label>Use crawl settings of
+      <label>{{ _("Product page URL") }} <input type="url" name="url" required placeholder="https://online.mmvietnam.com/product/…"></label>
+      <label>{{ _("Use crawl settings of") }}
         <select name="supermarket_id">
-          <option value="">— none —</option>
+          <option value="">{{ _("— none —") }}</option>
           {% for m in markets %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}
         </select>
       </label>
       <div class="grid-2">
-        <label>Provider
+        <label>{{ _("Provider") }}
           <select name="provider">
-            <option value="">current</option>
+            <option value="">{{ _("current") }}</option>
             {% for p in providers %}<option value="{{ p.name }}">{{ p.name }}</option>{% endfor %}
           </select>
         </label>
-        <label>Model <input type="text" name="model" list="ai-models" placeholder="current"></label>
+        <label>{{ _("Model") }} <input type="text" name="model" list="ai-models" placeholder="{{ _('current') }}"></label>
       </div>
-      <button type="submit">Run test</button>
-      <span id="ai-test-spin" class="htmx-indicator muted"><small>fetching and extracting…</small></span>
+      <button type="submit">{{ _("Run test") }}</button>
+      <span id="ai-test-spin" class="htmx-indicator muted"><small>{{ _("fetching and extracting…") }}</small></span>
     </form>
     <div id="ai-test-result"></div>
   </article>
 </div>
 
-<h3>Usage, last 7 days</h3>
+<h3>{{ _("Usage, last 7 days") }}</h3>
 {% if usage.rows %}
 <div class="table-wrap">
   <table>
-    <thead><tr><th>Day</th><th>Model</th><th class="num">Calls</th><th class="num">Input tokens</th><th class="num">Output tokens</th><th class="num">Est. cost</th></tr></thead>
+    <thead><tr><th>{{ _("Day") }}</th><th>{{ _("Model") }}</th><th class="num">{{ _("Calls") }}</th><th class="num">{{ _("Input tokens") }}</th><th class="num">{{ _("Output tokens") }}</th><th class="num">{{ _("Est. cost") }}</th></tr></thead>
     <tbody>
     {% for row, cost in usage.rows %}
       <tr>
-        <td class="nowrap">{{ row.day.isoformat() }}</td>
+        <td class="nowrap">{{ row.day.strftime("%d/%m/%Y") }}</td>
         <td class="mono"><small>{{ row.provider }}/{{ row.model }}</small></td>
         <td class="num">{{ row.calls | num }}</td>
         <td class="num">{{ row.input_tokens | num }}</td>
         <td class="num">{{ row.output_tokens | num }}</td>
-        <td class="num">{% if cost is none %}<span class="muted">no price</span>{% else %}${{ "%.4f" | format(cost) }}{% endif %}</td>
+        <td class="num">{% if cost is none %}<span class="muted">{{ _("no price") }}</span>{% else %}{{ cost | usd4 }}{% endif %}</td>
       </tr>
     {% endfor %}
     </tbody>
-    <tfoot><tr><th colspan="2">Total</th><th class="num">{{ usage.calls | num }}</th><th class="num">{{ usage.input_tokens | num }}</th><th class="num">{{ usage.output_tokens | num }}</th><th class="num">${{ "%.4f" | format(usage.cost) }}</th></tr></tfoot>
+    <tfoot><tr><th colspan="2">{{ _("Total") }}</th><th class="num">{{ usage.calls | num }}</th><th class="num">{{ usage.input_tokens | num }}</th><th class="num">{{ usage.output_tokens | num }}</th><th class="num">{{ usage.cost | usd4 }}</th></tr></tfoot>
   </table>
 </div>
 {% else %}
-<p class="muted">No AI calls in the last 7 days.</p>
+<p class="muted">{{ _("No AI calls in the last 7 days.") }}</p>
 {% endif %}
 
 <details class="config">
-  <summary>Price table for cost estimates</summary>
-  <p class="muted"><small>USD per 1 million tokens, per model. Only used for the estimates on this dashboard — check your provider's console for real billing.</small></p>
+  <summary>{{ _("Price table for cost estimates") }}</summary>
+  <p class="muted"><small>{{ _("USD per 1 million tokens, per model. Only used for the estimates on this dashboard — check your provider's console for real billing.") }}</small></p>
   <form method="post" action="/admin/ai/prices">
     <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-    <textarea name="prices" class="code" spellcheck="false" aria-label="Model prices JSON">{{ prices_json }}</textarea>
-    <button type="submit" class="secondary">Save prices</button>
+    <textarea name="prices" class="code" spellcheck="false" aria-label="{{ _('Model prices (JSON)') }}">{{ prices_json }}</textarea>
+    <button type="submit" class="secondary">{{ _("Save prices") }}</button>
   </form>
 </details>
 {% endblock %}

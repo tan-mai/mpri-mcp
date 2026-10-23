@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from apscheduler.triggers.cron import CronTrigger
 
+from mpri_mcp.i18n import format_weekday_datetime
 from mpri_mcp.utils.time import utcnow
 
 MACROS = {
@@ -127,5 +128,5 @@ def next_fire_times(
 
 
 def describe_times(times: list[datetime], timezone: str) -> list[str]:
-    tz = ZoneInfo(timezone)
-    return [t.astimezone(tz).strftime("%a %Y-%m-%d %H:%M %Z") for t in times]
+    """In the current language: 'Sat 24/10/2026 03:00' / 'Thứ Bảy, 24/10/2026 03:00'."""
+    return [format_weekday_datetime(t, timezone) or "" for t in times]

@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from mpri_mcp.db import Database
 from mpri_mcp.db.models import CrawlRun, CrawlRunItem, ProductUrl
+from mpri_mcp.i18n import _
 from mpri_mcp.services.errors import NotFoundError
 
 
@@ -24,7 +25,7 @@ async def get_run(db: Database, run_id: int) -> tuple[CrawlRun, list[CrawlRunIte
     async with db.session() as s:
         run = await s.get(CrawlRun, run_id)
         if run is None:
-            raise NotFoundError(f"Run #{run_id} not found.")
+            raise NotFoundError(_("Run #{id} not found.").format(id=run_id))
         items = (
             await s.scalars(
                 select(CrawlRunItem)

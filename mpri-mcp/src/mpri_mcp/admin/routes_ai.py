@@ -10,6 +10,7 @@ from starlette.responses import Response
 
 from mpri_mcp.admin.routes_pages import usage_summary
 from mpri_mcp.admin.web import flash, form_data, render, require_admin, state, verify_csrf
+from mpri_mcp.i18n import _
 from mpri_mcp.services import supermarkets
 from mpri_mcp.services.settings import AISettings, get_ai_settings, set_ai_settings, set_prices
 
@@ -50,7 +51,7 @@ async def ai_save(request: Request) -> Response:
     for key in ("provider", "fallback_provider"):
         value = form.get(key, "").strip()
         if value and value not in names:
-            flash(request, f"Unknown provider '{value}'.", "error")
+            flash(request, _("Unknown provider '{name}'.").format(name=value), "error")
             return RedirectResponse("/admin/ai", status_code=303)
     await set_ai_settings(
         st.db,
@@ -61,7 +62,7 @@ async def ai_save(request: Request) -> Response:
             fallback_model=form.get("fallback_model", "").strip() or None,
         ),
     )
-    flash(request, "AI settings saved. They apply from the next crawl.", "success")
+    flash(request, _("AI settings saved. They apply from the next crawl."), "success")
     return RedirectResponse("/admin/ai", status_code=303)
 
 
@@ -79,10 +80,14 @@ async def ai_prices(request: Request) -> Response:
         }
     except (ValueError, KeyError, TypeError) as e:
         example = '{"model": {"input": 0.1, "output": 0.4}}'
-        flash(request, f"Not saved — use {example}: {e}", "error")
+        flash(
+            request,
+            _("Not saved — use {example}: {error}").format(example=example, error=e),
+            "error",
+        )
         return RedirectResponse("/admin/ai", status_code=303)
     await set_prices(state(request).db, clean)
-    flash(request, "Price table saved.", "success")
+    flash(request, _("Price table saved."), "success")
     return RedirectResponse("/admin/ai", status_code=303)
 
 
@@ -94,7 +99,7 @@ async def ai_test(request: Request) -> Response:
     form = await form_data(request)
     url = form.get("url", "").strip()
     if not url.startswith(("http://", "https://")):
-        return render(request, "_dry_run.html", result=None, error="Enter a full http(s) URL.")
+        return render(request, "_dry_run.html", result=None, error=_("Enter a full http(s) URL."))
     result = await st.container.runner.dry_run(
         url,
         supermarket_id=form.get("supermarket_id") or None,

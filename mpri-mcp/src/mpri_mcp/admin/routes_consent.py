@@ -17,6 +17,7 @@ from mpri_mcp.admin.web import (
     state,
     verify_csrf,
 )
+from mpri_mcp.i18n import _, get_language
 
 router = APIRouter()
 
@@ -26,8 +27,10 @@ def _expired(request: Request) -> Response:
         request,
         "error.html",
         status_code=400,
-        title="Authorization request expired",
-        message="This connection request is no longer valid. Start connecting again from Claude.",
+        title=_("Authorization request expired"),
+        message=_(
+            "This connection request is no longer valid. Start connecting again from Claude."
+        ),
     )
 
 
@@ -46,9 +49,11 @@ async def consent_form(request: Request, req: str = "") -> Response:
         request,
         "consent.html",
         pending=pending,
-        client_name=pending.client.client_name or "An unnamed application",
+        client_name=pending.client.client_name or _("An unnamed application"),
         redirect_host=urlparse(pending.redirect_uri).netloc,
         resource=pending.resource,
+        # Pre-select the language the admin is viewing this page in (default: English).
+        selected_language=get_language(),
     )
 
 
@@ -65,7 +70,12 @@ async def consent_submit(request: Request) -> Response:
     if pending is None:
         return _expired(request)
     approve = form.get("decision") == "allow"
-    code = await st.oauth.complete_pending(pending, approve=approve, subject=admin.username)
+    code = await st.oauth.complete_pending(
+        pending,
+        approve=approve,
+        subject=admin.username,
+        language=str(form.get("language") or "") or None,
+    )
     params: dict[str, str | None] = {"state": pending.state, "iss": st.settings.issuer_url}
     if code is not None:
         params["code"] = code

@@ -11,7 +11,7 @@ import hashlib
 import logging
 import secrets
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from urllib.parse import urlparse
 
@@ -38,9 +38,11 @@ from mpri_mcp.db import Database
 from mpri_mcp.db.models import (
     OAuthAuthorizationCode,
     OAuthClient,
+    OAuthGrant,
     OAuthPendingAuthorization,
     OAuthToken,
 )
+from mpri_mcp.i18n import normalize_language
 from mpri_mcp.utils.time import utcnow
 
 log = logging.getLogger(__name__)
@@ -106,6 +108,19 @@ class ClientSummary:
 
 
 @dataclass
+class ConnectionSummary:
+    """One live connection: an approved authorization whose refresh token is still valid."""
+
+    family_id: str
+    client_id: str
+    client_name: str
+    subject: str | None
+    language: str
+    connected_at: datetime
+    last_used_at: datetime | None
+
+
+@dataclass
 class PendingRequest:
     id: str
     client: MpriClient
@@ -119,6 +134,14 @@ class PendingRequest:
 
 def _ts(dt: datetime) -> int:
     return int(dt.timestamp())
+
+
+def _as_utc(value: datetime | str | None) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = datetime.fromisoformat(value)
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value
 
 
 class SqliteOAuthProvider:
@@ -221,9 +244,16 @@ class SqliteOAuthProvider:
         )
 
     async def complete_pending(
-        self, pending: PendingRequest, *, approve: bool, subject: str
+        self,
+        pending: PendingRequest,
+        *,
+        approve: bool,
+        subject: str,
+        language: str | None = None,
     ) -> str | None:
-        """Consume the pending request. Returns a new authorization code when approved."""
+        """Consume the pending request. Returns a new authorization code when approved.
+
+        `language` is the response language chosen on the consent screen for this connection."""
         async with self._db.session() as s:
             await s.execute(
                 delete(OAuthPendingAuthorization).where(OAuthPendingAuthorization.id == pending.id)
@@ -231,7 +261,17 @@ class SqliteOAuthProvider:
             if not approve:
                 return None
             code = secrets.token_urlsafe(32)
+            family_id = secrets.token_hex(16)
             now = utcnow()
+            s.add(
+                OAuthGrant(
+                    family_id=family_id,
+                    client_id=pending.client.client_id,
+                    subject=subject,
+                    language=normalize_language(language) or self._settings.default_language,
+                    created_at=now,
+                )
+            )
             s.add(
                 OAuthAuthorizationCode(
                     code_hash=token_hash(code),
@@ -242,7 +282,7 @@ class SqliteOAuthProvider:
                     scopes=pending.scopes,
                     resource=pending.resource,
                     subject=subject,
-                    family_id=secrets.token_hex(16),
+                    family_id=family_id,
                     created_at=now,
                     expires_at=now + timedelta(seconds=self._settings.oauth_code_ttl_seconds),
                 )
@@ -473,6 +513,115 @@ class SqliteOAuthProvider:
             for c in clients
         ]
 
+    # ------------------------------------------------------------------ connections
+    async def _family_of(self, s: Any, access_token: str) -> OAuthToken | None:
+        row = await s.get(OAuthToken, token_hash(access_token))
+        return row if row is not None and row.kind == "access" else None
+
+    async def language_for_token(self, access_token: str) -> str | None:
+        """The response language saved for the connection this access token belongs to."""
+        async with self._db.session() as s:
+            row = await self._family_of(s, access_token)
+            if row is None:
+                return None
+            grant = await s.get(OAuthGrant, row.family_id)
+        return grant.language if grant else None
+
+    async def set_language_for_token(self, access_token: str, language: str) -> bool:
+        """Save the language for this token's connection. False if the token is unknown."""
+        async with self._db.session() as s:
+            row = await self._family_of(s, access_token)
+            if row is None:
+                return False
+            await self._set_grant_language(s, row.family_id, row.client_id, row.subject, language)
+        return True
+
+    async def set_connection_language(self, family_id: str, language: str) -> bool:
+        async with self._db.session() as s:
+            token = await s.scalar(
+                select(OAuthToken).where(OAuthToken.family_id == family_id).limit(1)
+            )
+            if token is None:
+                return False
+            await self._set_grant_language(s, family_id, token.client_id, token.subject, language)
+        return True
+
+    async def _set_grant_language(
+        self, s: Any, family_id: str, client_id: str, subject: str | None, language: str
+    ) -> None:
+        code = normalize_language(language)
+        if code is None:
+            raise ValueError(f"unsupported language {language!r}")
+        grant = await s.get(OAuthGrant, family_id)
+        if grant is None:  # connections made before languages existed
+            s.add(
+                OAuthGrant(family_id=family_id, client_id=client_id, subject=subject, language=code)
+            )
+        else:
+            grant.language = code
+
+    async def list_connections(self) -> list[ConnectionSummary]:
+        now = utcnow()
+        async with self._db.session() as s:
+            live = (
+                await s.execute(
+                    select(OAuthToken.family_id, OAuthToken.client_id, OAuthToken.subject)
+                    .where(
+                        OAuthToken.kind == "refresh",
+                        OAuthToken.revoked_at.is_(None),
+                        OAuthToken.used_at.is_(None),
+                        OAuthToken.expires_at > now,
+                    )
+                    .distinct()
+                )
+            ).all()
+            if not live:
+                return []
+            families = [row.family_id for row in live]
+            stats = {
+                row.family_id: row
+                for row in await s.execute(
+                    select(
+                        OAuthToken.family_id,
+                        func.min(OAuthToken.created_at).label("first"),
+                        func.max(OAuthToken.last_used_at).label("last"),
+                    )
+                    .where(OAuthToken.family_id.in_(families))
+                    .group_by(OAuthToken.family_id)
+                )
+            }
+            grants = {
+                g.family_id: g
+                for g in (
+                    await s.scalars(select(OAuthGrant).where(OAuthGrant.family_id.in_(families)))
+                ).all()
+            }
+            names = {
+                c.client_id: c.client_name or "(unnamed)"
+                for c in (await s.scalars(select(OAuthClient))).all()
+            }
+        result = []
+        for row in live:
+            grant, stat = grants.get(row.family_id), stats[row.family_id]
+            result.append(
+                ConnectionSummary(
+                    family_id=row.family_id,
+                    client_id=row.client_id,
+                    client_name=names.get(row.client_id, row.client_id),
+                    subject=row.subject,
+                    language=grant.language if grant else self._settings.default_language,
+                    # Aggregates come back raw from SQLite: naive UTC strings/datetimes.
+                    connected_at=_as_utc(stat.first) or now,
+                    last_used_at=_as_utc(stat.last),
+                )
+            )
+        result.sort(key=lambda c: c.connected_at, reverse=True)
+        return result
+
+    async def disconnect(self, family_id: str) -> None:
+        async with self._db.session() as s:
+            await self._revoke_family(s, family_id)
+
     async def revoke_client(self, client_id: str) -> None:
         async with self._db.session() as s:
             row = await s.get(OAuthClient, client_id)
@@ -500,6 +649,13 @@ class SqliteOAuthProvider:
             await s.execute(
                 delete(OAuthToken).where(
                     or_(OAuthToken.expires_at < cutoff, OAuthToken.revoked_at < cutoff)
+                )
+            )
+            # Grants whose tokens and codes are all gone belong to finished connections.
+            await s.execute(
+                delete(OAuthGrant).where(
+                    OAuthGrant.family_id.not_in(select(OAuthToken.family_id)),
+                    OAuthGrant.family_id.not_in(select(OAuthAuthorizationCode.family_id)),
                 )
             )
 

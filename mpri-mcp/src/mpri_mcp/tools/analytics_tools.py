@@ -7,15 +7,16 @@ from mcp.types import ToolAnnotations
 from pydantic import Field
 
 from mpri_mcp.container import Container
+from mpri_mcp.i18n import translate_stored
 from mpri_mcp.services import analytics
 from mpri_mcp.services.analytics import MarketPrice
-from mpri_mcp.tools.common import Clock, drop_none, service_errors
+from mpri_mcp.tools.common import ToolContext, drop_none
 
 _READ = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
 
 
-def register_analytics_tools(mcp: MCPServer, c: Container) -> None:
-    clock = Clock(c.settings.scheduler_timezone)
+def register_analytics_tools(mcp: MCPServer, c: Container, ctx: ToolContext) -> None:
+    clock = ctx.clock
 
     def price_row(p: MarketPrice) -> dict[str, Any]:
         return drop_none(
@@ -31,13 +32,13 @@ def register_analytics_tools(mcp: MCPServer, c: Container) -> None:
                 "checked_at": clock.human(p.crawled_at),
                 "stale": p.is_stale or None,
                 "no_data_yet": p.current_price is None or None,
-                "last_error": p.last_error,
+                "last_error": translate_stored(p.last_error),
                 "url": p.url,
             }
         )
 
     @mcp.tool(title="Compare prices", annotations=_READ)
-    @service_errors
+    @ctx.tool
     async def get_product_price_comparison(
         product_name: Annotated[
             str,
@@ -61,7 +62,7 @@ def register_analytics_tools(mcp: MCPServer, c: Container) -> None:
         }
 
     @mcp.tool(title="Deep discounts", annotations=_READ)
-    @service_errors
+    @ctx.tool
     async def get_deep_discount_items(
         min_discount_percentage: Annotated[
             int, Field(description="Minimum discount vs. the original price, in percent (1–99).")
@@ -96,7 +97,7 @@ def register_analytics_tools(mcp: MCPServer, c: Container) -> None:
         }
 
     @mcp.tool(title="Price history", annotations=_READ)
-    @service_errors
+    @ctx.tool
     async def get_price_history(
         product_name: Annotated[
             str, Field(description="Product name; fuzzy and accent-insensitive.")

@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.responses import Response
 
 from mpri_mcp.admin.web import flash, form_data, render, require_admin, state, verify_csrf
+from mpri_mcp.i18n import _
 from mpri_mcp.services import analytics, products, supermarkets
 from mpri_mcp.services.errors import ServiceError
 from mpri_mcp.services.products import UrlInput
@@ -58,8 +59,8 @@ async def product_add(request: Request) -> Response:
             flash(request, f"{r.supermarket_id}: {r.message}", "error")
         elif r.warning:
             flash(request, f"{r.supermarket_id}: {r.warning}", "warning")
-    verb = "Added" if result.created else "Updated"
-    flash(request, f"{verb} '{result.product.name}'.", "success")
+    message = _("Added '{name}'.") if result.created else _("Updated '{name}'.")
+    flash(request, message.format(name=result.product.name), "success")
     return _detail(result.product.id)
 
 
@@ -88,7 +89,7 @@ async def product_edit(request: Request, product_id: int) -> Response:
         await products.update_product(
             state(request).db, product_id, name=form.get("name", ""), category=form.get("category")
         )
-        flash(request, "Saved.", "success")
+        flash(request, _("Saved."), "success")
     except ServiceError as e:
         flash(request, str(e), "error")
     return _detail(product_id)
@@ -98,7 +99,7 @@ async def product_edit(request: Request, product_id: int) -> Response:
 async def product_delete(request: Request, product_id: int) -> Response:
     await verify_csrf(request)
     await products.delete_product(state(request).db, product_id)
-    flash(request, "Product deleted with its price history.", "success")
+    flash(request, _("Product deleted with its price history."), "success")
     return RedirectResponse("/admin/products", status_code=303)
 
 
@@ -117,9 +118,9 @@ async def product_add_url(request: Request, product_id: int) -> Response:
         )
         r = result.urls[0]
         if r.status == "error":
-            flash(request, r.message or "Could not add URL.", "error")
+            flash(request, r.message or _("Could not add URL."), "error")
         else:
-            flash(request, r.warning or "URL added.", "warning" if r.warning else "success")
+            flash(request, r.warning or _("URL added."), "warning" if r.warning else "success")
     except ServiceError as e:
         flash(request, str(e), "error")
     return _detail(product_id)
@@ -138,7 +139,7 @@ async def url_edit(request: Request, url_id: int) -> Response:
             url=form.get("url") or None,
             is_active=form.get("is_active") == "on",
         )
-        flash(request, "URL saved.", "success")
+        flash(request, _("URL saved."), "success")
     except ServiceError as e:
         flash(request, str(e), "error")
     return _detail(row.product_id)
@@ -150,7 +151,11 @@ async def url_delete(request: Request, url_id: int) -> Response:
     st = state(request)
     row = await products.get_url(st.db, url_id)
     await products.delete_url(st.db, url_id)
-    flash(request, f"Stopped tracking at {row.supermarket.name}.", "success")
+    flash(
+        request,
+        _("Stopped tracking at {name}.").format(name=row.supermarket.name),
+        "success",
+    )
     return _detail(row.product_id)
 
 
