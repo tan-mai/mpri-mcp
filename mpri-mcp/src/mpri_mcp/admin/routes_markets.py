@@ -9,7 +9,6 @@ from fastapi.responses import RedirectResponse
 from starlette.responses import Response
 
 from mpri_mcp.admin.web import flash, form_data, render, require_admin, state, verify_csrf
-from mpri_mcp.i18n import _
 from mpri_mcp.scheduler.cron import describe_times
 from mpri_mcp.services import runs, schedules, supermarkets
 from mpri_mcp.services.errors import ServiceError
@@ -52,13 +51,7 @@ async def market_add(request: Request) -> Response:
             form=form,
             error=str(e),
         )
-    flash(
-        request,
-        _("Added {name} (ID {id}). Set a crawl schedule below.").format(
-            name=market.name, id=market.id
-        ),
-        "success",
-    )
+    flash(request, f"Added {market.name} (ID {market.id}). Set a crawl schedule below.", "success")
     return _detail(market.id)
 
 
@@ -100,7 +93,7 @@ async def market_edit(request: Request, market_id: str) -> Response:
             name=form.get("name", ""),
             base_url=form.get("base_url", ""),
         )
-        flash(request, _("Saved."), "success")
+        flash(request, "Saved.", "success")
     except ServiceError as e:
         flash(request, str(e), "error")
     return _detail(market_id)
@@ -114,7 +107,7 @@ async def market_schedule(request: Request, market_id: str) -> Response:
     try:
         if form.get("action") == "disable":
             await schedules.disable_cron(st.db, st.container.scheduler, market_id)
-            flash(request, _("Schedule paused."), "success")
+            flash(request, "Schedule paused.", "success")
         else:
             result = await schedules.set_cron(
                 st.db, st.container.scheduler, market_id, form.get("cron_expression", "")
@@ -122,9 +115,8 @@ async def market_schedule(request: Request, market_id: str) -> Response:
             first = describe_times(result.next_runs[:1], result.timezone)
             flash(
                 request,
-                _("Schedule set to '{cron}'. Next run: {next}.").format(
-                    cron=result.cron_expression, next=first[0] if first else _("never")
-                ),
+                f"Schedule set to '{result.cron_expression}'. Next run: "
+                f"{first[0] if first else 'never'}.",
                 "success",
             )
     except ServiceError as e:
@@ -140,9 +132,9 @@ async def market_run(request: Request, market_id: str) -> Response:
         started = await schedules.trigger_now(st.db, st.container.scheduler, market_id)
         flash(
             request,
-            _("Crawl started in the background — refresh in a minute.")
+            "Crawl started in the background — refresh in a minute."
             if started
-            else _("A crawl of this supermarket is already running."),
+            else "A crawl of this supermarket is already running.",
             "success" if started else "warning",
         )
     except ServiceError as e:
@@ -158,11 +150,11 @@ async def market_crawl_config(request: Request, market_id: str) -> Response:
     try:
         parsed = json.loads(raw)
         if not isinstance(parsed, dict):
-            raise ValueError(_("crawl settings must be a JSON object"))
+            raise ValueError("crawl_config must be a JSON object")
         await supermarkets.update_supermarket(state(request).db, market_id, crawl_config=parsed)
-        flash(request, _("Crawl settings saved."), "success")
+        flash(request, "Crawl settings saved.", "success")
     except (ValueError, ServiceError) as e:
-        flash(request, _("Not saved: {error}").format(error=e), "error")
+        flash(request, f"Not saved: {e}", "error")
     return _detail(market_id)
 
 
@@ -172,7 +164,7 @@ async def market_ai(request: Request, market_id: str) -> Response:
     form = await form_data(request)
     provider = form.get("ai_provider", "").strip()
     if provider and provider not in state(request).container.registry.names():
-        flash(request, _("Unknown AI provider '{name}'.").format(name=provider), "error")
+        flash(request, f"Unknown AI provider '{provider}'.", "error")
         return _detail(market_id)
     try:
         await supermarkets.update_supermarket(
@@ -181,7 +173,7 @@ async def market_ai(request: Request, market_id: str) -> Response:
             ai_provider=provider,
             ai_model=form.get("ai_model", "").strip(),
         )
-        flash(request, _("AI override saved."), "success")
+        flash(request, "AI override saved.", "success")
     except ServiceError as e:
         flash(request, str(e), "error")
     return _detail(market_id)
@@ -192,16 +184,12 @@ async def market_delete(request: Request, market_id: str) -> Response:
     await verify_csrf(request)
     form = await form_data(request)
     if form.get("confirm") != market_id:
-        flash(request, _("Type the supermarket ID to confirm deletion."), "error")
+        flash(request, "Type the supermarket ID to confirm deletion.", "error")
         return _detail(market_id)
     st = state(request)
     st.container.scheduler.remove_market_job(market_id)
     await supermarkets.delete_supermarket(st.db, market_id)
-    flash(
-        request,
-        _("Deleted supermarket '{id}' and its price history.").format(id=market_id),
-        "success",
-    )
+    flash(request, f"Deleted supermarket '{market_id}' and its price history.", "success")
     return RedirectResponse("/admin/supermarkets", status_code=303)
 
 

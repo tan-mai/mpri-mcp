@@ -4,8 +4,7 @@ Tracks product prices at Vietnamese supermarkets (MM Mega Market, Winmart, Co.op
 and gives Claude tools to manage the tracking and analyse prices, as a **remote MCP
 connector** secured with OAuth 2.1.
 
-- **10 MCP tools.** Add supermarkets, set each one's independent crawl schedule, track products by URL, crawl on demand, compare prices, find deep discounts, read price history, and choose the response language.
-- **English and Vietnamese.** English is the default. Each Claude connection can switch to Vietnamese (*"chuyển sang tiếng Việt"*), and the dashboard has an EN | VI switch.
+- **9 MCP tools.** Add supermarkets, set each one's independent crawl schedule, track products by URL, crawl on demand, compare prices, find deep discounts, and read price history.
 - **Per-supermarket cron jobs.** One schedule per market (APScheduler, standard cron, Vietnam time). A slow or broken site never holds up the others.
 - **Crawler.** Playwright renders each product page. An AI model reads a compact digest of the page and returns `current_price`, `original_price` and `member_price` as JSON.
 - **Pluggable AI.** Choose Gemini (Vertex AI or AI Studio), any OpenAI-compatible API, or Anthropic Claude, globally or per supermarket, with an optional fallback provider.
@@ -46,7 +45,6 @@ When Claude connects:
 | `get_product_price_comparison(product_name)` | Latest price everywhere, cheapest first. Fuzzy, accent-insensitive matching |
 | `get_deep_discount_items(min_discount_percentage, days=7, limit=50)` | Products discounted at least N% |
 | `get_price_history(product_name, days=30, supermarket_id?)` | Daily history with min, max, average and today's price vs. the period's low |
-| `set_response_language(language)` | `en` or `vi`: language of this connection's messages, errors and dates |
 
 Cron expressions are standard 5-field cron in `Asia/Ho_Chi_Minh` time. Weekday 0/7 is Sunday,
 which is converted correctly for APScheduler 3.
@@ -92,7 +90,6 @@ full list.
 | `OPENAI_API_KEY` / `OPENAI_BASE_URL` | — | OpenAI, or any compatible API (OpenRouter, DeepSeek, Groq, Ollama, vLLM…) |
 | `ANTHROPIC_API_KEY` / `ANTHROPIC_EFFORT` | — / `low` | Claude models, e.g. `claude-opus-5-5`, or `claude-haiku-5-5` for lowest cost |
 | `SCHEDULER_TIMEZONE` | `Asia/Ho_Chi_Minh` | Cron and display timezone |
-| `DEFAULT_LANGUAGE` | `en` | `en` or `vi`: dashboard and new connections until someone picks another language |
 | `MAX_CONCURRENT_MARKETS` / `MAX_PAGES_PER_MARKET` | `2` / `3` | Crawl concurrency |
 | `PAGE_TIMEOUT_SECONDS` / `JOB_TIMEOUT_SECONDS` | `45` / `1800` | Per-page and per-crawl limits |
 | `ADMIN_SETUP_TOKEN` | random, logged | First-run setup token |
@@ -114,44 +111,6 @@ sites that need a store to be chosen or a proxy:
   "proxy": {"server": "http://vn-proxy.example.com:3128"}
 }
 ```
-
-## Languages (English / Tiếng Việt)
-
-English is the default (`DEFAULT_LANGUAGE=en`). Vietnamese can be chosen in three places:
-
-- **Each Claude connection** has its own language for the server's messages, error
-  explanations and dates (`Sat 24/10/2026 03:00` → `Thứ Bảy, 24/10/2026 03:00`). There are three ways to set it:
-  - choose it on the consent screen when connecting;
-  - later, tell Claude *"chuyển sang tiếng Việt"* or *"switch to English"*, which calls `set_response_language`;
-  - or change it under **Connected apps**.
-
-  The choice survives token refreshes. Claude itself always replies in the language you
-  write in. Tool names and descriptions stay in English, because that's what Claude reads.
-- **The dashboard** has an **EN | VI** switch in the header, remembered by a browser cookie. It
-  also works on the setup, sign-in and consent pages.
-- **Stored crawl errors** with fixed wording are translated when they're displayed. Dynamic
-  ones such as `HTTP 404` are shown as recorded.
-
-### Adding or changing translations
-
-The source strings are English. In Python use `_("Added {name}.").format(name=x)`, or `N_()`
-to mark a string that's translated later. In templates use
-`{{ _("Signed in as %(name)s.", name=x) }}`, and never put a bare `%` in a template string.
-The Vietnamese catalog is
-[`src/mpri_mcp/i18n/locales/vi/LC_MESSAGES/messages.po`](src/mpri_mcp/i18n/locales/vi/LC_MESSAGES/messages.po).
-It is read directly at runtime, so there's no compile step.
-
-```bash
-uv run pybabel extract -F babel.cfg -o src/mpri_mcp/i18n/locales/messages.pot \
-    --no-wrap --sort-by-file --add-location=file .
-uv run pybabel update -i src/mpri_mcp/i18n/locales/messages.pot \
-    -d src/mpri_mcp/i18n/locales -l vi --no-wrap --ignore-obsolete
-# translate the new/empty msgstr entries (and review any marked "#, fuzzy", then remove that flag)
-uv run pytest tests/test_i18n.py
-```
-
-`tests/test_i18n.py` fails if any string is missing a Vietnamese translation or if a
-translation drops a placeholder or an HTML tag.
 
 ## Security notes
 
@@ -184,7 +143,6 @@ src/mpri_mcp/
   scheduler/        APScheduler engine, cron translation, SQLite backups
   crawler/          Playwright browser, page digest, AI extractor, crawl runner
   ai/               provider adapters (gemini, openai_compat, anthropic) + registry
-  i18n/             translation helpers + locales/vi/LC_MESSAGES/messages.po
   auth/             admin account, OAuth provider/routes, passwords
   admin/            dashboard routes, Jinja2 templates, static assets (vendored)
   db/               SQLAlchemy models + async session

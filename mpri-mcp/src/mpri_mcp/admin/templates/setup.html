@@ -1,33 +1,33 @@
 {% extends "base.html" %}
-{% block title %}{{ _("First-run setup") }}{% endblock %}
+{% block title %}First-run setup{% endblock %}
 {% block content %}
 <article class="narrow">
   <header>
-    <h2>{{ _("Create the admin account") }}</h2>
-    <p class="muted">{{ _("This server has no admin yet. The admin signs in to this dashboard and approves Claude's connection.") }}</p>
+    <h2>Create the admin account</h2>
+    <p class="muted">This server has no admin yet. The admin signs in to this dashboard and approves Claude's connection.</p>
   </header>
   {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
   <form method="post" action="/admin/setup">
     <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
     <label>
-      {{ _("Setup token") }}
+      Setup token
       <input type="password" name="setup_token" required autocomplete="off" aria-describedby="token-help">
-      <small id="token-help">{{ _("Printed in the server logs at startup — run <code>docker compose logs mpri-mcp | grep -A2 SETUP</code>. Or the value of <code>ADMIN_SETUP_TOKEN</code>.") }}</small>
+      <small id="token-help">Printed in the server logs at startup — run <code>docker compose logs mpri-mcp | grep -A2 SETUP</code>. Or the value of <code>ADMIN_SETUP_TOKEN</code>.</small>
     </label>
     <label>
-      {{ _("Username") }}
+      Username
       <input type="text" name="username" value="{{ username }}" required minlength="3" maxlength="50" pattern="[A-Za-z0-9._\-]+" autocomplete="username">
     </label>
     <label>
-      {{ _("Password") }}
+      Password
       <input type="password" name="password" required minlength="{{ min_length }}" autocomplete="new-password" aria-describedby="pw-help">
-      <small id="pw-help">{{ _("At least %(n)s characters. A passphrase works well.", n=min_length) }}</small>
+      <small id="pw-help">At least {{ min_length }} characters. A passphrase works well.</small>
     </label>
     <label>
-      {{ _("Confirm password") }}
+      Confirm password
       <input type="password" name="confirm" required minlength="{{ min_length }}" autocomplete="new-password">
     </label>
-    <button type="submit">{{ _("Create admin account") }}</button>
+    <button type="submit">Create admin account</button>
   </form>
 </article>
 {% endblock %}

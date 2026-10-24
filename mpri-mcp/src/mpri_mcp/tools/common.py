@@ -5,17 +5,25 @@ from __future__ import annotations
 import functools
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from zoneinfo import ZoneInfo
 
-from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.mcpserver.exceptions import ToolError
 
-from mpri_mcp.i18n import format_weekday_datetime, use_language
 from mpri_mcp.services.errors import ServiceError
 
-if TYPE_CHECKING:
-    from mpri_mcp.container import Container
+
+def service_errors[**P, R](fn: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
+    """Turn expected service failures into ToolError so Claude sees the message."""
+
+    @functools.wraps(fn)
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        try:
+            return await fn(*args, **kwargs)
+        except ServiceError as e:
+            raise ToolError(str(e)) from e
+
+    return wrapper
 
 
 class Clock:
@@ -27,37 +35,7 @@ class Clock:
         return value.astimezone(self.tz).isoformat(timespec="minutes") if value else None
 
     def human(self, value: datetime | None) -> str | None:
-        """In the current language: 'Sat 24/10/2026 03:00' / 'Thứ Bảy, 24/10/2026 03:00'."""
-        return format_weekday_datetime(value, self.name)
-
-
-class ToolContext:
-    """Wraps tool functions so each call runs in its connection's language."""
-
-    def __init__(self, container: Container) -> None:
-        self.c = container
-        self.clock = Clock(container.settings.scheduler_timezone)
-
-    async def current_language(self) -> str:
-        token = get_access_token()  # None for unauthenticated/in-process calls
-        if token is not None:
-            language = await self.c.oauth.language_for_token(token.token)
-            if language:
-                return language
-        return self.c.settings.default_language
-
-    def tool[**P, R](self, fn: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
-        """Run in the connection's language; expected failures become readable ToolErrors."""
-
-        @functools.wraps(fn)
-        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-            with use_language(await self.current_language()):
-                try:
-                    return await fn(*args, **kwargs)
-                except ServiceError as e:
-                    raise ToolError(str(e)) from e
-
-        return wrapper
+        return value.astimezone(self.tz).strftime("%a %d/%m/%Y %H:%M") if value else None
 
 
 def drop_none(d: dict[str, Any]) -> dict[str, Any]:

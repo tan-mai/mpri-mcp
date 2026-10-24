@@ -9,7 +9,6 @@ from sqlalchemy.orm import selectinload
 
 from mpri_mcp.db import Database
 from mpri_mcp.db.models import Product, ProductUrl, Supermarket
-from mpri_mcp.i18n import _
 from mpri_mcp.services.errors import ConflictError, NotFoundError, ValidationError
 from mpri_mcp.utils.text import FuzzyMatch, fuzzy_rank, normalize_name, same_site, validate_page_url
 
@@ -45,12 +44,12 @@ class ProductListItem:
 def _clean_name(name: str) -> tuple[str, str]:
     name = " ".join(name.split())
     if not name:
-        raise ValidationError(_("Product name is required."))
+        raise ValidationError("Product name is required.")
     if len(name) > 300:
-        raise ValidationError(_("Product name is too long (max {max} characters).").format(max=300))
+        raise ValidationError("Product name is too long (max 300 characters).")
     normalized = normalize_name(name)
     if not normalized:
-        raise ValidationError(_("Product name must contain letters or digits."))
+        raise ValidationError("Product name must contain letters or digits.")
     return name, normalized
 
 
@@ -87,7 +86,7 @@ async def add_product_with_urls(
                         item.supermarket_id,
                         item.url,
                         "error",
-                        _("Unknown supermarket_id '{id}'.").format(id=item.supermarket_id),
+                        f"Unknown supermarket_id '{item.supermarket_id}'.",
                     )
                 )
                 continue
@@ -99,9 +98,7 @@ async def add_product_with_urls(
             warning = (
                 None
                 if same_site(url, market.base_url)
-                else _("URL host does not match {name} ({url}).").format(
-                    name=market.name, url=market.base_url
-                )
+                else f"URL host does not match {market.name} ({market.base_url})."
             )
             row = existing.get(market.id)
             if row is None:
@@ -132,9 +129,7 @@ async def resolve_product(db: Database, query: str) -> tuple[Product, list[Fuzzy
     matches = await find_products(db, query, limit=5)
     if not matches:
         raise NotFoundError(
-            _(
-                "No tracked product matches '{query}'. Add it first with add_product_with_urls."
-            ).format(query=query)
+            f"No tracked product matches '{query}'. Add it first with add_product_with_urls."
         )
     best = matches[0]
     alternatives = [m for m in matches[1:] if best.score - m.score <= 5]
@@ -150,7 +145,7 @@ async def get_product(db: Database, product_id: int) -> Product:
             .options(selectinload(Product.urls).selectinload(ProductUrl.supermarket))
         )
     if product is None:
-        raise NotFoundError(_("Product #{id} not found.").format(id=product_id))
+        raise NotFoundError(f"Product #{product_id} not found.")
     return product
 
 
@@ -186,14 +181,12 @@ async def update_product(
     async with db.session() as s:
         product = await s.get(Product, product_id)
         if product is None:
-            raise NotFoundError(_("Product #{id} not found.").format(id=product_id))
+            raise NotFoundError(f"Product #{product_id} not found.")
         clash = await s.scalar(
             select(Product).where(Product.normalized_name == normalized, Product.id != product_id)
         )
         if clash:
-            raise ConflictError(
-                _("Another product is already named '{name}'.").format(name=clash.name)
-            )
+            raise ConflictError(f"Another product is already named '{clash.name}'.")
         product.name, product.normalized_name = name, normalized
         product.category = (category or "").strip() or None
     return product
@@ -203,7 +196,7 @@ async def delete_product(db: Database, product_id: int) -> None:
     async with db.session() as s:
         product = await s.get(Product, product_id)
         if product is None:
-            raise NotFoundError(_("Product #{id} not found.").format(id=product_id))
+            raise NotFoundError(f"Product #{product_id} not found.")
         await s.delete(product)
 
 
@@ -215,7 +208,7 @@ async def get_url(db: Database, url_id: int) -> ProductUrl:
             .options(selectinload(ProductUrl.product), selectinload(ProductUrl.supermarket))
         )
     if row is None:
-        raise NotFoundError(_("URL #{id} not found.").format(id=url_id))
+        raise NotFoundError(f"URL #{url_id} not found.")
     return row
 
 
@@ -225,7 +218,7 @@ async def update_url(
     async with db.session() as s:
         row = await s.get(ProductUrl, url_id)
         if row is None:
-            raise NotFoundError(_("URL #{id} not found.").format(id=url_id))
+            raise NotFoundError(f"URL #{url_id} not found.")
         if url is not None:
             try:
                 new_url = validate_page_url(url)
@@ -244,5 +237,5 @@ async def delete_url(db: Database, url_id: int) -> None:
     async with db.session() as s:
         row = await s.get(ProductUrl, url_id)
         if row is None:
-            raise NotFoundError(_("URL #{id} not found.").format(id=url_id))
+            raise NotFoundError(f"URL #{url_id} not found.")
         await s.delete(row)

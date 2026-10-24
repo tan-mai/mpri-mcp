@@ -15,7 +15,6 @@ from fastapi.staticfiles import StaticFiles
 from starlette.datastructures import MutableHeaders
 from starlette.exceptions import HTTPException
 from starlette.middleware.sessions import SessionMiddleware
-from starlette.requests import HTTPConnection
 from starlette.responses import Response
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
@@ -29,7 +28,6 @@ from mpri_mcp.admin import (
     routes_products,
 )
 from mpri_mcp.admin.web import (
-    LANGUAGE_COOKIE,
     STATIC_DIR,
     LoginRequired,
     SetupRequired,
@@ -43,7 +41,6 @@ from mpri_mcp.auth.oauth_routes import build_oauth_routes
 from mpri_mcp.config import Settings, get_settings
 from mpri_mcp.container import Container
 from mpri_mcp.db import Database
-from mpri_mcp.i18n import _, activate, deactivate, set_default_language
 from mpri_mcp.log import configure_logging
 from mpri_mcp.mcp_server import build_mcp_server, transport_security
 from mpri_mcp.services.errors import NotFoundError
@@ -100,24 +97,6 @@ class SecurityHeadersMiddleware:
         await self.app(scope, receive, send_with_headers)
 
 
-class LanguageMiddleware:
-    """Dashboard language for this request, from the language cookie (else the default).
-    MCP tool calls override it with their connection's saved language."""
-
-    def __init__(self, app: ASGIApp) -> None:
-        self.app = app
-
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] != "http":
-            await self.app(scope, receive, send)
-            return
-        token = activate(HTTPConnection(scope).cookies.get(LANGUAGE_COOKIE))
-        try:
-            await self.app(scope, receive, send)
-        finally:
-            deactivate(token)
-
-
 def _session_secret(settings: Settings) -> str:
     if settings.session_secret:
         return settings.session_secret.get_secret_value()
@@ -138,7 +117,6 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     settings = settings or get_settings()
     configure_logging(settings.log_level, settings.log_json)
     configure_display(settings.scheduler_timezone)
-    set_default_language(settings.default_language)
     container = container or Container(settings)
     st = AppState(
         settings=settings,
@@ -188,7 +166,6 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         same_site="lax",
         https_only=settings.is_https,
     )
-    app.add_middleware(LanguageMiddleware)
     app.add_middleware(SecurityHeadersMiddleware, hsts=settings.is_https)
 
     @app.exception_handler(SetupRequired)
@@ -201,20 +178,18 @@ def create_app(settings: Settings | None = None, container: Container | None = N
 
     @app.exception_handler(NotFoundError)
     async def _not_found(request: Request, exc: NotFoundError) -> Response:
-        return render(
-            request, "error.html", status_code=404, title=_("Not found"), message=str(exc)
-        )
+        return render(request, "error.html", status_code=404, title="Not found", message=str(exc))
 
     @app.exception_handler(HTTPException)
     async def _http_error(request: Request, exc: HTTPException) -> Response:
         if request.url.path.startswith(_HTML_PREFIXES):
-            titles = {403: _("Not allowed"), 404: _("Not found")}
+            titles = {403: "Not allowed", 404: "Not found"}
             return render(
                 request,
                 "error.html",
                 status_code=exc.status_code,
-                title=titles.get(exc.status_code, _("Something went wrong")),
-                message=exc.detail if exc.status_code != 404 else _("This page does not exist."),
+                title=titles.get(exc.status_code, "Something went wrong"),
+                message=exc.detail if exc.status_code != 404 else "This page does not exist.",
             )
         return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 

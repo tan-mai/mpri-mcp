@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field
 from mpri_mcp.ai.base import StructuredResult
 from mpri_mcp.ai.registry import AIChoice, ProviderRegistry
 from mpri_mcp.crawler.digest import PageDigest
-from mpri_mcp.i18n import N_
 
 MAX_PLAUSIBLE_PRICE = 1_000_000_000  # 1 billion VND
 
@@ -89,10 +88,10 @@ class ExtractionOutcome:
 def validate_extraction(data: PriceExtraction) -> CleanPrice:
     """Raises ValueError with a human-readable reason when the extraction is unusable."""
     if not data.is_product_page:
-        raise ValueError(N_("Not a product page (or no price shown)"))
+        raise ValueError("Not a product page (or no price shown)")
     current = data.current_price
     if current is None or current <= 0:
-        raise ValueError(N_("No current price found on the page"))
+        raise ValueError("No current price found on the page")
     if current > MAX_PLAUSIBLE_PRICE:
         raise ValueError(f"Implausible price {current}")
     notes: list[str] = []

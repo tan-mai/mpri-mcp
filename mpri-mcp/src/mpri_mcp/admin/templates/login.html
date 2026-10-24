@@ -1,21 +1,21 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Sign in") }}{% endblock %}
+{% block title %}Sign in{% endblock %}
 {% block content %}
 <article class="narrow">
-  <header><h2>{{ _("Sign in") }}</h2></header>
+  <header><h2>Sign in</h2></header>
   {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
   <form method="post" action="/admin/login">
     <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
     <input type="hidden" name="next" value="{{ next }}">
     <label>
-      {{ _("Username") }}
+      Username
       <input type="text" name="username" value="{{ username }}" required autocomplete="username" autofocus>
     </label>
     <label>
-      {{ _("Password") }}
+      Password
       <input type="password" name="password" required autocomplete="current-password">
     </label>
-    <button type="submit">{{ _("Sign in") }}</button>
+    <button type="submit">Sign in</button>
   </form>
 </article>
 {% endblock %}
