@@ -36,6 +36,11 @@ ENV DATA_DIR=/app/data \
     PORT=8000 \
     LOG_JSON=true
 
+# Commit the image was built from (set by CI as a build arg); reported by /health.
+# Declared last so changing it never invalidates the cached layers above.
+ARG GIT_SHA=dev
+ENV MPRI_COMMIT=$GIT_SHA
+
 EXPOSE 8000
 VOLUME ["/app/data"]
 

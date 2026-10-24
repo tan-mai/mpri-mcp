@@ -1,0 +1,7 @@
+# Fallback: build the image on this machine instead of pulling it from GHCR.
+# Needs the full source checkout:
+#   docker compose -f compose.yaml -f compose.build.yml up -d --build
+services:
+  mpri-mcp:
+    build: .
+    image: mpri-mcp:local
