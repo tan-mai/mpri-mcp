@@ -1,10 +1,11 @@
-# Production: mpri-mcp behind Caddy (automatic HTTPS via Let's Encrypt).
+# Production: the mpri-mcp image built by GitHub Actions, behind Caddy (automatic HTTPS).
 # Step-by-step guide: deploy/VPS_SETUP.md
-#   docker compose up -d --build
+#   docker compose pull && docker compose up -d
 services:
   mpri-mcp:
-    build: .
-    image: mpri-mcp:latest
+    # Pin the exact build in .env, e.g. MPRI_IMAGE=ghcr.io/tan-mai/mpri-mcp:sha-3ef0a94
+    # (the GitHub Actions run summary shows it). Roll back by putting an older tag there.
+    image: ${MPRI_IMAGE:-ghcr.io/tan-mai/mpri-mcp:latest}
     restart: unless-stopped
     env_file: .env
     environment:

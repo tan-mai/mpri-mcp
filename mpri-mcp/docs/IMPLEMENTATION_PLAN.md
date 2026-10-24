@@ -154,6 +154,11 @@ Deviations from the plan, all minor:
   Sunday, as in standard cron.
 - Docker could not be run on the development machine; local work used uv directly.
 
+2026-10-24 — Images are built and published by GitHub Actions
+(`.github/workflows/docker-publish.yml`) to `ghcr.io/tan-mai/mpri-mcp` (public package), tagged
+`sha-<commit>`, `latest`, and the version for `v*` git tags. The VPS pulls a pinned tag
+(`MPRI_IMAGE` in `.env`) and deploys manually; `/health` reports the running commit.
+
 ## Risks
 
 - VN supermarket sites may block or geo-price the Malaysian VPS IP → per-market

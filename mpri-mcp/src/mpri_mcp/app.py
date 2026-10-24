@@ -18,7 +18,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import Response
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from mpri_mcp import __version__
+from mpri_mcp import __commit__, __version__
 from mpri_mcp.admin import (
     routes_ai,
     routes_auth,
@@ -136,6 +136,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        log.info("mpri-mcp %s (commit %s) starting", __version__, __commit__)
         await container.start()
         st.admin_exists = await admin_count(container.db) > 0
         if not st.admin_exists:
@@ -195,7 +196,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
 
     @app.get("/health", include_in_schema=False)
     async def health() -> JSONResponse:
-        return JSONResponse({"status": "ok", "version": __version__})
+        return JSONResponse({"status": "ok", "version": __version__, "commit": __commit__})
 
     @app.get("/", include_in_schema=False)
     async def root() -> RedirectResponse:

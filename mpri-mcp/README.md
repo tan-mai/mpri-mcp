@@ -9,10 +9,24 @@ connector** secured with OAuth 2.1.
 - **Crawler.** Playwright renders each product page. An AI model reads a compact digest of the page and returns `current_price`, `original_price` and `member_price` as JSON.
 - **Pluggable AI.** Choose Gemini (Vertex AI or AI Studio), any OpenAI-compatible API, or Anthropic Claude, globally or per supermarket, with an optional fallback provider.
 - **Admin dashboard.** The admin account is created on the first visit. Pages: overview, supermarkets, products with price charts, crawl runs, AI settings and usage, and connected apps.
-- **Self-contained.** One process and one SQLite file. Deploy with Docker Compose and Caddy (automatic HTTPS).
+- **Self-contained.** One process and one SQLite file. GitHub Actions publishes the Docker image to `ghcr.io/tan-mai/mpri-mcp`; the VPS runs it with Docker Compose and Caddy (automatic HTTPS).
 
 Requirements: [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md). Design: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
 Deployment: **[deploy/VPS_SETUP.md](deploy/VPS_SETUP.md)**.
+
+## Build and deploy, in short
+
+1. `git push` to `main`. The [**Build and publish image**](../.github/workflows/docker-publish.yml)
+   workflow runs lint and tests, builds the image, and pushes it to
+   `ghcr.io/tan-mai/mpri-mcp` tagged `sha-<commit>` and `latest`. A `v1.2.3` git tag also
+   publishes `:1.2.3`.
+2. Copy the `MPRI_IMAGE=ghcr.io/tan-mai/mpri-mcp:sha-…` line from the run's summary into the
+   VPS `.env`.
+3. On the VPS: `docker compose pull && docker compose up -d`. To roll back, put an older tag in
+   `.env` and run the same command.
+
+`/health` reports the running build's commit. To build on a server instead of pulling:
+`docker compose -f compose.yaml -f compose.build.yml up -d --build`.
 
 ## How it fits together
 
@@ -148,4 +162,7 @@ src/mpri_mcp/
   db/               SQLAlchemy models + async session
 tests/              pytest suite (fixtures include two real MM Mega Market pages)
 deploy/             Caddyfile, VPS guide
+compose.yaml        production: pulls MPRI_IMAGE from ghcr.io, plus Caddy
+compose.build.yml   override to build the image locally instead
+../.github/workflows/docker-publish.yml   CI: test, build, publish the image
 ```
