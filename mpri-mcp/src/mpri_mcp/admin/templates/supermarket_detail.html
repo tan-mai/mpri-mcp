@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import run_badge, schedule_badge, url_status, duration, trigger_label %}
+{% from "_macros.html" import run_badge, schedule_badge, url_status, duration %}
 {% set nav = "supermarkets" %}
 {% block title %}{{ market.name }}{% endblock %}
 {% block content %}
@@ -10,133 +10,133 @@
 
 <div class="grid-2">
   <article>
-    <header><h3>{{ _("Crawl schedule") }}</h3></header>
+    <header><h3>Crawl schedule</h3></header>
     <p>{{ schedule_badge(market, running) }}
-      {% if market.cron_enabled and next_run %} {{ _("Next run <strong>%(when)s</strong> (%(relative)s).", when=next_run | dtw, relative=next_run | ago) }}{% endif %}</p>
+      {% if market.cron_enabled and next_run %} Next run <strong>{{ next_run | dt("%a %d/%m %H:%M") }}</strong> ({{ next_run | ago }}).{% endif %}</p>
     <form method="post" action="/admin/supermarkets/{{ market.id }}/schedule">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
       <label>
-        {{ _("Cron expression (%(tz)s)", tz=market.timezone) }}
+        Cron expression ({{ market.timezone }})
         <input type="text" name="cron_expression" value="{{ market.cron_expression or '' }}" placeholder="0 3 * * *"
                class="mono" autocomplete="off"
                hx-get="/admin/cron-preview" hx-trigger="load, input changed delay:400ms"
                hx-target="#cron-preview" hx-vals='{"tz": "{{ market.timezone }}"}'>
         <span id="cron-preview" aria-live="polite"></span>
       </label>
-      <p class="muted"><small>{{ _("minute hour day month weekday — <code>0 3 * * *</code> 03:00 daily · <code>30 6 * * 1-5</code> 06:30 Mon–Fri · weekday 0/7 = Sunday.") }}</small></p>
+      <p class="muted"><small>minute hour day month weekday — <code>0 3 * * *</code> 03:00 daily · <code>30 6 * * 1-5</code> 06:30 Mon–Fri · weekday 0/7 = Sunday.</small></p>
       <div class="actions">
-        <button type="submit" name="action" value="save">{{ _("Save schedule") }}</button>
-        {% if market.cron_enabled %}<button type="submit" name="action" value="disable" class="secondary outline">{{ _("Pause") }}</button>{% endif %}
+        <button type="submit" name="action" value="save">Save schedule</button>
+        {% if market.cron_enabled %}<button type="submit" name="action" value="disable" class="secondary outline">Pause</button>{% endif %}
       </div>
     </form>
     <hr>
     <form method="post" action="/admin/supermarkets/{{ market.id }}/run" class="actions">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <button type="submit" class="secondary" {% if running %}disabled{% endif %}>{{ _("Crawl now") }}</button>
-      <small class="muted">{{ _("Visits all %(n)s active URLs in the background.", n=urls | selectattr("is_active") | list | length) }}</small>
+      <button type="submit" class="secondary" {% if running %}disabled{% endif %}>Crawl now</button>
+      <small class="muted">Visits all {{ urls | selectattr("is_active") | list | length }} active URLs in the background.</small>
     </form>
   </article>
 
   <article>
-    <header><h3>{{ _("Details") }}</h3></header>
+    <header><h3>Details</h3></header>
     <form method="post" action="/admin/supermarkets/{{ market.id }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <label>{{ _("Name") }} <input type="text" name="name" value="{{ market.name }}" required></label>
-      <label>{{ _("Website") }} <input type="text" name="base_url" value="{{ market.base_url }}" required></label>
-      <button type="submit" class="secondary">{{ _("Save") }}</button>
+      <label>Name <input type="text" name="name" value="{{ market.name }}" required></label>
+      <label>Website <input type="text" name="base_url" value="{{ market.base_url }}" required></label>
+      <button type="submit" class="secondary">Save</button>
     </form>
   </article>
 </div>
 
-<h3>{{ _("Tracked products (%(n)s)", n=urls | length) }}</h3>
+<h3>Tracked products ({{ urls | length }})</h3>
 {% if urls %}
 <div class="table-wrap">
   <table>
-    <thead><tr><th>{{ _("Product") }}</th><th>{{ _("Status") }}</th><th>{{ _("Last checked") }}</th><th>{{ _("Last error") }}</th></tr></thead>
+    <thead><tr><th>Product</th><th>Status</th><th>Last checked</th><th>Last error</th></tr></thead>
     <tbody>
     {% for u in urls %}
       <tr>
         <td><a href="/admin/products/{{ u.product_id }}">{{ u.product.name }}</a><br><a href="{{ u.url }}" rel="noopener noreferrer" target="_blank"><small class="mono">{{ u.url | truncate(70) }}</small></a></td>
         <td>{{ url_status(u) }}</td>
         <td class="nowrap">{{ u.last_crawled_at | ago }}</td>
-        <td><small>{{ u.last_error | tr or "" }}</small></td>
+        <td><small>{{ u.last_error or "" }}</small></td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
 {% else %}
-<p class="muted">{{ _("No products at this supermarket yet. Add them on the <a href=\"/admin/products\">Products</a> page or ask Claude.") }}</p>
+<p class="muted">No products at this supermarket yet. Add them on the <a href="/admin/products">Products</a> page or ask Claude.</p>
 {% endif %}
 
-<h3>{{ _("Recent crawls") }}</h3>
+<h3>Recent crawls</h3>
 {% if recent %}
 <div class="table-wrap">
   <table>
-    <thead><tr><th>{{ _("Run") }}</th><th>{{ _("Status") }}</th><th>{{ _("Started") }}</th><th>{{ _("Duration") }}</th><th class="num">{{ _("OK / failed") }}</th><th>{{ _("Error") }}</th></tr></thead>
+    <thead><tr><th>Run</th><th>Status</th><th>Started</th><th>Duration</th><th class="num">OK / failed</th><th>Error</th></tr></thead>
     <tbody>
     {% for r in recent %}
       <tr>
-        <td><a href="/admin/runs/{{ r.id }}">#{{ r.id }}</a> <small class="muted">{{ trigger_label(r.trigger) }}</small></td>
+        <td><a href="/admin/runs/{{ r.id }}">#{{ r.id }}</a> <small class="muted">{{ r.trigger }}</small></td>
         <td>{{ run_badge(r.status) }}</td>
         <td class="nowrap">{{ r.started_at | dt }}</td>
         <td>{{ duration(r) }}</td>
         <td class="num">{{ r.urls_ok }} / {{ r.urls_failed }}</td>
-        <td><small>{{ r.error | tr or "" }}</small></td>
+        <td><small>{{ r.error or "" }}</small></td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
-{% else %}<p class="muted">{{ _("No crawls yet.") }}</p>{% endif %}
+{% else %}<p class="muted">No crawls yet.</p>{% endif %}
 
 <div class="grid-2">
   <article>
-    <header><h3>{{ _("AI model for this supermarket") }}</h3></header>
-    <p class="muted"><small>{{ _("Leave empty to use the global setting from the AI page. Useful when one site needs a stronger model.") }}</small></p>
+    <header><h3>AI model for this supermarket</h3></header>
+    <p class="muted"><small>Leave empty to use the global setting from the AI page. Useful when one site needs a stronger model.</small></p>
     <form method="post" action="/admin/supermarkets/{{ market.id }}/ai">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <label>{{ _("Provider") }}
+      <label>Provider
         <select name="ai_provider">
-          <option value="">{{ _("— global setting —") }}</option>
+          <option value="">— global setting —</option>
           {% for p in providers %}
-          <option value="{{ p.name }}" {% if market.ai_provider == p.name %}selected{% endif %}>{{ p.label }}{% if not p.configured %} {{ _("(not configured)") }}{% endif %}</option>
+          <option value="{{ p.name }}" {% if market.ai_provider == p.name %}selected{% endif %}>{{ p.label }}{% if not p.configured %} (not configured){% endif %}</option>
           {% endfor %}
         </select>
       </label>
-      <label>{{ _("Model") }}
-        <input type="text" name="ai_model" value="{{ market.ai_model or '' }}" list="model-suggestions" placeholder="{{ _('provider default') }}">
+      <label>Model
+        <input type="text" name="ai_model" value="{{ market.ai_model or '' }}" list="model-suggestions" placeholder="provider default">
         <datalist id="model-suggestions">
           {% for p in providers %}{% for m in p.suggested_models %}<option value="{{ m }}">{% endfor %}{% endfor %}
         </datalist>
       </label>
-      <button type="submit" class="secondary">{{ _("Save") }}</button>
+      <button type="submit" class="secondary">Save</button>
     </form>
   </article>
 
   <article>
-    <header><h3>{{ _("Crawl settings") }}</h3></header>
-    <p class="muted"><small>{{ _("Optional JSON: wait for a selector, limit the text area, set cookies (e.g. a store), run setup clicks, or use a proxy. Leave <code>{}</code> for defaults.") }}</small></p>
+    <header><h3>Crawl settings</h3></header>
+    <p class="muted"><small>Optional JSON: wait for a selector, limit the text area, set cookies (e.g. a store), run setup clicks, or use a proxy. Leave <code>{}</code> for defaults.</small></p>
     <form method="post" action="/admin/supermarkets/{{ market.id }}/crawl-config">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <textarea name="crawl_config" class="code" spellcheck="false" aria-label="{{ _('Crawl settings (JSON)') }}">{{ config_json }}</textarea>
-      <button type="submit" class="secondary">{{ _("Save crawl settings") }}</button>
+      <textarea name="crawl_config" class="code" spellcheck="false" aria-label="crawl_config JSON">{{ config_json }}</textarea>
+      <button type="submit" class="secondary">Save crawl settings</button>
     </form>
     <details class="config">
-      <summary>{{ _("Example") }}</summary>
+      <summary>Example</summary>
       <pre><code>{{ config_example }}</code></pre>
-      <p><small>{{ _("Keys: <code>wait_for_selector</code>, <code>wait_ms</code>, <code>text_selector</code>, <code>max_chars</code>, <code>cookies</code>, <code>extra_headers</code>, <code>proxy</code> (<code>server</code>, <code>username</code>, <code>password</code>), <code>block_resources</code>, <code>setup_url</code>, <code>setup_actions</code> (<code>goto</code>/<code>click</code>/<code>fill</code>/<code>press</code>/<code>wait</code>/<code>wait_for</code>).") }}</small></p>
+      <p><small>Keys: <code>wait_for_selector</code>, <code>wait_ms</code>, <code>text_selector</code>, <code>max_chars</code>, <code>cookies</code>, <code>extra_headers</code>, <code>proxy</code> (<code>server</code>, <code>username</code>, <code>password</code>), <code>block_resources</code>, <code>setup_url</code>, <code>setup_actions</code> (<code>goto</code>/<code>click</code>/<code>fill</code>/<code>press</code>/<code>wait</code>/<code>wait_for</code>).</small></p>
     </details>
   </article>
 </div>
 
 <article>
-  <header><h3>{{ _("Delete supermarket") }}</h3></header>
-  <p>{{ _("Removes %(name)s, its schedule, its product URLs and all their price history. This cannot be undone.", name=market.name) }}</p>
-  <form method="post" action="/admin/supermarkets/{{ market.id }}/delete" data-confirm="{{ _('Delete %(name)s and all its price history?', name=market.name) }}">
+  <header><h3>Delete supermarket</h3></header>
+  <p>Removes {{ market.name }}, its schedule, its product URLs and all their price history. This cannot be undone.</p>
+  <form method="post" action="/admin/supermarkets/{{ market.id }}/delete" data-confirm="Delete {{ market.name }} and all its price history?">
     <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-    <label>{{ _("Type <code>%(id)s</code> to confirm", id=market.id) }} <input type="text" name="confirm" required autocomplete="off"></label>
-    <button type="submit" class="secondary outline">{{ _("Delete permanently") }}</button>
+    <label>Type <code>{{ market.id }}</code> to confirm <input type="text" name="confirm" required autocomplete="off"></label>
+    <button type="submit" class="secondary outline">Delete permanently</button>
   </form>
 </article>
 {% endblock %}

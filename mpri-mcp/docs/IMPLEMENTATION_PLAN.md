@@ -16,8 +16,7 @@ out of the planning discussion.
 | Database | SQLite (WAL mode) in a Docker volume, nightly backup. |
 | AI | Provider adapter: Gemini (Vertex AI or AI Studio), any OpenAI-compatible API, Anthropic. Default: Gemini on Vertex AI (paid from the $300 GCP trial credit), model `gemini-2.5-flash-lite`. Switchable per environment, from the dashboard, or per supermarket; optional fallback provider. |
 | Repo | Code lives in the main repository under `mpri-mcp/`; published to `github.com/tan-mai/mpri-mcp`. |
-| Extra MCP tools | `get_price_history`, `trigger_crawl_now`, `disable_supermarket_cron_task` (in addition to the six in the spec), and `set_response_language` (2026-10-23). |
-| Languages (2026-10-23) | English default, Vietnamese available. Tool names/descriptions stay English. Per-connection language for MCP messages, errors and dates (consent screen, `set_response_language`, Connected apps); dashboard EN/VI switch (cookie). Babel catalogs, `.po` read at runtime. |
+| Extra MCP tools | `get_price_history`, `trigger_crawl_now`, `disable_supermarket_cron_task` (in addition to the six in the spec). |
 | Test pages | `online.mmvietnam.com` (MM Mega Market): Satori water 24×500ml and 24×350ml. |
 
 ## Architecture
@@ -146,10 +145,6 @@ run (real uvicorn, real Playwright crawl of the MM Mega Market test pages, OAuth
 MCP client) passed. Phase 10 files (compose.yaml, Caddyfile, deploy/VPS_SETUP.md) are
 written; the Docker image build and the claude.ai connection are verified on the VPS once the
 domain is registered.
-
-2026-10-23 — English/Vietnamese support added (approved plan: per-connection language). New
-`oauth_grants` table holds each connection's language (a new table, so existing databases need
-no migration); `tests/test_i18n.py` checks catalog completeness and placeholder integrity.
 
 Deviations from the plan, all minor:
 - The OAuth endpoints reuse the MCP SDK's standards-compliant handlers with our own SQLite

@@ -9,7 +9,6 @@ from sqlalchemy import func, select
 
 from mpri_mcp.db import Database
 from mpri_mcp.db.models import ProductUrl, Supermarket
-from mpri_mcp.i18n import _
 from mpri_mcp.scheduler.cron import CronError, build_trigger, next_fire_times, normalize_expression
 from mpri_mcp.scheduler.engine import SchedulerEngine
 from mpri_mcp.services.errors import ValidationError
@@ -28,7 +27,7 @@ def preview(expression: str, timezone: str, count: int = 3) -> list[datetime]:
     try:
         return next_fire_times(build_trigger(expression, timezone), count)
     except CronError as e:
-        raise ValidationError(_("Invalid cron expression: {error}").format(error=e)) from e
+        raise ValidationError(f"Invalid cron expression: {e}") from e
 
 
 async def set_cron(
@@ -64,8 +63,6 @@ async def trigger_now(db: Database, engine: SchedulerEngine, supermarket_id: str
         )
     if not active:
         raise ValidationError(
-            _("Supermarket '{id}' has no active product URLs to crawl yet.").format(
-                id=supermarket_id
-            )
+            f"Supermarket '{supermarket_id}' has no active product URLs to crawl yet."
         )
     return engine.run_now(supermarket_id)

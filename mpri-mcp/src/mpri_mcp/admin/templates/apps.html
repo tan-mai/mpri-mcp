@@ -1,59 +1,22 @@
 {% extends "base.html" %}
 {% set nav = "apps" %}
-{% block title %}{{ _("Connected apps") }}{% endblock %}
+{% block title %}Connected apps{% endblock %}
 {% block content %}
-<h2>{{ _("Connected apps") }}</h2>
+<h2>Connected apps</h2>
 <article>
-  <header><strong>{{ _("Connect Claude") }}</strong></header>
+  <header><strong>Connect Claude</strong></header>
   <ol>
-    <li>{{ _("In claude.ai open <em>Settings → Connectors → Add custom connector</em>.") }}</li>
-    <li>{{ _("Name it (e.g. <em>MPRI</em>) and paste this URL: <code class=\"mono\">%(url)s</code>", url=connector_url) }}</li>
-    <li>{{ _("Click <em>Connect</em>. You'll land on this server's sign-in page — sign in as the admin, choose the language for messages, and click <em>Allow</em>.") }}</li>
+    <li>In claude.ai open <em>Settings → Connectors → Add custom connector</em>.</li>
+    <li>Name it (e.g. <em>MPRI</em>) and paste this URL: <code class="mono">{{ connector_url }}</code></li>
+    <li>Click <em>Connect</em>. You'll land on this server's sign-in page — sign in as the admin and click <em>Allow</em>.</li>
   </ol>
-  <p class="muted"><small>{{ _("Claude Code: <code>claude mcp add --transport http mpri %(url)s</code> (it opens the same sign-in in your browser).", url=connector_url) }}</small></p>
+  <p class="muted"><small>Claude Code: <code>claude mcp add --transport http mpri {{ connector_url }}</code> (it opens the same sign-in in your browser).</small></p>
 </article>
 
-<h3>{{ _("Active connections") }}</h3>
-<p class="muted"><small>{{ _("Each time someone clicks Connect in Claude, a connection appears here. Its language applies to the messages, errors and dates this server sends to Claude; users can also switch by asking Claude, e.g. \"chuyển sang tiếng Việt\".") }}</small></p>
-{% if connections %}
-<div class="table-wrap">
-  <table>
-    <thead><tr><th>{{ _("App") }}</th><th>{{ _("Connected") }}</th><th>{{ _("Last used") }}</th><th>{{ _("Language") }}</th><th></th></tr></thead>
-    <tbody>
-    {% for conn in connections %}
-      <tr>
-        <td>{{ conn.client_name }}<br><small class="muted">{{ _("signed in as %(name)s", name=conn.subject or "?") }}</small></td>
-        <td class="nowrap">{{ conn.connected_at | dt }}</td>
-        <td class="nowrap">{{ conn.last_used_at | ago }}</td>
-        <td>
-          <form method="post" action="/admin/connections/{{ conn.family_id }}/language" class="actions">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-            <select name="language" aria-label="{{ _('Language') }}">
-              {% for code, label in LANGUAGES.items() %}<option value="{{ code }}" lang="{{ code }}" {% if conn.language == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
-            </select>
-            <button type="submit" class="secondary small">{{ _("Save") }}</button>
-          </form>
-        </td>
-        <td>
-          <form method="post" action="/admin/connections/{{ conn.family_id }}/disconnect" data-confirm="{{ _('End this connection? Claude will have to sign in again.') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-            <button type="submit" class="secondary outline small">{{ _("Disconnect") }}</button>
-          </form>
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% else %}
-<p class="muted">{{ _("No active connections.") }}</p>
-{% endif %}
-
-<h3>{{ _("Registered apps") }}</h3>
 {% if clients %}
 <div class="table-wrap">
   <table>
-    <thead><tr><th>{{ _("App") }}</th><th>{{ _("Returns to") }}</th><th>{{ _("Registered") }}</th><th>{{ _("Last used") }}</th><th>{{ _("Status") }}</th><th></th></tr></thead>
+    <thead><tr><th>App</th><th>Returns to</th><th>Registered</th><th>Last used</th><th>Status</th><th></th></tr></thead>
     <tbody>
     {% for c in clients %}
       <tr>
@@ -61,11 +24,11 @@
         <td>{% for u in c.redirect_uris %}<small class="mono">{{ u }}</small><br>{% endfor %}</td>
         <td class="nowrap">{{ c.created_at | dt }}</td>
         <td class="nowrap">{{ c.last_used_at | ago }}</td>
-        <td>{% if c.revoked_at %}<span class="badge badge-off">{{ _("revoked") }}</span>{% elif c.active_grants %}<span class="badge badge-ok">{{ _("connected") }}</span>{% else %}<span class="badge badge-idle">{{ _("not signed in") }}</span>{% endif %}</td>
+        <td>{% if c.revoked_at %}<span class="badge badge-off">revoked</span>{% elif c.active_grants %}<span class="badge badge-ok">connected</span>{% else %}<span class="badge badge-idle">not signed in</span>{% endif %}</td>
         <td>{% if not c.revoked_at %}
-          <form method="post" action="/admin/apps/{{ c.client_id }}/revoke" data-confirm="{{ _('Revoke %(name)s? It will have to connect and be approved again.', name=c.name) }}">
+          <form method="post" action="/admin/apps/{{ c.client_id }}/revoke" data-confirm="Revoke {{ c.name }}? It will have to connect and be approved again.">
             <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-            <button type="submit" class="secondary outline small">{{ _("Revoke") }}</button>
+            <button type="submit" class="secondary outline small">Revoke</button>
           </form>{% endif %}
         </td>
       </tr>
@@ -74,6 +37,6 @@
   </table>
 </div>
 {% else %}
-<p class="muted">{{ _("No apps have registered yet.") }}</p>
+<p class="muted">No apps have registered yet.</p>
 {% endif %}
 {% endblock %}

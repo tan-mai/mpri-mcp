@@ -126,9 +126,7 @@ uv run python scripts/smoke_test.py https://mpri.example.com <admin-username>
 
 1. In claude.ai open **Settings → Connectors → Add custom connector**.
 2. Enter name **MPRI** and URL **`https://mpri.example.com/mcp`**.
-3. Click **Connect**. Your browser opens this server's sign-in page. Sign in as the admin,
-   choose the language for messages (English, or Tiếng Việt), and click **Allow**.
-   To switch later, just tell Claude *"chuyển sang tiếng Việt"* or *"switch to English"*.
+3. Click **Connect**. Your browser opens this server's sign-in page. Sign in as the admin and click **Allow**.
 
 Then try:
 

@@ -17,12 +17,6 @@
   var emptyBox = root.querySelector(".chart-empty");
   var tableBox = document.getElementById("price-table");
   var src = root.getAttribute("data-src");
-  // Translated labels come from the template (data-label-*), English as fallback.
-  var i18n = {
-    was: root.getAttribute("data-label-was") || "was",
-    member: root.getAttribute("data-label-member") || "member",
-    date: root.getAttribute("data-label-date") || "Date",
-  };
   var chart = null;
   var lastData = null;
 
@@ -95,7 +89,7 @@
     tableBox.textContent = "";
     var table = document.createElement("table");
     var head = table.createTHead().insertRow();
-    [i18n.date].concat(series.map(function (s) { return s.name; })).forEach(function (h) {
+    ["Date"].concat(series.map(function (s) { return s.name; })).forEach(function (h) {
       var th = document.createElement("th");
       th.textContent = h;
       head.appendChild(th);
@@ -231,8 +225,8 @@
                 if (raw.y === null) return null;
                 var main = vnd(raw.y) + "  " + item.dataset.label;
                 var extra = [];
-                if (raw.original && raw.original > raw.y) extra.push(i18n.was + " " + vnd(raw.original));
-                if (raw.member) extra.push(i18n.member + " " + vnd(raw.member));
+                if (raw.original && raw.original > raw.y) extra.push("was " + vnd(raw.original));
+                if (raw.member) extra.push("member " + vnd(raw.member));
                 if (!extra.length) return main;
                 // Narrow charts (phones): details on a second line so the box fits.
                 return item.chart.width < 520

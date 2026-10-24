@@ -1,35 +1,26 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Authorize access") }}{% endblock %}
+{% block title %}Authorize access{% endblock %}
 {% block content %}
 <article class="narrow">
   <header>
-    <h2>{{ _("Allow access to MPRI?") }}</h2>
+    <h2>Allow access to MPRI?</h2>
   </header>
-  <p>{{ _("<strong>%(app)s</strong> wants to use this price tracker on your behalf. After you allow it, you'll be sent back to:", app=client_name) }}</p>
+  <p><strong>{{ client_name }}</strong> wants to use this price tracker on your behalf. After you allow it, you'll be sent back to:</p>
   <p class="consent-host">{{ redirect_host }}</p>
   {% if redirect_host.startswith("localhost") or redirect_host.startswith("127.0.0.1") %}
-  <p class="form-error">{{ _("This is an address on your own computer (used by Claude Code or developer tools). Only allow it if you started this connection yourself.") }}</p>
+  <p class="form-error">This is an address on your own computer (used by Claude Code or developer tools). Only allow it if you started this connection yourself.</p>
   {% endif %}
-  <p>{{ _("It will be able to:") }}</p>
+  <p>It will be able to:</p>
   <ul>
-    <li>{{ _("read tracked products, prices and history") }}</li>
-    <li>{{ _("add supermarkets and products, change crawl schedules and start crawls") }}</li>
+    <li>read tracked products, prices and history</li>
+    <li>add supermarkets and products, change crawl schedules and start crawls</li>
   </ul>
-  <p class="muted">{{ _("Access is for <span class=\"mono\">%(resource)s</span>. You can revoke it any time under Connected apps.", resource=resource) }}</p>
-  <form method="post" action="/oauth/consent">
+  <p class="muted">Access is for <span class="mono">{{ resource }}</span>. You can revoke it any time under Connected apps.</p>
+  <form method="post" action="/oauth/consent" class="actions">
     <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
     <input type="hidden" name="req" value="{{ pending.id }}">
-    <fieldset>
-      <legend>{{ _("Language of messages and dates for this connection") }}</legend>
-      {% for code, label in LANGUAGES.items() %}
-      <label><input type="radio" name="language" value="{{ code }}" {% if code == selected_language %}checked{% endif %}> <span lang="{{ code }}">{{ label }}</span></label>
-      {% endfor %}
-      <small class="muted">{{ _("You can change it later by asking Claude, or under Connected apps.") }}</small>
-    </fieldset>
-    <div class="actions">
-      <button type="submit" name="decision" value="allow">{{ _("Allow") }}</button>
-      <button type="submit" name="decision" value="deny" class="secondary outline">{{ _("Deny") }}</button>
-    </div>
+    <button type="submit" name="decision" value="allow">Allow</button>
+    <button type="submit" name="decision" value="deny" class="secondary outline">Deny</button>
   </form>
 </article>
 {% endblock %}
