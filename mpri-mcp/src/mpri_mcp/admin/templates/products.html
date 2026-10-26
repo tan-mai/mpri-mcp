@@ -10,13 +10,16 @@
 {% if items %}
 <div class="table-wrap">
   <table>
-    <thead><tr><th>Product</th><th>Category</th><th class="num">Supermarkets</th><th>Added</th></tr></thead>
+    <thead><tr><th>Product</th><th>Category</th><th class="num">Supermarkets</th><th class="num">Cheapest price</th><th>Cheapest at</th><th>Added</th></tr></thead>
     <tbody>
     {% for i in items %}
+      {% set c = cheapest.get(i.product.id) %}
       <tr>
         <td><a href="/admin/products/{{ i.product.id }}">{{ i.product.name }}</a></td>
         <td>{{ i.product.category or "" }}</td>
         <td class="num">{{ i.url_count }}</td>
+        <td class="num">{% if c %}<strong>{{ c.current_price | vnd }}</strong>{% else %}—{% endif %}</td>
+        <td>{{ c.supermarket_name if c else "—" }}</td>
         <td class="nowrap">{{ i.product.created_at | dt("%Y-%m-%d") }}</td>
       </tr>
     {% endfor %}

@@ -25,6 +25,7 @@ async def _list_page(request: Request, q: str = "", status_code: int = 200, **ex
         "products.html",
         status_code=status_code,
         items=await products.list_products(st.db, q or None),
+        cheapest=await analytics.cheapest_by_product(st.db),
         markets=[s.supermarket for s in await supermarkets.list_supermarkets(st.db)],
         q=q,
         form=extra.pop("form", {}),
