@@ -55,6 +55,38 @@ async def market_add(request: Request) -> Response:
     return _detail(market.id)
 
 
+@router.post("/admin/supermarkets/crawl")
+async def market_crawl_selected(request: Request) -> Response:
+    """Start a background crawl for every ticked supermarket on the list page."""
+    await verify_csrf(request)
+    st = state(request)
+    ids = list(dict.fromkeys(str(v) for v in (await request.form()).getlist("market_id")))
+    if not ids:
+        flash(request, "Select at least one supermarket to crawl.", "warning")
+        return RedirectResponse("/admin/supermarkets", status_code=303)
+    started: list[str] = []
+    running: list[str] = []
+    failed: list[str] = []
+    for market_id in ids:
+        try:
+            ok = await schedules.trigger_now(st.db, st.container.scheduler, market_id)
+            (started if ok else running).append(market_id)
+        except ServiceError as e:
+            failed.append(f"{market_id}: {e}")
+    if started:
+        flash(
+            request,
+            f"Crawl started for {len(started)} supermarket(s): {', '.join(started)}. "
+            "Refresh in a minute.",
+            "success",
+        )
+    if running:
+        flash(request, f"Already running: {', '.join(running)}.", "warning")
+    for msg in failed:
+        flash(request, msg, "error")
+    return RedirectResponse("/admin/supermarkets", status_code=303)
+
+
 @router.get("/admin/supermarkets/{market_id}")
 async def market_detail(request: Request, market_id: str) -> Response:
     st = state(request)

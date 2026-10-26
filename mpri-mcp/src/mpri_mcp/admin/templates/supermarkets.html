@@ -5,13 +5,16 @@
 {% block content %}
 <h2>Supermarkets</h2>
 {% if summaries %}
+<form method="post" action="/admin/supermarkets/crawl" data-confirm="Start a crawl for the selected supermarkets?">
+<input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
 <div class="table-wrap">
   <table>
-    <thead><tr><th>Name</th><th>Website</th><th>Schedule</th><th>Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
+    <thead><tr><th><input type="checkbox" aria-label="Select all" onclick="document.querySelectorAll('input[name=market_id]').forEach(function (c) { c.checked = this.checked; }, this)"></th><th>Name</th><th>Website</th><th>Schedule</th><th>Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
     <tbody>
     {% for s in summaries %}
       {% set m = s.supermarket %}
       <tr>
+        <td><input type="checkbox" name="market_id" value="{{ m.id }}" aria-label="Select {{ m.name }}"{% if not s.active_url_count %} disabled title="No active URLs"{% endif %}></td>
         <td><a href="/admin/supermarkets/{{ m.id }}">{{ m.name }}</a><br><small class="muted mono">{{ m.id }}</small></td>
         <td><small class="mono">{{ m.base_url }}</small></td>
         <td>{{ schedule_badge(m, scheduler.is_running(m.id)) }}{% if m.cron_expression %}<br><small class="mono">{{ m.cron_expression }}</small>{% endif %}</td>
@@ -23,6 +26,11 @@
     </tbody>
   </table>
 </div>
+<div class="actions">
+  <button type="submit" class="secondary">Crawl selected</button>
+  <small class="muted">Visits all active URLs of each ticked supermarket in the background.</small>
+</div>
+</form>
 {% else %}
 <p class="muted">No supermarkets yet.</p>
 {% endif %}
