@@ -176,6 +176,29 @@ async def latest_prices(db: Database, product: Product) -> list[MarketPrice]:
     return prices
 
 
+async def cheapest_by_product(db: Database) -> dict[int, MarketPrice]:
+    """Current cheapest price per product id, across its active URLs. Unpriced products are absent."""
+    now = utcnow()
+    async with db.session() as s:
+        latest = await _latest_records(s)
+        if not latest:
+            return {}
+        urls = (
+            await s.scalars(
+                select(ProductUrl)
+                .where(ProductUrl.id.in_(latest.keys()), ProductUrl.is_active)
+                .options(selectinload(ProductUrl.supermarket))
+            )
+        ).all()
+    cheapest: dict[int, MarketPrice] = {}
+    for u in urls:
+        mp = _market_price(u, latest[u.id], now)
+        best = cheapest.get(u.product_id)
+        if mp.current_price is not None and (best is None or mp.current_price < best.current_price):
+            cheapest[u.product_id] = mp
+    return cheapest
+
+
 async def price_comparison(db: Database, product_name: str) -> Comparison:
     product, alternatives = await resolve_product(db, product_name)
     prices = await latest_prices(db, product)
