@@ -177,7 +177,7 @@ async def latest_prices(db: Database, product: Product) -> list[MarketPrice]:
 
 
 async def cheapest_by_product(db: Database) -> dict[int, MarketPrice]:
-    """Current cheapest price per product id across its active URLs; unpriced products are absent."""
+    """Cheapest current price per product id across its active URLs (unpriced products absent)."""
     now = utcnow()
     async with db.session() as s:
         latest = await _latest_records(s)
