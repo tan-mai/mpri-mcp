@@ -1,52 +1,80 @@
 {% extends "base.html" %}
+{% from "_macros.html" import empty, dialog_head %}
+{% from "_icons.html" import icon %}
 {% set nav = "products" %}
 {% block title %}Products{% endblock %}
 {% block content %}
-<h2>Products</h2>
-<form method="get" action="/admin/products" role="search">
-  <input type="search" name="q" value="{{ q }}" placeholder="Search, accents optional — e.g. sua th it duong" aria-label="Search products">
-</form>
-
-{% if items %}
-<div class="table-wrap">
-  <table>
-    <thead><tr><th>Product</th><th>Category</th><th class="num">Supermarkets</th><th>Added</th></tr></thead>
-    <tbody>
-    {% for i in items %}
-      <tr>
-        <td><a href="/admin/products/{{ i.product.id }}">{{ i.product.name }}</a></td>
-        <td>{{ i.product.category or "" }}</td>
-        <td class="num">{{ i.url_count }}</td>
-        <td class="nowrap">{{ i.product.created_at | dt("%Y-%m-%d") }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+<div class="page-head">
+  <div>
+    <h1>Products</h1>
+    <p class="page-sub">Each product is tracked at one or more supermarkets.</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-primary" data-dialog-open="add-product" {% if not markets %}disabled title="Add a supermarket first"{% endif %}>{{ icon("plus") }}Track product</button>
+  </div>
 </div>
-{% elif q %}
-<p class="muted">No product matches "{{ q }}".</p>
-{% else %}
-<p class="muted">No products tracked yet.</p>
-{% endif %}
 
-<article>
-  <header><h3>Track a product</h3></header>
-  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
-  {% if markets %}
+<section class="card">
+  <header class="card-head">
+    <form method="get" action="/admin/products" role="search" class="search">
+      {{ icon("search") }}
+      <input type="search" name="q" value="{{ q }}" placeholder="Search, accents optional — e.g. sua th it duong" aria-label="Search products">
+    </form>
+    <span class="muted">{{ items | length }} product{{ "" if items | length == 1 else "s" }}{% if q %} matching “{{ q }}” · <a href="/admin/products">clear</a>{% endif %}</span>
+  </header>
+  {% if items %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Product</th><th class="hide-sm">Category</th><th class="num">Supermarkets</th><th class="hide-sm">Added</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+        <tr>
+          <td><a class="strong" href="/admin/products/{{ i.product.id }}">{{ i.product.name }}</a></td>
+          <td class="hide-sm">{% if i.product.category %}<span class="chip">{{ i.product.category }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+          <td class="num">{{ i.url_count }}</td>
+          <td class="nowrap hide-sm">{{ i.product.created_at | dt("%Y-%m-%d") }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% elif q %}
+  {{ empty("search", "No matches", "No product matches “" ~ q ~ "”. Try fewer words — accents are optional.") }}
+  {% elif markets %}
+  {% call empty("package", "No products tracked yet", "Paste a product page from each supermarket that sells it; prices are collected on every crawl.") %}
+    <button type="button" class="btn btn-primary" data-dialog-open="add-product">{{ icon("plus") }}Track product</button>
+  {% endcall %}
+  {% else %}
+  {% call empty("store", "Add a supermarket first", "Products are tracked by their page at each supermarket.") %}
+    <a href="/admin/supermarkets" class="btn btn-primary">{{ icon("store") }}Go to supermarkets</a>
+  {% endcall %}
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block dialogs %}
+{% if markets %}
+<dialog class="modal wide" id="add-product" aria-labelledby="add-product-title"{% if error %} data-open{% endif %}>
   <form method="post" action="/admin/products">
     <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-    <div class="grid-2">
-      <label>Product name <input type="text" name="name" value="{{ form.get('name', '') }}" required placeholder="Thùng Sữa TH True Milk Ít Đường 110ml"></label>
-      <label>Category <input type="text" name="category" value="{{ form.get('category', '') }}" placeholder="optional"></label>
+    {{ dialog_head("Track a product", "add-product-title") }}
+    <div class="modal-body">
+      {% if error %}<div class="alert alert-error" role="alert">{{ icon("alert-circle") }}<div class="alert-body">{{ error }}</div></div>{% endif %}
+      <div class="form-row">
+        <label class="field"><span>Product name</span><input type="text" name="name" value="{{ form.get('name', '') }}" required placeholder="Thùng Sữa TH True Milk Ít Đường 110ml" autofocus></label>
+        <label class="field"><span>Category</span><input type="text" name="category" value="{{ form.get('category', '') }}" placeholder="optional"></label>
+      </div>
+      <span class="label">Product pages</span>
+      <p class="help">Paste the product page at each supermarket that sells it; leave the others empty.</p>
+      {% for m in markets %}
+      <label class="field"><span class="muted">{{ m.name }}</span><input type="url" name="url__{{ m.id }}" value="{{ form.get('url__' ~ m.id, '') }}" placeholder="{{ m.base_url }}/…"></label>
+      {% endfor %}
     </div>
-    <p class="muted"><small>Paste the product page at each supermarket that sells it; leave the others empty.</small></p>
-    {% for m in markets %}
-    <label>{{ m.name }} <input type="url" name="url__{{ m.id }}" value="{{ form.get('url__' ~ m.id, '') }}" placeholder="{{ m.base_url }}/…"></label>
-    {% endfor %}
-    <button type="submit">Track product</button>
+    <footer class="modal-foot">
+      <button type="button" class="btn" data-dialog-close>Cancel</button>
+      <button type="submit" class="btn btn-primary">Track product</button>
+    </footer>
   </form>
-  {% else %}
-  <p>Add a <a href="/admin/supermarkets">supermarket</a> first.</p>
-  {% endif %}
-</article>
+</dialog>
+{% endif %}
 {% endblock %}

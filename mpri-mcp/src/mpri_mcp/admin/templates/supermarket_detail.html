@@ -1,142 +1,186 @@
 {% extends "base.html" %}
-{% from "_macros.html" import run_badge, schedule_badge, url_status, duration %}
+{% from "_macros.html" import run_badge, schedule_badge, url_status, duration, ok_fail, empty %}
+{% from "_icons.html" import icon %}
 {% set nav = "supermarkets" %}
+{% set active_count = urls | selectattr("is_active") | list | length %}
 {% block title %}{{ market.name }}{% endblock %}
 {% block content %}
-<hgroup>
-  <h2>{{ market.name }}</h2>
-  <p><span class="mono">{{ market.id }}</span> · <a href="{{ market.base_url }}" rel="noopener noreferrer" target="_blank">{{ market.base_url }}</a></p>
-</hgroup>
-
-<div class="grid-2">
-  <article>
-    <header><h3>Crawl schedule</h3></header>
-    <p>{{ schedule_badge(market, running) }}
-      {% if market.cron_enabled and next_run %} Next run <strong>{{ next_run | dt("%a %d/%m %H:%M") }}</strong> ({{ next_run | ago }}).{% endif %}</p>
-    <form method="post" action="/admin/supermarkets/{{ market.id }}/schedule">
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/admin/supermarkets">Supermarkets</a>{{ icon("chevron-right") }}<span>{{ market.name }}</span></nav>
+<div class="page-head">
+  <div>
+    <div class="page-title"><h1>{{ market.name }}</h1>{{ schedule_badge(market, running) }}</div>
+    <p class="page-sub">
+      <span class="chip mono">{{ market.id }}</span>
+      <a href="{{ market.base_url }}" rel="noopener noreferrer" target="_blank">{{ market.base_url }} {{ icon("external") }}</a>
+    </p>
+  </div>
+  <div class="page-actions">
+    <form method="post" action="/admin/supermarkets/{{ market.id }}/run">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <label>
-        Cron expression ({{ market.timezone }})
-        <input type="text" name="cron_expression" value="{{ market.cron_expression or '' }}" placeholder="0 3 * * *"
-               class="mono" autocomplete="off"
-               hx-get="/admin/cron-preview" hx-trigger="load, input changed delay:400ms"
-               hx-target="#cron-preview" hx-vals='{"tz": "{{ market.timezone }}"}'>
-        <span id="cron-preview" aria-live="polite"></span>
-      </label>
-      <p class="muted"><small>minute hour day month weekday — <code>0 3 * * *</code> 03:00 daily · <code>30 6 * * 1-5</code> 06:30 Mon–Fri · weekday 0/7 = Sunday.</small></p>
-      <div class="actions">
-        <button type="submit" name="action" value="save">Save schedule</button>
-        {% if market.cron_enabled %}<button type="submit" name="action" value="disable" class="secondary outline">Pause</button>{% endif %}
-      </div>
+      <button type="submit" class="btn btn-primary" {% if running %}disabled{% endif %} title="Visits all {{ active_count }} active URLs in the background">{{ icon("play") }}{{ "Crawling…" if running else "Crawl now" }}</button>
     </form>
-    <hr>
-    <form method="post" action="/admin/supermarkets/{{ market.id }}/run" class="actions">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <button type="submit" class="secondary" {% if running %}disabled{% endif %}>Crawl now</button>
-      <small class="muted">Visits all {{ urls | selectattr("is_active") | list | length }} active URLs in the background.</small>
-    </form>
-  </article>
-
-  <article>
-    <header><h3>Details</h3></header>
-    <form method="post" action="/admin/supermarkets/{{ market.id }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <label>Name <input type="text" name="name" value="{{ market.name }}" required></label>
-      <label>Website <input type="text" name="base_url" value="{{ market.base_url }}" required></label>
-      <button type="submit" class="secondary">Save</button>
-    </form>
-  </article>
+  </div>
 </div>
 
-<h3>Tracked products ({{ urls | length }})</h3>
-{% if urls %}
-<div class="table-wrap">
-  <table>
-    <thead><tr><th>Product</th><th>Status</th><th>Last checked</th><th>Last error</th></tr></thead>
-    <tbody>
-    {% for u in urls %}
-      <tr>
-        <td><a href="/admin/products/{{ u.product_id }}">{{ u.product.name }}</a><br><a href="{{ u.url }}" rel="noopener noreferrer" target="_blank"><small class="mono">{{ u.url | truncate(70) }}</small></a></td>
-        <td>{{ url_status(u) }}</td>
-        <td class="nowrap">{{ u.last_crawled_at | ago }}</td>
-        <td><small>{{ u.last_error or "" }}</small></td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% else %}
-<p class="muted">No products at this supermarket yet. Add them on the <a href="/admin/products">Products</a> page or ask Claude.</p>
-{% endif %}
-
-<h3>Recent crawls</h3>
-{% if recent %}
-<div class="table-wrap">
-  <table>
-    <thead><tr><th>Run</th><th>Status</th><th>Started</th><th>Duration</th><th class="num">OK / failed</th><th>Error</th></tr></thead>
-    <tbody>
-    {% for r in recent %}
-      <tr>
-        <td><a href="/admin/runs/{{ r.id }}">#{{ r.id }}</a> <small class="muted">{{ r.trigger }}</small></td>
-        <td>{{ run_badge(r.status) }}</td>
-        <td class="nowrap">{{ r.started_at | dt }}</td>
-        <td>{{ duration(r) }}</td>
-        <td class="num">{{ r.urls_ok }} / {{ r.urls_failed }}</td>
-        <td><small>{{ r.error or "" }}</small></td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% else %}<p class="muted">No crawls yet.</p>{% endif %}
-
-<div class="grid-2">
-  <article>
-    <header><h3>AI model for this supermarket</h3></header>
-    <p class="muted"><small>Leave empty to use the global setting from the AI page. Useful when one site needs a stronger model.</small></p>
-    <form method="post" action="/admin/supermarkets/{{ market.id }}/ai">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <label>Provider
-        <select name="ai_provider">
-          <option value="">— global setting —</option>
-          {% for p in providers %}
-          <option value="{{ p.name }}" {% if market.ai_provider == p.name %}selected{% endif %}>{{ p.label }}{% if not p.configured %} (not configured){% endif %}</option>
+<div class="split">
+  <div class="stack">
+    <section class="card">
+      <header class="card-head">
+        <h2>{{ icon("package") }}Tracked products <span class="count">{{ urls | length }}</span></h2>
+        <a href="/admin/products">Track a product →</a>
+      </header>
+      {% if urls %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Product</th><th>Status</th><th class="hide-sm">Last checked</th></tr></thead>
+          <tbody>
+          {% for u in urls %}
+            <tr>
+              <td>
+                <a class="strong" href="/admin/products/{{ u.product_id }}">{{ u.product.name }}</a>
+                <a class="sub mono truncate" href="{{ u.url }}" rel="noopener noreferrer" target="_blank" title="{{ u.url }}">{{ u.url }}</a>
+                {% if u.last_error %}<span class="sub err">{{ u.last_error }}</span>{% endif %}
+              </td>
+              <td>{{ url_status(u) }}</td>
+              <td class="nowrap hide-sm">{{ u.last_crawled_at | ago }}</td>
+            </tr>
           {% endfor %}
-        </select>
-      </label>
-      <label>Model
-        <input type="text" name="ai_model" value="{{ market.ai_model or '' }}" list="model-suggestions" placeholder="provider default">
-        <datalist id="model-suggestions">
-          {% for p in providers %}{% for m in p.suggested_models %}<option value="{{ m }}">{% endfor %}{% endfor %}
-        </datalist>
-      </label>
-      <button type="submit" class="secondary">Save</button>
-    </form>
-  </article>
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      {% call empty("package", "No products here yet", "Track products from the Products page, or ask Claude to add them.") %}
+        <a href="/admin/products" class="btn">{{ icon("plus") }}Track a product</a>
+      {% endcall %}
+      {% endif %}
+    </section>
 
-  <article>
-    <header><h3>Crawl settings</h3></header>
-    <p class="muted"><small>Optional JSON: wait for a selector, limit the text area, set cookies (e.g. a store), run setup clicks, or use a proxy. Leave <code>{}</code> for defaults.</small></p>
-    <form method="post" action="/admin/supermarkets/{{ market.id }}/crawl-config">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <textarea name="crawl_config" class="code" spellcheck="false" aria-label="crawl_config JSON">{{ config_json }}</textarea>
-      <button type="submit" class="secondary">Save crawl settings</button>
-    </form>
-    <details class="config">
-      <summary>Example</summary>
-      <pre><code>{{ config_example }}</code></pre>
-      <p><small>Keys: <code>wait_for_selector</code>, <code>wait_ms</code>, <code>text_selector</code>, <code>max_chars</code>, <code>cookies</code>, <code>extra_headers</code>, <code>proxy</code> (<code>server</code>, <code>username</code>, <code>password</code>), <code>block_resources</code>, <code>setup_url</code>, <code>setup_actions</code> (<code>goto</code>/<code>click</code>/<code>fill</code>/<code>press</code>/<code>wait</code>/<code>wait_for</code>).</small></p>
-    </details>
-  </article>
+    <section class="card">
+      <header class="card-head">
+        <h2>{{ icon("activity") }}Recent crawls</h2>
+        {% if recent %}<a href="/admin/runs?market={{ market.id }}">All runs →</a>{% endif %}
+      </header>
+      {% if recent %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Run</th><th>Status</th><th>Started</th><th class="hide-sm">Duration</th><th class="num hide-sm">OK / failed</th></tr></thead>
+          <tbody>
+          {% for r in recent %}
+            <tr>
+              <td class="nowrap"><a class="strong" href="/admin/runs/{{ r.id }}">#{{ r.id }}</a><span class="sub">{{ r.trigger }}</span></td>
+              <td>{{ run_badge(r.status) }}{% if r.error %}<span class="sub err">{{ r.error }}</span>{% endif %}</td>
+              <td class="nowrap">{{ r.started_at | dt }}<span class="sub">{{ r.started_at | ago }}</span></td>
+              <td class="hide-sm">{{ duration(r) }}</td>
+              <td class="num hide-sm">{{ ok_fail(r) }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty empty-sm"><p>No crawls yet. Use <strong>Crawl now</strong> or set a schedule.</p></div>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <header class="card-head">
+        <h2>{{ icon("sliders") }}Crawl settings</h2>
+        <p class="card-desc">Optional JSON: wait for a selector, limit the text area, set cookies (e.g. a store), run setup clicks, or use a proxy. Leave <code>{}</code> for defaults.</p>
+      </header>
+      <form method="post" action="/admin/supermarkets/{{ market.id }}/crawl-config">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+        <div class="card-body">
+          <textarea name="crawl_config" class="code" spellcheck="false" aria-label="crawl_config JSON">{{ config_json }}</textarea>
+          <details class="inline">
+            <summary>Example and available keys</summary>
+            <pre><code>{{ config_example }}</code></pre>
+            <p class="help">Keys: <code>wait_for_selector</code>, <code>wait_ms</code>, <code>text_selector</code>, <code>max_chars</code>, <code>cookies</code>, <code>extra_headers</code>, <code>proxy</code> (<code>server</code>, <code>username</code>, <code>password</code>), <code>block_resources</code>, <code>setup_url</code>, <code>setup_actions</code> (<code>goto</code>/<code>click</code>/<code>fill</code>/<code>press</code>/<code>wait</code>/<code>wait_for</code>).</p>
+          </details>
+        </div>
+        <footer class="card-foot"><button type="submit" class="btn btn-primary">Save crawl settings</button></footer>
+      </form>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <header class="card-head"><h2>{{ icon("calendar") }}Crawl schedule</h2></header>
+      <form method="post" action="/admin/supermarkets/{{ market.id }}/schedule">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+        <div class="card-body">
+          <div class="schedule-status">
+            {{ schedule_badge(market, running) }}
+            {% if market.cron_enabled and next_run %}<span>Next run <strong>{{ next_run | dt("%a %d/%m %H:%M") }}</strong> <span class="muted">({{ next_run | ago }})</span></span>{% endif %}
+          </div>
+          <label class="field">
+            <span>Cron expression <span class="muted">({{ market.timezone }})</span></span>
+            <input type="text" name="cron_expression" value="{{ market.cron_expression or '' }}" placeholder="0 3 * * *"
+                   class="code" autocomplete="off"
+                   hx-get="/admin/cron-preview" hx-trigger="load, input changed delay:400ms"
+                   hx-target="#cron-preview" hx-vals='{"tz": "{{ market.timezone }}"}'>
+            <span id="cron-preview" class="cron-preview" aria-live="polite"></span>
+          </label>
+          <p class="help">minute hour day month weekday — <code>0 3 * * *</code> 03:00 daily · <code>30 6 * * 1-5</code> 06:30 Mon–Fri · weekday 0/7 = Sunday.</p>
+        </div>
+        <footer class="card-foot">
+          {% if market.cron_enabled %}<button type="submit" name="action" value="disable" class="btn">{{ icon("pause") }}Pause</button>{% endif %}
+          <button type="submit" name="action" value="save" class="btn btn-primary">Save schedule</button>
+        </footer>
+      </form>
+    </section>
+
+    <section class="card">
+      <header class="card-head"><h2>{{ icon("store") }}Details</h2></header>
+      <form method="post" action="/admin/supermarkets/{{ market.id }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+        <div class="card-body">
+          <label class="field"><span>Name</span><input type="text" name="name" value="{{ market.name }}" required></label>
+          <label class="field"><span>Website</span><input type="text" name="base_url" value="{{ market.base_url }}" required></label>
+        </div>
+        <footer class="card-foot"><button type="submit" class="btn btn-primary">Save</button></footer>
+      </form>
+    </section>
+
+    <section class="card">
+      <header class="card-head">
+        <h2>{{ icon("sparkles") }}AI model</h2>
+        <p class="card-desc">Leave empty to use the global setting. Useful when one site needs a stronger model.</p>
+      </header>
+      <form method="post" action="/admin/supermarkets/{{ market.id }}/ai">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+        <div class="card-body">
+          <label class="field"><span>Provider</span>
+            <select name="ai_provider">
+              <option value="">— global setting —</option>
+              {% for p in providers %}
+              <option value="{{ p.name }}" {% if market.ai_provider == p.name %}selected{% endif %}>{{ p.label }}{% if not p.configured %} (not configured){% endif %}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="field"><span>Model</span>
+            <input type="text" name="ai_model" value="{{ market.ai_model or '' }}" list="model-suggestions" placeholder="provider default">
+            <datalist id="model-suggestions">
+              {% for p in providers %}{% for m in p.suggested_models %}<option value="{{ m }}">{% endfor %}{% endfor %}
+            </datalist>
+          </label>
+        </div>
+        <footer class="card-foot"><button type="submit" class="btn btn-primary">Save</button></footer>
+      </form>
+    </section>
+
+    <section class="card card-danger">
+      <header class="card-head">
+        <h2>{{ icon("trash") }}Danger zone</h2>
+        <p class="card-desc">Removes {{ market.name }}, its schedule, its product URLs and all their price history. This cannot be undone.</p>
+      </header>
+      <form method="post" action="/admin/supermarkets/{{ market.id }}/delete" data-confirm="Delete {{ market.name }} and all its price history?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+        <div class="card-body">
+          <label class="field"><span>Type <code>{{ market.id }}</code> to confirm</span><input type="text" name="confirm" required autocomplete="off"></label>
+        </div>
+        <footer class="card-foot"><button type="submit" class="btn btn-danger">{{ icon("trash") }}Delete permanently</button></footer>
+      </form>
+    </section>
+  </div>
 </div>
-
-<article>
-  <header><h3>Delete supermarket</h3></header>
-  <p>Removes {{ market.name }}, its schedule, its product URLs and all their price history. This cannot be undone.</p>
-  <form method="post" action="/admin/supermarkets/{{ market.id }}/delete" data-confirm="Delete {{ market.name }} and all its price history?">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-    <label>Type <code>{{ market.id }}</code> to confirm <input type="text" name="confirm" required autocomplete="off"></label>
-    <button type="submit" class="secondary outline">Delete permanently</button>
-  </form>
-</article>
 {% endblock %}

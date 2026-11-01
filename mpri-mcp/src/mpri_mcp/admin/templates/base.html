@@ -1,3 +1,5 @@
+{%- from "_icons.html" import icon -%}
+{%- set flash_icons = {"success": "check-circle", "error": "alert-circle", "warning": "alert"} -%}
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,44 +8,84 @@
   <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
   <title>{% block title %}Admin{% endblock %} · MPRI</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/static/pico.min.css">
   <link rel="stylesheet" href="/static/app.css">
   <script src="/static/htmx.min.js" defer></script>
   {% block head_scripts %}{% endblock %}
   <script src="/static/app.js" defer></script>
 </head>
 <body{% if admin %} hx-headers='{"X-CSRF-Token": "{{ csrf_token(request) }}"}'{% endif %}>
-  <header class="container site-header">
-    <nav>
-      <ul>
-        <li><a href="/admin" class="brand"><strong>MPRI</strong> <span class="muted">price tracker</span></a></li>
-      </ul>
-      {% if admin %}
-      <ul class="main-nav">
-        <li><a href="/admin" {% if nav == "overview" %}aria-current="page"{% endif %}>Overview</a></li>
-        <li><a href="/admin/supermarkets" {% if nav == "supermarkets" %}aria-current="page"{% endif %}>Supermarkets</a></li>
-        <li><a href="/admin/products" {% if nav == "products" %}aria-current="page"{% endif %}>Products</a></li>
-        <li><a href="/admin/runs" {% if nav == "runs" %}aria-current="page"{% endif %}>Runs</a></li>
-        <li><a href="/admin/ai" {% if nav == "ai" %}aria-current="page"{% endif %}>AI</a></li>
-        <li><a href="/admin/apps" {% if nav == "apps" %}aria-current="page"{% endif %}>Connected apps</a></li>
-        <li><a href="/admin/account" {% if nav == "account" %}aria-current="page"{% endif %}>{{ admin.username }}</a></li>
-        <li>
-          <form method="post" action="/admin/logout" class="inline-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-            <button type="submit" class="secondary outline small">Log out</button>
-          </form>
-        </li>
-      </ul>
-      {% endif %}
+{% macro flashes() %}
+  {% for category, message in pop_flashes(request) %}
+  <div class="alert alert-{{ category }}" role="status">
+    {{ icon(flash_icons.get(category, "info")) }}
+    <div class="alert-body">{{ message }}</div>
+    <button type="button" class="btn btn-ghost" data-dismiss aria-label="Dismiss">{{ icon("x") }}</button>
+  </div>
+  {% endfor %}
+{% endmacro %}
+{% macro brand() %}
+  <a href="/admin" class="brand"><img src="/static/favicon.svg" alt=""><span class="brand-name">MPRI<small>price tracker</small></span></a>
+{% endmacro %}
+{% if admin and layout != "auth" %}
+{% set links = [
+  ("overview", "/admin", "dashboard", "Overview"),
+  ("supermarkets", "/admin/supermarkets", "store", "Supermarkets"),
+  ("products", "/admin/products", "package", "Products"),
+  ("runs", "/admin/runs", "activity", "Crawl runs"),
+] %}
+{% set settings_links = [
+  ("ai", "/admin/ai", "sparkles", "AI settings"),
+  ("apps", "/admin/apps", "plug", "Connected apps"),
+] %}
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    {{ brand() }}
+    <nav class="nav" aria-label="Main">
+      {% for key, href, ic, label in links %}
+      <a href="{{ href }}" {% if nav == key %}aria-current="page"{% endif %}>{{ icon(ic) }}{{ label }}</a>
+      {% endfor %}
+      <div class="nav-label">Settings</div>
+      {% for key, href, ic, label in settings_links %}
+      <a href="{{ href }}" {% if nav == key %}aria-current="page"{% endif %}>{{ icon(ic) }}{{ label }}</a>
+      {% endfor %}
     </nav>
-  </header>
-  <main class="container">
-    {% for category, message in pop_flashes(request) %}
-    <article class="flash flash-{{ category }}" role="status">{{ message }}</article>
-    {% endfor %}
-    {% block content %}{% endblock %}
-  </main>
-  <footer class="container site-footer"><small class="muted">mpri-mcp · times shown in {{ request.app.state.mpri.settings.scheduler_timezone }}</small></footer>
-  {% block scripts %}{% endblock %}
+    <div class="sidebar-foot">
+      <div class="user{% if nav == 'account' %} is-current{% endif %}">
+        <span class="avatar" aria-hidden="true">{{ admin.username[:1] }}</span>
+        <span class="user-text">
+          <a href="/admin/account" {% if nav == "account" %}aria-current="page"{% endif %}>{{ admin.username }}</a>
+          <small>Administrator</small>
+        </span>
+        <form method="post" action="/admin/logout">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+          <button type="submit" class="btn btn-ghost btn-icon" title="Log out" aria-label="Log out">{{ icon("logout") }}</button>
+        </form>
+      </div>
+      <div class="tz">{{ icon("globe") }}Times in {{ request.app.state.mpri.settings.scheduler_timezone }}</div>
+    </div>
+  </aside>
+  <div class="backdrop" data-nav-close></div>
+  <div class="main">
+    <header class="topbar">
+      <button type="button" class="btn btn-ghost btn-icon" data-nav-toggle aria-controls="sidebar" aria-expanded="false" aria-label="Menu">{{ icon("menu") }}</button>
+      {{ brand() }}
+    </header>
+    <main class="content">
+      {{ flashes() }}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% else %}
+<main class="auth">
+  {{ brand() }}
+  <div class="auth-card{% if wide %} wide{% endif %}">
+    {{ flashes() }}
+    {{ self.content() }}
+  </div>
+</main>
+{% endif %}
+{% block dialogs %}{% endblock %}
+{% block scripts %}{% endblock %}
 </body>
 </html>

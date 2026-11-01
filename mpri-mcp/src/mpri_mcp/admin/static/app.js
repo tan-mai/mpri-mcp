@@ -9,8 +9,84 @@
     if (message && !window.confirm(message)) event.preventDefault();
   });
 
+  function setNav(open) {
+    document.body.classList.toggle("nav-open", open);
+    var toggle = document.querySelector("[data-nav-toggle]");
+    if (toggle) toggle.setAttribute("aria-expanded", String(open));
+  }
+
+  function copyText(button) {
+    var text = button.getAttribute("data-copy");
+    var label = button.querySelector("span");
+    var done = function () {
+      if (!label) return;
+      var before = label.textContent;
+      label.textContent = "Copied";
+      setTimeout(function () { label.textContent = before; }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done);
+    } else {
+      var area = document.createElement("textarea");
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+      done();
+    }
+  }
+
+  // Delegated clicks: dialogs, mobile nav, copy buttons, dismissable alerts.
+  document.addEventListener("click", function (event) {
+    var el = event.target.closest ? event.target : null;
+    if (!el) return;
+    var opener = el.closest("[data-dialog-open]");
+    if (opener) {
+      var dialog = document.getElementById(opener.getAttribute("data-dialog-open"));
+      var title = opener.getAttribute("data-dialog-title");
+      if (title && dialog) dialog.querySelector(".modal-head h2").textContent = title;
+      if (dialog && !dialog.open) dialog.showModal();
+      return;
+    }
+    if (el.closest("[data-dialog-close]")) {
+      var open = el.closest("dialog");
+      if (open) open.close();
+      return;
+    }
+    // A click on the backdrop lands on the <dialog> itself.
+    if (el.tagName === "DIALOG" && el.open) {
+      var box = el.getBoundingClientRect();
+      var inside = event.clientX >= box.left && event.clientX <= box.right &&
+        event.clientY >= box.top && event.clientY <= box.bottom;
+      if (!inside) el.close();
+      return;
+    }
+    if (el.closest("[data-nav-toggle]")) return setNav(!document.body.classList.contains("nav-open"));
+    if (el.closest("[data-nav-close]")) return setNav(false);
+    var copy = el.closest("[data-copy]");
+    if (copy) return copyText(copy);
+    var dismiss = el.closest("[data-dismiss]");
+    if (dismiss) dismiss.parentElement.remove();
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") setNav(false);
+  });
+
+  // <select data-autosubmit> applies a filter as soon as it changes.
+  document.addEventListener("change", function (event) {
+    if (event.target.hasAttribute && event.target.hasAttribute("data-autosubmit")) {
+      event.target.form.submit();
+    }
+  });
+
+  // A form that failed validation re-renders with its dialog open.
+  document.querySelectorAll("dialog[data-open]").forEach(function (d) { d.showModal(); });
+
   var root = document.getElementById("price-chart");
   if (!root || !window.Chart) return;
+  window.Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
 
   var MAX_SERIES = 8; // a 9th series never gets a generated hue
   var canvas = root.querySelector("canvas");
@@ -171,7 +247,7 @@
         layout: { padding: { right: labelRoom } },
         scales: {
           x: {
-            ticks: { color: token("--chart-muted"), maxTicksLimit: 8, maxRotation: 0 },
+            ticks: { color: token("--chart-muted"), maxTicksLimit: root.clientWidth < 520 ? 4 : 8, maxRotation: 0 },
             grid: { display: false },
             border: { color: token("--chart-axis") },
           },

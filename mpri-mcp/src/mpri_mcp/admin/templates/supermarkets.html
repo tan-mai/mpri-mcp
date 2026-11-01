@@ -1,40 +1,62 @@
 {% extends "base.html" %}
-{% from "_macros.html" import run_badge, schedule_badge %}
+{% from "_macros.html" import run_badge, schedule_badge, empty, dialog_head %}
+{% from "_icons.html" import icon %}
 {% set nav = "supermarkets" %}
 {% block title %}Supermarkets{% endblock %}
 {% block content %}
-<h2>Supermarkets</h2>
-{% if summaries %}
-<div class="table-wrap">
-  <table>
-    <thead><tr><th>Name</th><th>Website</th><th>Schedule</th><th>Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
-    <tbody>
-    {% for s in summaries %}
-      {% set m = s.supermarket %}
-      <tr>
-        <td><a href="/admin/supermarkets/{{ m.id }}">{{ m.name }}</a><br><small class="muted mono">{{ m.id }}</small></td>
-        <td><small class="mono">{{ m.base_url }}</small></td>
-        <td>{{ schedule_badge(m, scheduler.is_running(m.id)) }}{% if m.cron_expression %}<br><small class="mono">{{ m.cron_expression }}</small>{% endif %}</td>
-        <td class="nowrap">{{ scheduler.next_run_time(m.id) | dt }}</td>
-        <td>{% if s.last_run %}{{ run_badge(s.last_run.status) }} <small class="muted">{{ s.last_run.started_at | ago }}</small>{% else %}<span class="muted">never</span>{% endif %}</td>
-        <td class="num">{{ s.active_url_count }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+<div class="page-head">
+  <div>
+    <h1>Supermarkets</h1>
+    <p class="page-sub">Each supermarket has its own crawl schedule, so a slow site never holds up the others.</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-primary" data-dialog-open="add-market">{{ icon("plus") }}Add supermarket</button>
+  </div>
 </div>
-{% else %}
-<p class="muted">No supermarkets yet.</p>
-{% endif %}
 
-<article class="narrow">
-  <header><h3>Add a supermarket</h3></header>
-  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+<section class="card">
+  {% if summaries %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Name</th><th class="hide-sm">Website</th><th>Schedule</th><th class="hide-sm">Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
+      <tbody>
+      {% for s in summaries %}
+        {% set m = s.supermarket %}
+        <tr>
+          <td><a class="strong" href="/admin/supermarkets/{{ m.id }}">{{ m.name }}</a><span class="sub mono">{{ m.id }}</span></td>
+          <td class="hide-sm"><a href="{{ m.base_url }}" rel="noopener noreferrer" target="_blank" class="muted">{{ m.base_url | replace("https://", "") | replace("http://", "") }}</a></td>
+          <td>{{ schedule_badge(m, scheduler.is_running(m.id)) }}{% if m.cron_expression %}<span class="sub mono">{{ m.cron_expression }}</span>{% endif %}</td>
+          <td class="nowrap hide-sm">{{ scheduler.next_run_time(m.id) | dt }}</td>
+          <td>{% if s.last_run %}<a href="/admin/runs/{{ s.last_run.id }}">{{ run_badge(s.last_run.status) }}</a><span class="sub">{{ s.last_run.started_at | ago }}</span>{% else %}<span class="muted">never</span>{% endif %}</td>
+          <td class="num">{{ s.active_url_count }}{% if s.failing_url_count %}<span class="sub text-bad">{{ s.failing_url_count }} failing</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  {% call empty("store", "No supermarkets yet", "Add the first one, then set its crawl schedule and track products there.") %}
+    <button type="button" class="btn btn-primary" data-dialog-open="add-market">{{ icon("plus") }}Add supermarket</button>
+  {% endcall %}
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block dialogs %}
+<dialog class="modal" id="add-market" aria-labelledby="add-market-title"{% if error %} data-open{% endif %}>
   <form method="post" action="/admin/supermarkets">
     <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-    <label>Name <input type="text" name="name" value="{{ form.get('name', '') }}" required placeholder="Lotte Mart"></label>
-    <label>Website <input type="text" name="base_url" value="{{ form.get('base_url', '') }}" required placeholder="lottemart.vn"></label>
-    <button type="submit">Add supermarket</button>
+    {{ dialog_head("Add a supermarket", "add-market-title") }}
+    <div class="modal-body">
+      {% if error %}<div class="alert alert-error" role="alert">{{ icon("alert-circle") }}<div class="alert-body">{{ error }}</div></div>{% endif %}
+      <label class="field"><span>Name</span><input type="text" name="name" value="{{ form.get('name', '') }}" required placeholder="Lotte Mart" autofocus></label>
+      <label class="field"><span>Website</span><input type="text" name="base_url" value="{{ form.get('base_url', '') }}" required placeholder="lottemart.vn">
+        <small class="help">The domain or home page. Product URLs are checked against it.</small></label>
+    </div>
+    <footer class="modal-foot">
+      <button type="button" class="btn" data-dialog-close>Cancel</button>
+      <button type="submit" class="btn btn-primary">Add supermarket</button>
+    </footer>
   </form>
-</article>
+</dialog>
 {% endblock %}

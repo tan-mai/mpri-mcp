@@ -1,26 +1,29 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set layout = "auth" %}
+{% set wide = true %}
 {% block title %}Authorize access{% endblock %}
 {% block content %}
-<article class="narrow">
-  <header>
-    <h2>Allow access to MPRI?</h2>
-  </header>
-  <p><strong>{{ client_name }}</strong> wants to use this price tracker on your behalf. After you allow it, you'll be sent back to:</p>
-  <p class="consent-host">{{ redirect_host }}</p>
-  {% if redirect_host.startswith("localhost") or redirect_host.startswith("127.0.0.1") %}
-  <p class="form-error">This is an address on your own computer (used by Claude Code or developer tools). Only allow it if you started this connection yourself.</p>
-  {% endif %}
-  <p>It will be able to:</p>
-  <ul>
-    <li>read tracked products, prices and history</li>
-    <li>add supermarkets and products, change crawl schedules and start crawls</li>
-  </ul>
-  <p class="muted">Access is for <span class="mono">{{ resource }}</span>. You can revoke it any time under Connected apps.</p>
-  <form method="post" action="/oauth/consent" class="actions">
+<section class="card">
+  <div class="card-body">
+    <h1>Allow access to MPRI?</h1>
+    <p class="lead"><strong>{{ client_name }}</strong> wants to use this price tracker on your behalf. After you allow it, you'll be sent back to:</p>
+    <p class="consent-host">{{ redirect_host }}</p>
+    {% if redirect_host.startswith("localhost") or redirect_host.startswith("127.0.0.1") %}
+    <div class="alert alert-warning">{{ icon("alert") }}<div class="alert-body">This is an address on your own computer (used by Claude Code or developer tools). Only allow it if you started this connection yourself.</div></div>
+    {% endif %}
+    <p>It will be able to:</p>
+    <ul class="perm-list">
+      <li>{{ icon("check") }}<span>read tracked products, prices and history</span></li>
+      <li>{{ icon("check") }}<span>add supermarkets and products, change crawl schedules and start crawls</span></li>
+    </ul>
+    <p class="help">Access is for <span class="mono">{{ resource }}</span>. You can revoke it any time under Connected apps.</p>
+  </div>
+  <form method="post" action="/oauth/consent" class="card-foot">
     <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
     <input type="hidden" name="req" value="{{ pending.id }}">
-    <button type="submit" name="decision" value="allow">Allow</button>
-    <button type="submit" name="decision" value="deny" class="secondary outline">Deny</button>
+    <button type="submit" name="decision" value="deny" class="btn">Deny</button>
+    <button type="submit" name="decision" value="allow" class="btn btn-primary">Allow</button>
   </form>
-</article>
+</section>
 {% endblock %}

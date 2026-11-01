@@ -1,33 +1,55 @@
 {% extends "base.html" %}
-{% from "_macros.html" import run_badge, duration %}
+{% from "_macros.html" import run_badge, duration, empty %}
+{% from "_icons.html" import icon %}
 {% set nav = "runs" %}
 {% block title %}Run #{{ run.id }}{% endblock %}
 {% block content %}
-<hgroup>
-  <h2>Run #{{ run.id }} · {{ market.name }}</h2>
-  <p>{{ run_badge(run.status) }} {{ run.trigger }} · started {{ run.started_at | dt("%Y-%m-%d %H:%M:%S") }} · {{ duration(run) }} · {{ run.urls_ok }} ok, {{ run.urls_failed }} failed of {{ run.urls_total }}</p>
-</hgroup>
-{% if run.error %}<p class="form-error">{{ run.error }}</p>{% endif %}
-{% if items %}
-<div class="table-wrap">
-  <table>
-    <thead><tr><th>Status</th><th>URL</th><th>Error</th><th class="num">Time</th><th>AI</th><th class="num">Tokens in / out</th></tr></thead>
-    <tbody>
-    {% for i in items %}
-      <tr>
-        <td>{{ run_badge(i.status) }}</td>
-        <td><a href="{{ i.url }}" rel="noopener noreferrer" target="_blank"><small class="mono">{{ i.url | truncate(60) }}</small></a></td>
-        <td><small>{{ i.error or "" }}</small></td>
-        <td class="num">{% if i.duration_ms %}{{ (i.duration_ms / 1000) | round(1) }}s{% endif %}</td>
-        <td><small>{% if i.provider %}{{ i.provider }}/{{ i.model }}{% endif %}</small></td>
-        <td class="num">{% if i.input_tokens is not none %}{{ i.input_tokens | num }} / {{ i.output_tokens | num }}{% endif %}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+<nav class="crumbs" aria-label="Breadcrumb"><a href="/admin/runs">Crawl runs</a>{{ icon("chevron-right") }}<span>Run #{{ run.id }}</span></nav>
+<div class="page-head">
+  <div>
+    <div class="page-title"><h1>Run #{{ run.id }}</h1>{{ run_badge(run.status) }}</div>
+    <p class="page-sub"><a href="/admin/supermarkets/{{ market.id }}">{{ market.name }}</a><span class="sep">·</span><span>started {{ run.started_at | dt("%Y-%m-%d %H:%M:%S") }}</span></p>
+  </div>
 </div>
-{% else %}
-<p class="muted">{% if run.status == "running" %}In progress — refresh to see results.{% else %}No URLs were crawled.{% endif %}</p>
+
+<section class="card">
+  <dl class="facts">
+    <div><dt>Trigger</dt><dd>{{ run.trigger }}</dd></div>
+    <div><dt>Duration</dt><dd>{{ duration(run) }}</dd></div>
+    <div><dt>URLs</dt><dd>{{ run.urls_total }}</dd></div>
+    <div><dt>OK</dt><dd{% if run.urls_ok %} class="text-ok"{% endif %}>{{ run.urls_ok }}</dd></div>
+    <div><dt>Failed</dt><dd{% if run.urls_failed %} class="text-bad"{% endif %}>{{ run.urls_failed }}</dd></div>
+  </dl>
+</section>
+
+{% if run.error %}
+<div class="alert alert-error" role="alert">{{ icon("alert-circle") }}<div class="alert-body">{{ run.error }}</div></div>
 {% endif %}
-<p><a href="/admin/supermarkets/{{ market.id }}">← {{ market.name }}</a></p>
+
+<section class="card">
+  <header class="card-head"><h2>{{ icon("link") }}Pages crawled <span class="count">{{ items | length }}</span></h2></header>
+  {% if items %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Status</th><th>URL</th><th class="num">Time</th><th class="hide-sm">AI</th><th class="num hide-sm">Tokens in / out</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+        <tr>
+          <td>{{ run_badge(i.status) }}</td>
+          <td>
+            <a class="mono truncate" href="{{ i.url }}" rel="noopener noreferrer" target="_blank" title="{{ i.url }}">{{ i.url }}</a>
+            {% if i.error %}<span class="sub err">{{ i.error }}</span>{% endif %}
+          </td>
+          <td class="num">{% if i.duration_ms %}{{ (i.duration_ms / 1000) | round(1) }}s{% endif %}</td>
+          <td class="hide-sm"><span class="mono">{% if i.provider %}{{ i.provider }}/{{ i.model }}{% endif %}</span></td>
+          <td class="num hide-sm">{% if i.input_tokens is not none %}{{ i.input_tokens | num }} / {{ i.output_tokens | num }}{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty empty-sm"><p>{% if run.status == "running" %}In progress — refresh to see results.{% else %}No URLs were crawled.{% endif %}</p></div>
+  {% endif %}
+</section>
 {% endblock %}

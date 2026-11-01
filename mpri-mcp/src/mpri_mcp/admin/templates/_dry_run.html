@@ -1,29 +1,28 @@
+{% from "_icons.html" import icon %}
 {% if error %}
-<p class="form-error">{{ error }}</p>
+<div class="alert alert-error" role="alert">{{ icon("alert-circle") }}<div class="alert-body">{{ error }}</div></div>
 {% elif result %}
-<article>
+<div class="dry-run">
   {% if result.ok %}
-  <p><span class="badge badge-ok">extracted</span> <small class="muted">nothing was saved</small></p>
-  <table>
-    <tbody>
-      <tr><th>Current price</th><td class="num"><strong>{{ result.price.current_price | vnd }}</strong></td></tr>
-      <tr><th>Original price</th><td class="num">{{ result.price.original_price | vnd }}</td></tr>
-      <tr><th>Member price</th><td class="num">{{ result.price.member_price | vnd }}</td></tr>
-      <tr><th>In stock</th><td>{% if result.price.in_stock is none %}unknown{% elif result.price.in_stock %}yes{% else %}no{% endif %}</td></tr>
-    </tbody>
-  </table>
-  {% for note in result.notes %}<p><small class="muted">{{ note }}</small></p>{% endfor %}
+  <div class="result-head"><span class="badge badge-ok">extracted</span><small class="muted">Nothing was saved.</small></div>
+  <dl class="kv">
+    <dt>Current price</dt><dd class="big">{{ result.price.current_price | vnd }}</dd>
+    <dt>Original price</dt><dd>{{ result.price.original_price | vnd }}</dd>
+    <dt>Member price</dt><dd>{{ result.price.member_price | vnd }}</dd>
+    <dt>In stock</dt><dd>{% if result.price.in_stock is none %}unknown{% elif result.price.in_stock %}yes{% else %}no{% endif %}</dd>
+  </dl>
+  {% for note in result.notes %}<p class="help">{{ note }}</p>{% endfor %}
   {% else %}
-  <p><span class="badge badge-bad">failed</span> {{ result.error }}</p>
+  <div class="alert alert-error" role="alert">{{ icon("alert-circle") }}<div class="alert-body"><strong>Failed.</strong> {{ result.error }}</div></div>
   {% endif %}
   {% if result.provider %}
-  <p><small class="muted">{{ result.provider }}/{{ result.model }} · {{ result.input_tokens | num }} in / {{ result.output_tokens | num }} out tokens{% if result.latency_ms %} · {{ result.latency_ms }} ms{% endif %}</small></p>
+  <p class="result-meta">{{ result.provider }}/{{ result.model }} · {{ result.input_tokens | num }} in / {{ result.output_tokens | num }} out tokens{% if result.latency_ms %} · {{ result.latency_ms }} ms{% endif %}</p>
   {% endif %}
   {% if result.extraction %}
-  <details><summary><small>Raw AI answer</small></summary><pre class="result-box">{{ result.extraction | tojson(indent=2) }}</pre></details>
+  <details class="inline"><summary>Raw AI answer</summary><pre class="result-box">{{ result.extraction | tojson(indent=2) }}</pre></details>
   {% endif %}
   {% if result.digest %}
-  <details><summary><small>What was sent to the AI ({{ result.digest.to_prompt() | length }} characters)</small></summary><pre class="result-box">{{ result.digest.to_prompt() }}</pre></details>
+  <details class="inline"><summary>What was sent to the AI ({{ result.digest.to_prompt() | length }} characters)</summary><pre class="result-box">{{ result.digest.to_prompt() }}</pre></details>
   {% endif %}
-</article>
+</div>
 {% endif %}

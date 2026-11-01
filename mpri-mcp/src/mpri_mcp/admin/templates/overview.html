@@ -1,76 +1,126 @@
 {% extends "base.html" %}
-{% from "_macros.html" import run_badge, schedule_badge, duration %}
+{% from "_macros.html" import run_badge, schedule_badge, ok_fail, empty %}
+{% from "_icons.html" import icon %}
 {% set nav = "overview" %}
 {% block title %}Overview{% endblock %}
 {% block content %}
-<h2>Overview</h2>
+<div class="page-head">
+  <div>
+    <h1>Overview</h1>
+    <p class="page-sub">Price tracking across your supermarkets at a glance.</p>
+  </div>
+  <div class="page-actions">
+    <a href="/admin/products" class="btn">{{ icon("package") }}Products</a>
+    <a href="/admin/supermarkets" class="btn btn-primary">{{ icon("store") }}Supermarkets</a>
+  </div>
+</div>
 
 {% if not connected %}
-<article>
-  <header><strong>Connect Claude</strong></header>
-  <p>In claude.ai open <em>Settings → Connectors → Add custom connector</em>, paste this URL, and sign in with this admin account when asked:</p>
-  <p><code class="mono">{{ connector_url }}</code></p>
-  <p class="muted">Connected apps appear under <a href="/admin/apps">Connected apps</a>.</p>
-</article>
+<section class="card callout">
+  <span class="callout-icon">{{ icon("plug") }}</span>
+  <div class="callout-body">
+    <h2>Connect Claude</h2>
+    <p>In claude.ai open <em>Settings → Connectors → Add custom connector</em>, paste this URL, and sign in with this admin account when asked.</p>
+    <div class="input-group">
+      <code class="copy-box">{{ connector_url }}</code>
+      <button type="button" class="btn" data-copy="{{ connector_url }}">{{ icon("copy") }}<span>Copy</span></button>
+    </div>
+    <p class="help">Connected apps appear under <a href="/admin/apps">Connected apps</a>.</p>
+  </div>
+</section>
 {% endif %}
 
-<div class="tiles">
-  <article class="tile"><span class="value">{{ summaries | length }}</span><span class="label">Supermarkets</span></article>
-  <article class="tile"><span class="value">{{ product_count }}</span><span class="label">Products tracked</span></article>
-  <article class="tile"><span class="value">{{ url_count }}</span><span class="label">Product URLs</span></article>
-  <article class="tile"><span class="value">{{ failing | length }}</span><span class="label">Failing URLs</span></article>
-  <article class="tile"><span class="value">{{ usage.calls | num }}</span><span class="label">AI calls, last 7 days</span></article>
-  <article class="tile"><span class="value">{{ usage.cost | usd }}</span><span class="label">Est. AI cost, last 7 days{% if usage.unpriced %}*{% endif %}</span></article>
+{% set scheduled = summaries | selectattr("supermarket.cron_enabled") | list | length %}
+<div class="stats">
+  <div class="card stat">
+    <div class="stat-head">Supermarkets{{ icon("store") }}</div>
+    <div class="stat-value">{{ summaries | length }}</div>
+    <div class="stat-foot">{{ scheduled }} on a schedule</div>
+  </div>
+  <div class="card stat">
+    <div class="stat-head">Products tracked{{ icon("package") }}</div>
+    <div class="stat-value">{{ product_count }}</div>
+    <div class="stat-foot">{{ url_count }} active product URLs</div>
+  </div>
+  <div class="card stat {{ 'is-bad' if failing else 'is-ok' }}">
+    <div class="stat-head">Failing URLs{{ icon("alert" if failing else "check-circle") }}</div>
+    <div class="stat-value">{{ failing | length }}</div>
+    <div class="stat-foot">{{ "Need attention" if failing else "All healthy" }}</div>
+  </div>
+  <div class="card stat">
+    <div class="stat-head">AI calls{{ icon("zap") }}</div>
+    <div class="stat-value">{{ usage.calls | num }}</div>
+    <div class="stat-foot">Last 7 days</div>
+  </div>
+  <div class="card stat">
+    <div class="stat-head">Est. AI cost{{ icon("dollar") }}</div>
+    <div class="stat-value">{{ usage.cost | usd }}{% if usage.unpriced %}<span class="muted">*</span>{% endif %}</div>
+    <div class="stat-foot">{% if usage.unpriced %}<a href="/admin/ai" title="No price set for {{ usage.unpriced | join(', ') }}">* prices missing</a>{% else %}Last 7 days{% endif %}</div>
+  </div>
 </div>
-{% if usage.unpriced %}<p class="muted"><small>* No price set for {{ usage.unpriced | join(", ") }} — add it under <a href="/admin/ai">AI</a>.</small></p>{% endif %}
 
-<h3>Supermarkets</h3>
-{% if summaries %}
-<div class="table-wrap">
-  <table>
-    <thead><tr><th>Name</th><th>Schedule</th><th>Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
-    <tbody>
-    {% for s in summaries %}
-      {% set m = s.supermarket %}
-      <tr>
-        <td><a href="/admin/supermarkets/{{ m.id }}">{{ m.name }}</a><br><small class="muted mono">{{ m.id }}</small></td>
-        <td>{{ schedule_badge(m, scheduler.is_running(m.id)) }}{% if m.cron_expression %}<br><small class="mono">{{ m.cron_expression }}</small>{% endif %}</td>
-        <td class="nowrap">{{ scheduler.next_run_time(m.id) | dt }}</td>
-        <td>{% if s.last_run %}<a href="/admin/runs/{{ s.last_run.id }}">{{ run_badge(s.last_run.status) }}</a><br><small class="muted">{{ s.last_run.started_at | ago }}</small>{% else %}<span class="muted">never</span>{% endif %}</td>
-        <td class="num">{{ s.active_url_count }}{% if s.failing_url_count %} <span class="badge badge-bad">{{ s.failing_url_count }} failing</span>{% endif %}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% else %}
-<p>No supermarkets yet. <a href="/admin/supermarkets">Add one</a>, or ask Claude: <em>"Add Lotte Mart, domain lottemart.vn."</em></p>
-{% endif %}
+<section class="card">
+  <header class="card-head">
+    <h2>{{ icon("store") }}Supermarkets</h2>
+    <a href="/admin/supermarkets">Manage →</a>
+  </header>
+  {% if summaries %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Name</th><th>Schedule</th><th class="hide-sm">Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
+      <tbody>
+      {% for s in summaries %}
+        {% set m = s.supermarket %}
+        <tr>
+          <td><a class="strong" href="/admin/supermarkets/{{ m.id }}">{{ m.name }}</a><span class="sub mono">{{ m.id }}</span></td>
+          <td>{{ schedule_badge(m, scheduler.is_running(m.id)) }}{% if m.cron_expression %}<span class="sub mono">{{ m.cron_expression }}</span>{% endif %}</td>
+          <td class="nowrap hide-sm">{{ scheduler.next_run_time(m.id) | dt }}</td>
+          <td>{% if s.last_run %}<a href="/admin/runs/{{ s.last_run.id }}">{{ run_badge(s.last_run.status) }}</a><span class="sub">{{ s.last_run.started_at | ago }}</span>{% else %}<span class="muted">never</span>{% endif %}</td>
+          <td class="num">{{ s.active_url_count }}{% if s.failing_url_count %}<span class="sub text-bad">{{ s.failing_url_count }} failing</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  {% call empty("store", "No supermarkets yet", "Add one here, or ask Claude: “Add Lotte Mart, domain lottemart.vn.”") %}
+    <a href="/admin/supermarkets" class="btn btn-primary">{{ icon("plus") }}Add supermarket</a>
+  {% endcall %}
+  {% endif %}
+</section>
 
 <div class="grid-2">
-  <section>
-    <h3>Recent crawls</h3>
+  <section class="card">
+    <header class="card-head">
+      <h2>{{ icon("activity") }}Recent crawls</h2>
+      {% if recent %}<a href="/admin/runs">All runs →</a>{% endif %}
+    </header>
     {% if recent %}
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Run</th><th>Supermarket</th><th>Status</th><th class="num">OK / failed</th></tr></thead>
+        <thead><tr><th>Run</th><th>Supermarket</th><th>Status</th><th class="num hide-sm">OK / failed</th></tr></thead>
         <tbody>
         {% for r in recent %}
           <tr>
-            <td><a href="/admin/runs/{{ r.id }}">#{{ r.id }}</a><br><small class="muted">{{ r.started_at | ago }} · {{ r.trigger }}</small></td>
+            <td class="nowrap"><a class="strong" href="/admin/runs/{{ r.id }}">#{{ r.id }}</a><span class="sub">{{ r.started_at | ago }} · {{ r.trigger }}</span></td>
             <td>{{ names.get(r.supermarket_id, r.supermarket_id) }}</td>
             <td>{{ run_badge(r.status) }}</td>
-            <td class="num">{{ r.urls_ok }} / {{ r.urls_failed }}</td>
+            <td class="num hide-sm">{{ ok_fail(r) }}</td>
           </tr>
         {% endfor %}
         </tbody>
       </table>
     </div>
-    <p><a href="/admin/runs">All runs →</a></p>
-    {% else %}<p class="muted">No crawls yet.</p>{% endif %}
+    {% else %}
+    <div class="empty empty-sm"><p>No crawls yet.</p></div>
+    {% endif %}
   </section>
-  <section>
-    <h3>Failing URLs</h3>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>{{ icon("alert") }}Failing URLs</h2>
+      {% if failing %}<span class="badge badge-bad">{{ failing | length }}</span>{% endif %}
+    </header>
     {% if failing %}
     <div class="table-wrap">
       <table>
@@ -78,14 +128,16 @@
         <tbody>
         {% for u in failing %}
           <tr>
-            <td><a href="/admin/products/{{ u.product_id }}">{{ u.product.name }}</a><br><small class="muted">{{ u.supermarket.name }} · ×{{ u.consecutive_failures }}</small></td>
-            <td><small>{{ u.last_error }}</small></td>
+            <td><a class="strong" href="/admin/products/{{ u.product_id }}">{{ u.product.name }}</a><span class="sub">{{ u.supermarket.name }} · failed ×{{ u.consecutive_failures }}</span></td>
+            <td><span class="err">{{ u.last_error }}</span></td>
           </tr>
         {% endfor %}
         </tbody>
       </table>
     </div>
-    {% else %}<p class="muted">Nothing failing.</p>{% endif %}
+    {% else %}
+    <div class="empty empty-sm">{{ icon("check-circle") }}<p>Nothing failing. Every tracked URL crawled fine last time.</p></div>
+    {% endif %}
   </section>
 </div>
 {% endblock %}

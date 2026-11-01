@@ -1,9 +1,13 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 {% block title %}{{ status_code }}{% endblock %}
 {% block content %}
-<article class="narrow">
-  <header><h2>{{ title }}</h2></header>
-  <p>{{ message }}</p>
-  <p><a href="/admin">Back to the dashboard</a></p>
-</article>
+<section class="card">
+  <div class="empty">
+    {{ icon("alert-circle") }}
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+    <a href="/admin" class="btn btn-primary">Back to the dashboard</a>
+  </div>
+</section>
 {% endblock %}
