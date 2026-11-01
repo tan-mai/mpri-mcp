@@ -16,13 +16,16 @@
 
 <section class="card">
   {% if summaries %}
+  <form method="post" action="/admin/supermarkets/crawl" data-confirm="Start a crawl for the selected supermarkets?">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Name</th><th class="hide-sm">Website</th><th>Schedule</th><th class="hide-sm">Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
+      <thead><tr><th class="check-col"><input type="checkbox" data-select-all="market_id" aria-label="Select all"></th><th>Name</th><th class="hide-sm">Website</th><th>Schedule</th><th class="hide-sm">Next run</th><th>Last run</th><th class="num">URLs</th></tr></thead>
       <tbody>
       {% for s in summaries %}
         {% set m = s.supermarket %}
         <tr>
+          <td class="check-col"><input type="checkbox" name="market_id" value="{{ m.id }}" aria-label="Select {{ m.name }}"{% if not s.active_url_count %} disabled title="No active URLs"{% endif %}></td>
           <td><a class="strong" href="/admin/supermarkets/{{ m.id }}">{{ m.name }}</a><span class="sub mono">{{ m.id }}</span></td>
           <td class="hide-sm"><a href="{{ m.base_url }}" rel="noopener noreferrer" target="_blank" class="muted">{{ m.base_url | replace("https://", "") | replace("http://", "") }}</a></td>
           <td>{{ schedule_badge(m, scheduler.is_running(m.id)) }}{% if m.cron_expression %}<span class="sub mono">{{ m.cron_expression }}</span>{% endif %}</td>
@@ -34,6 +37,11 @@
       </tbody>
     </table>
   </div>
+  <footer class="card-foot">
+    <span class="muted">Visits all active URLs of each ticked supermarket in the background.</span>
+    <button type="submit" class="btn">{{ icon("play") }}Crawl selected</button>
+  </footer>
+  </form>
   {% else %}
   {% call empty("store", "No supermarkets yet", "Add the first one, then set its crawl schedule and track products there.") %}
     <button type="button" class="btn btn-primary" data-dialog-open="add-market">{{ icon("plus") }}Add supermarket</button>

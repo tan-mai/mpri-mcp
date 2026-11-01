@@ -306,6 +306,9 @@ td .sub.mono { font-size: .75rem; }
 td a.strong { color: var(--text); font-weight: 600; }
 td a.strong:hover { color: var(--accent-text); }
 td.actions-cell { width: 1%; white-space: nowrap; text-align: right; }
+th.check-col, td.check-col { width: 1%; padding-right: 0; }
+td.check-col input { margin-top: .1875rem; }
+input[type="checkbox"]:disabled { cursor: not-allowed; opacity: .45; }
 .row-actions { display: inline-flex; gap: .375rem; align-items: center; justify-content: flex-end; }
 .row-actions form { margin: 0; }
 .err { color: var(--bad); font-size: .8125rem; }

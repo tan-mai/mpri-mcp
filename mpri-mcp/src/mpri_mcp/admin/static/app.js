@@ -75,9 +75,27 @@
   });
 
   // <select data-autosubmit> applies a filter as soon as it changes.
+  // <input type="checkbox" data-select-all="name"> ticks every enabled box of that name in its form.
   document.addEventListener("change", function (event) {
-    if (event.target.hasAttribute && event.target.hasAttribute("data-autosubmit")) {
-      event.target.form.submit();
+    var target = event.target;
+    if (!target.hasAttribute) return;
+    if (target.hasAttribute("data-autosubmit")) {
+      target.form.submit();
+      return;
+    }
+    var form = target.form;
+    if (!form) return;
+    var group = target.getAttribute("data-select-all");
+    if (group) {
+      form.querySelectorAll('input[name="' + group + '"]:not(:disabled)').forEach(function (box) {
+        box.checked = target.checked;
+      });
+      return;
+    }
+    var all = form.querySelector('[data-select-all="' + target.name + '"]');
+    if (all) {
+      var boxes = form.querySelectorAll('input[name="' + target.name + '"]:not(:disabled)');
+      all.checked = Array.prototype.every.call(boxes, function (box) { return box.checked; });
     }
   });
 
