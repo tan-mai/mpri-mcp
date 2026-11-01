@@ -190,6 +190,28 @@ async def market_crawl_config(request: Request, market_id: str) -> Response:
     return _detail(market_id)
 
 
+@router.post("/admin/supermarkets/{market_id}/api-wait")
+async def market_api_wait(request: Request, market_id: str) -> Response:
+    await verify_csrf(request)
+    form = await form_data(request)
+    enabled = form.get("wait_for_api") == "on"
+    try:
+        await supermarkets.update_supermarket(
+            state(request).db,
+            market_id,
+            wait_for_api=enabled,
+            api_url_contains=form.get("api_url_contains", ""),
+        )
+        flash(
+            request,
+            "Waiting for the API response is on." if enabled else "Waiting for the API is off.",
+            "success",
+        )
+    except ServiceError as e:
+        flash(request, f"Not saved: {e}", "error")
+    return _detail(market_id)
+
+
 @router.post("/admin/supermarkets/{market_id}/ai")
 async def market_ai(request: Request, market_id: str) -> Response:
     await verify_csrf(request)

@@ -126,6 +126,18 @@ sites that need a store to be chosen or a proxy:
 }
 ```
 
+### Wait for API response
+
+By default a page is read once the network goes quiet (at most 10 s). On sites that load the
+price with a script after the page itself, that can be too early. The **Wait for API response**
+switch on a supermarket's dashboard page (off by default, stored in the `supermarkets` table)
+makes the crawler wait for one of the site's own API calls instead. Enter any part of its URL,
+e.g. `/gw/Product/GetProductDetail` for Bách Hóa Xanh. If that call fails or the site blocks
+it, the URL fails at once with the network error. Add `wait_for_selector` to also wait until
+the price is on screen.
+
+New columns are added to an existing database when the server starts; nothing to run by hand.
+
 ## Security notes
 
 - **OAuth 2.1:**

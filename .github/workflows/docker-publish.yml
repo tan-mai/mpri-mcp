@@ -50,8 +50,12 @@ jobs:
           uv run ruff check src tests scripts
           uv run ruff format --check src tests scripts
 
+      - name: Install Chromium
+        # For tests/test_browser.py, which serves its pages offline (no site is visited).
+        run: uv run playwright install --with-deps --only-shell chromium
+
       - name: Test
-        # The suite fakes the browser and AI providers: no Chromium or API keys needed.
+        # AI providers are faked (no API keys needed); the crawl tests fake the browser too.
         run: uv run pytest -q
 
   image:

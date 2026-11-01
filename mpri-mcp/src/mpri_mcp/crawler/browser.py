@@ -10,7 +10,16 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlparse
 
-from playwright.async_api import Browser, BrowserContext, Playwright, Route, async_playwright
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    Playwright,
+    Request,
+    Response,
+    Route,
+    async_playwright,
+)
+from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
 from mpri_mcp.config import Settings
@@ -58,6 +67,9 @@ EXTRACT_JS = r"""(textSelector) => {
 }"""
 
 _BLOCKED_RESOURCES = {"image", "media", "font"}
+# After the awaited API call has answered: time for the page to render its data, unless a
+# wait_for_selector says exactly what to wait for.
+_API_RENDER_MS = 1000
 
 
 class FetchError(Exception):
@@ -169,8 +181,17 @@ class BrowserManager:
             await page.close()
 
     async def fetch(
-        self, ctx: BrowserContext, url: str, config: CrawlConfig, timeout_s: float
+        self,
+        ctx: BrowserContext,
+        url: str,
+        config: CrawlConfig,
+        timeout_s: float,
+        wait_for_api: str | None = None,
     ) -> FetchedPage:
+        """Load a page and read it. With wait_for_api (part of an API URL, from the
+        supermarket's settings) the page is read once that call has answered."""
+        if wait_for_api:
+            return await self._fetch_after_api(ctx, url, config, timeout_s, wait_for_api)
         timeout_ms = int(timeout_s * 1000)
         page = await ctx.new_page()
         try:
@@ -196,4 +217,71 @@ class BrowserManager:
             raw = await page.evaluate(EXTRACT_JS, config.text_selector)
             return FetchedPage(url=url, final_url=page.url, status=status, raw=raw)
         finally:
+            await page.close()
+
+    async def _fetch_after_api(
+        self, ctx: BrowserContext, url: str, config: CrawlConfig, timeout_s: float, api: str
+    ) -> FetchedPage:
+        """Wait for the page's own API call (e.g. its price request) instead of networkidle,
+        which fires too early on single-page apps. A failed or blocked call fails the fetch
+        right away with the network error. One deadline covers loading, the API call and the
+        optional selector."""
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + timeout_s
+
+        def remaining_s() -> float:
+            return max(0.001, deadline - loop.time())
+
+        page = await ctx.new_page()
+        answered: asyncio.Future[Response] = loop.create_future()
+
+        def on_response(resp: Response) -> None:
+            if api in resp.url and resp.request.method != "OPTIONS" and not answered.done():
+                answered.set_result(resp)
+
+        def on_failed(req: Request) -> None:
+            # The page itself may cancel a call and send it again: keep waiting for that one.
+            if api in req.url and req.failure != "net::ERR_ABORTED" and not answered.done():
+                answered.set_exception(FetchError(f"API '{api}' failed: {req.failure}"))
+
+        page.on("response", on_response)
+        page.on("requestfailed", on_failed)
+        try:
+            try:
+                resp = await page.goto(
+                    url, wait_until="domcontentloaded", timeout=remaining_s() * 1000
+                )
+            except PlaywrightTimeoutError as e:
+                raise FetchError(f"Page load timed out after {timeout_s:.0f}s") from e
+            status = resp.status if resp else None
+            if status is not None and status >= 400:
+                raise FetchError(f"HTTP {status}")
+            try:
+                api_resp = await asyncio.wait_for(answered, remaining_s())
+                if api_resp.status >= 400:
+                    raise FetchError(f"API '{api}' returned HTTP {api_resp.status}")
+                if api_resp.ok:  # wait for the whole body (redirects have none)
+                    await asyncio.wait_for(api_resp.body(), remaining_s())
+            except TimeoutError as e:
+                raise FetchError(f"API '{api}' did not respond within {timeout_s:.0f}s") from e
+            except PlaywrightError as e:
+                raise FetchError(f"API '{api}' failed: {e.message.splitlines()[0]}") from e
+            if config.wait_for_selector:
+                try:
+                    await page.wait_for_selector(
+                        config.wait_for_selector, timeout=remaining_s() * 1000
+                    )
+                except PlaywrightTimeoutError as e:
+                    raise FetchError(f"Selector '{config.wait_for_selector}' did not appear") from e
+            else:
+                await page.wait_for_timeout(_API_RENDER_MS)
+            if config.wait_ms:
+                await page.wait_for_timeout(config.wait_ms)
+            raw = await page.evaluate(EXTRACT_JS, config.text_selector)
+            return FetchedPage(url=url, final_url=page.url, status=status, raw=raw)
+        finally:
+            if answered.done() and not answered.cancelled():
+                answered.exception()  # retrieved, so asyncio doesn't log it as unhandled
+            else:
+                answered.cancel()
             await page.close()

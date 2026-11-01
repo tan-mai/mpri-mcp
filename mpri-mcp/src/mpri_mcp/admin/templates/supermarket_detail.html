@@ -84,6 +84,25 @@
 
     <section class="card">
       <header class="card-head">
+        <h2>{{ icon("zap") }}Wait for API response</h2>
+        {% if market.wait_for_api %}<span class="badge badge-on">on</span>{% else %}<span class="badge badge-off">off</span>{% endif %}
+        <p class="card-desc">Read each product page once the site's own API call (e.g. its price request) has answered, instead of waiting for the network to go quiet. A blocked or failed call is reported right away.</p>
+      </header>
+      <form method="post" action="/admin/supermarkets/{{ market.id }}/api-wait">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+        <div class="card-body">
+          <div class="field"><label class="check"><input type="checkbox" name="wait_for_api" {% if market.wait_for_api %}checked{% endif %}> Wait for this API before reading the page</label></div>
+          <label class="field"><span>API URL contains</span>
+            <input type="text" name="api_url_contains" value="{{ market.api_url_contains or '' }}" class="code" maxlength="300" autocomplete="off" spellcheck="false" placeholder="/gw/Product/GetProductDetail">
+          </label>
+          <p class="help">Any part of the request URL, as shown in the browser's Network tab. To also wait until the price is on screen, add <code>wait_for_selector</code> in the crawl settings below.</p>
+        </div>
+        <footer class="card-foot"><button type="submit" class="btn btn-primary">Save</button></footer>
+      </form>
+    </section>
+
+    <section class="card">
+      <header class="card-head">
         <h2>{{ icon("sliders") }}Crawl settings</h2>
         <p class="card-desc">Optional JSON: wait for a selector, limit the text area, set cookies (e.g. a store), run setup clicks, or use a proxy. Leave <code>{}</code> for defaults.</p>
       </header>

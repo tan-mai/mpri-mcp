@@ -45,6 +45,32 @@ async def test_update_supermarket_crawl_config_validated(db):
         await supermarkets.update_supermarket(db, mm.id, crawl_config={"bogus": 1})
 
 
+async def test_wait_for_api_needs_an_api_url(db):
+    mm, wm = await _setup(db)
+    assert (mm.wait_for_api, mm.api_url_contains) == (False, None)
+    await supermarkets.update_supermarket(db, mm.id, crawl_config={"wait_for_selector": ".price"})
+
+    with pytest.raises(ValidationError, match="API URL"):
+        await supermarkets.update_supermarket(db, mm.id, wait_for_api=True, api_url_contains="  ")
+    assert (await supermarkets.get_supermarket(db, mm.id)).wait_for_api is False
+
+    on = await supermarkets.update_supermarket(
+        db, mm.id, wait_for_api=True, api_url_contains=" /gw/Product/GetProductDetail "
+    )
+    assert (on.wait_for_api, on.api_url_contains) == (True, "/gw/Product/GetProductDetail")
+    assert on.crawl_config == {"wait_for_selector": ".price"}
+
+    # Switching off keeps the URL for next time; clearing it while on is refused.
+    off = await supermarkets.update_supermarket(db, mm.id, wait_for_api=False)
+    assert (off.wait_for_api, off.api_url_contains) == (False, "/gw/Product/GetProductDetail")
+    await supermarkets.update_supermarket(db, mm.id, wait_for_api=True)
+    with pytest.raises(ValidationError):
+        await supermarkets.update_supermarket(db, mm.id, api_url_contains="")
+    with pytest.raises(ValidationError, match="too long"):
+        await supermarkets.update_supermarket(db, mm.id, api_url_contains="x" * 301)
+    assert (await supermarkets.get_supermarket(db, wm.id)).wait_for_api is False
+
+
 async def test_add_product_with_urls(db):
     mm, wm = await _setup(db)
     result = await products.add_product_with_urls(

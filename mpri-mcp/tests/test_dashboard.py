@@ -150,6 +150,39 @@ def test_crawl_config_validation(client):
     assert "wait_for_selector" in client.get("/admin/supermarkets/winmart").text
 
 
+def test_wait_for_api_flag_shows_and_saves_the_stored_value(client):
+    post(
+        client,
+        "/admin/supermarkets",
+        "/admin/supermarkets",
+        name="Bách Hóa Xanh",
+        base_url="bachhoaxanh.com",
+    )
+    page = "/admin/supermarkets/bach-hoa-xanh"
+    api = "/gw/Product/GetProductDetail"
+    detail = client.get(page).text
+    assert "Wait for API response" in detail
+    assert '<span class="badge badge-off">off</span>' in detail
+    assert 'name="wait_for_api" checked' not in detail
+
+    post(client, page, f"{page}/crawl-config", crawl_config='{"wait_for_selector": ".price"}')
+    resp = post(client, page, f"{page}/api-wait", wait_for_api="on", api_url_contains="")
+    assert resp.status_code == 303
+    detail = client.get(page).text
+    assert "Not saved" in detail and 'name="wait_for_api" checked' not in detail
+
+    post(client, page, f"{page}/api-wait", wait_for_api="on", api_url_contains=api)
+    detail = client.get(page).text
+    assert "Waiting for the API response is on." in detail
+    assert 'name="wait_for_api" checked' in detail and f'value="{api}"' in detail
+    assert '<span class="badge badge-on">on</span>' in detail
+    assert "wait_for_selector" in detail  # crawl settings are left alone
+
+    post(client, page, f"{page}/api-wait", api_url_contains=api)  # checkbox unticked
+    detail = client.get(page).text
+    assert 'name="wait_for_api" checked' not in detail and f'value="{api}"' in detail
+
+
 def test_delete_supermarket_requires_typed_confirmation(client):
     post(
         client, "/admin/supermarkets", "/admin/supermarkets", name="Winmart", base_url="winmart.vn"

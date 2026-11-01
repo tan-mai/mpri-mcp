@@ -53,6 +53,13 @@ def _error_text(exc: BaseException) -> str:
     return msg[:500]
 
 
+def _api_to_wait_for(market: Supermarket | None) -> str | None:
+    """The supermarket's 'wait for API response' setting, if it is switched on."""
+    if market is None or not market.wait_for_api:
+        return None
+    return market.api_url_contains or None
+
+
 class CrawlRunner:
     def __init__(
         self,
@@ -162,6 +169,7 @@ class CrawlRunner:
         if not urls:
             return
         config = CrawlConfig.model_validate(market.crawl_config or {})
+        api = _api_to_wait_for(market)
         choice, fallback = await self.resolve_ai(market)
         timeout = self._settings.page_timeout_seconds
         async with self._browser.context(config, market.base_url) as ctx:
@@ -171,7 +179,7 @@ class CrawlRunner:
 
             async def one(url_row: ProductUrl) -> None:
                 async with pages:
-                    await self._crawl_url(run_id, ctx, config, url_row, choice, fallback)
+                    await self._crawl_url(run_id, ctx, config, url_row, choice, fallback, api)
 
             await asyncio.gather(*(one(u) for u in urls))
 
@@ -183,13 +191,20 @@ class CrawlRunner:
         url_row: ProductUrl,
         choice: AIChoice,
         fallback: AIChoice | None,
+        api: str | None = None,
     ) -> None:
         started = time.monotonic()
         item = CrawlRunItem(run_id=run_id, product_url_id=url_row.id, url=url_row.url, status="ok")
         record: PriceRecord | None = None
         try:
             page = await asyncio.wait_for(
-                self._browser.fetch(ctx, url_row.url, config, self._settings.page_timeout_seconds),
+                self._browser.fetch(
+                    ctx,
+                    url_row.url,
+                    config,
+                    self._settings.page_timeout_seconds,
+                    wait_for_api=api,
+                ),
                 timeout=self._settings.page_timeout_seconds + 20,
             )
             digest = build_digest(
@@ -257,7 +272,9 @@ class CrawlRunner:
             async with self._browser.context(config, base) as ctx:
                 if config.setup_actions:
                     await self._browser.run_setup(ctx, config, base, timeout)
-                page = await self._browser.fetch(ctx, url, config, timeout)
+                page = await self._browser.fetch(
+                    ctx, url, config, timeout, wait_for_api=_api_to_wait_for(market)
+                )
             result.digest = build_digest(
                 url, page.raw, config.max_chars or self._settings.page_text_max_chars
             )

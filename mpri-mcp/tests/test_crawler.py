@@ -157,6 +157,7 @@ class FakeBrowser:
         self.pages = pages
         self.delay = delay
         self.contexts = 0
+        self.apis: list[str | None] = []
 
     @asynccontextmanager
     async def context(self, config, base_url):
@@ -166,7 +167,8 @@ class FakeBrowser:
     async def run_setup(self, ctx, config, base_url, timeout_s):
         pass
 
-    async def fetch(self, ctx, url, config, timeout_s):
+    async def fetch(self, ctx, url, config, timeout_s, wait_for_api=None):
+        self.apis.append(wait_for_api)
         if self.delay:
             await asyncio.sleep(self.delay)
         item = self.pages[url]
@@ -275,3 +277,26 @@ async def test_market_ai_override_is_used(settings, db):
     runner = _runner(settings, db, browser, provider)
     result = await runner.dry_run(URL_350, supermarket_id=mm.id)
     assert result.model == "special-model"
+
+
+async def test_wait_for_api_is_passed_only_when_switched_on(settings, db):
+    mm = await _market_with_urls(db)
+    pages = {URL_500: fixture("mm_satori_500ml")["raw"], URL_350: fixture("mm_satori_350ml")["raw"]}
+    browser = FakeBrowser(pages)
+    runner = _runner(settings, db, browser, FakeProvider(responder=satori_responder))
+
+    await runner.crawl_supermarket(mm.id)
+    await runner.dry_run(URL_350, supermarket_id=mm.id)
+    assert browser.apis == [None, None, None]
+
+    # Saved but switched off: still the default behaviour.
+    await supermarkets.update_supermarket(db, mm.id, api_url_contains="/graphql")
+    await runner.dry_run(URL_350, supermarket_id=mm.id)
+    assert browser.apis[-1] is None
+
+    browser.apis.clear()
+    await supermarkets.update_supermarket(db, mm.id, wait_for_api=True)
+    await runner.crawl_supermarket(mm.id)
+    await runner.dry_run(URL_350, supermarket_id=mm.id)
+    await runner.dry_run(URL_350)  # no supermarket chosen: nothing to wait for
+    assert browser.apis == ["/graphql", "/graphql", "/graphql", None]

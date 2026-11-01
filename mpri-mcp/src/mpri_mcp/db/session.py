@@ -1,17 +1,29 @@
-"""Async engine/session management for SQLite (WAL mode, foreign keys on)."""
+"""Async engine/session management for SQLite (WAL mode, foreign keys on), plus the
+add-column step that upgrades existing databases at startup."""
 
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import event
+from sqlalchemy import Connection, event, inspect, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.schema import CreateColumn
 
 from mpri_mcp.db.models import Base
+
+log = logging.getLogger(__name__)
+
+# Columns added to existing tables after the first release. create_all() only creates missing
+# tables, so these are added with ALTER TABLE at startup. Each needs a server default (or must
+# be nullable) so existing rows — and older images rolled back onto this schema — keep working.
+ADDED_COLUMNS: dict[str, tuple[str, ...]] = {
+    "supermarkets": ("wait_for_api", "api_url_contains"),
+}
 
 
 class Database:
@@ -32,6 +44,7 @@ class Database:
     async def create_all(self) -> None:
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            await conn.run_sync(_add_missing_columns)
 
     @asynccontextmanager
     async def session(self) -> AsyncIterator[AsyncSession]:
@@ -46,6 +59,19 @@ class Database:
 
     async def dispose(self) -> None:
         await self.engine.dispose()
+
+
+def _add_missing_columns(conn: Connection) -> None:
+    inspector = inspect(conn)
+    for table_name, names in ADDED_COLUMNS.items():
+        existing = {c["name"] for c in inspector.get_columns(table_name)}
+        table = Base.metadata.tables[table_name]
+        for name in names:
+            if name in existing:
+                continue
+            column_ddl = CreateColumn(table.c[name]).compile(dialect=conn.dialect)
+            conn.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {column_ddl}"))
+            log.info("Added column %s.%s", table_name, name)
 
 
 def _sqlite_pragmas(dbapi_conn: Any, _record: Any) -> None:

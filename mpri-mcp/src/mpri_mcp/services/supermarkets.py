@@ -15,7 +15,16 @@ from mpri_mcp.db.models import CrawlRun, ProductUrl, Supermarket
 from mpri_mcp.services.errors import ConflictError, NotFoundError, ValidationError
 from mpri_mcp.utils.text import normalize_base_url, normalize_name, slugify
 
-EDITABLE_FIELDS = {"name", "base_url", "crawl_config", "ai_provider", "ai_model", "timezone"}
+EDITABLE_FIELDS = {
+    "name",
+    "base_url",
+    "crawl_config",
+    "ai_provider",
+    "ai_model",
+    "timezone",
+    "wait_for_api",
+    "api_url_contains",
+}
 
 
 @dataclass
@@ -136,6 +145,17 @@ async def update_supermarket(db: Database, supermarket_id: str, **changes: Any) 
         for key in ("ai_provider", "ai_model"):
             if key in changes:
                 setattr(market, key, (changes[key] or None))
+        if "api_url_contains" in changes:
+            part = str(changes["api_url_contains"] or "").strip()
+            if len(part) > 300:
+                raise ValidationError("API URL is too long (max 300 characters).")
+            market.api_url_contains = part or None
+        if "wait_for_api" in changes:
+            market.wait_for_api = bool(changes["wait_for_api"])
+        if market.wait_for_api and not market.api_url_contains:
+            raise ValidationError(
+                "Enter the API URL (or part of it) to wait for before turning this on."
+            )
         if "timezone" in changes:
             try:
                 ZoneInfo(changes["timezone"])
