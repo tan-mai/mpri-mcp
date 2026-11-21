@@ -93,7 +93,9 @@ def register_agent_tools(mcp: MCPServer, c: Container) -> None:
         """Send the prices you read for tasks from get_pending_crawl_tasks. Each result is
         checked on its own: invalid ones are listed in rejected with the reason (fix and
         send them again); the rest are saved. A price more than 50% away from the last one
-        is saved but flagged needs_review. Never guess a price."""
+        is saved but flagged needs_review. Never guess a price. The server itself messages
+        the user about alerts_triggered and, once nothing is pending, a summary of where
+        each product is cheapest (summary_sent_to): do not send those again."""
         r = await agent_tasks.submit_results(
             c.db,
             c.settings,
@@ -110,9 +112,30 @@ def register_agent_tools(mcp: MCPServer, c: Container) -> None:
                 for i in results
             ],
         )
+        # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+        sent = await c.notifier.after_submit(r.saved, r.queue_empty, r.accepted)
+        notify_note = None
+        if (sent.alerts or (r.queue_empty and r.accepted)) and not sent.channels:
+            notify_note = (
+                "No Telegram/Discord channel is set up (dashboard → Notifications), so the "
+                "user was not messaged: tell them in your summary."
+            )
         return drop_none(
             {
                 "accepted": r.accepted,
+                "alerts_triggered": [
+                    {
+                        "product_name": h.product_name,
+                        "target_price": h.target_price,
+                        "prices": [
+                            {"supermarket_id": p.supermarket_id, "price": p.price} for p in h.prices
+                        ],
+                    }
+                    for h in sent.alerts
+                ]
+                or None,
+                "summary_sent_to": sent.summary_sent_to or None,
+                "notifications": notify_note,
                 "requeued": r.requeued or None,
                 "flagged": [
                     {

@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.responses import Response
 
 from mpri_mcp.admin.web import flash, form_data, render, require_admin, state, verify_csrf
-from mpri_mcp.services import analytics, products, supermarkets
+from mpri_mcp.services import alerts, analytics, products, supermarkets
 from mpri_mcp.services.errors import ServiceError
 from mpri_mcp.services.products import UrlInput
 
@@ -76,6 +76,8 @@ async def product_detail(request: Request, product_id: int) -> Response:
         "product_detail.html",
         product=product,
         prices=prices,
+        # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+        alert=await alerts.alert_for_product(st.db, product_id),
         urls=sorted(product.urls, key=lambda u: u.supermarket.name),
         untracked=[m for m in markets if m.id not in tracked],
     )

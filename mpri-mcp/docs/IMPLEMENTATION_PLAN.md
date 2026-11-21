@@ -179,6 +179,16 @@ in Chrome:
   admin account and OAuth tables, so deploying the image is the only step (the VPS is
   shared and has no shell access).
 
+<!-- TM - #{ticket number} - MPriMCP Price Alerts & Notifications -->
+2026-11-21 — **Price alerts and notifications.** Tools `set_price_alert`, `get_price_alerts`,
+`delete_price_alert` (one target price per product). After `submit_price_results` the server
+messages the user's own Telegram bot and/or Discord webhook: at once for a saved price below a
+target (once per supermarket, again when lower, re-armed at/above target), and a summary of
+where each product is cheapest when the crawl queue is empty. Channels, a test button, the
+summary switch and a message log are on the dashboard's Notifications page; the bot token and
+webhook URL live in `DATA_DIR/secrets` (or the environment), never in the database. The MPRI
+avatar is the dashboard logo, favicon and the MCP `serverInfo.icons` shown by connectors.
+
 ## Risks
 
 - Own OAuth server → covered by end-to-end tests of every rule.

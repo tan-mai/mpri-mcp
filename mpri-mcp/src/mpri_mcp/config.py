@@ -49,6 +49,12 @@ class Settings(BaseSettings):
         3, ge=1, description="Claims per task; an 'error' result re-queues it until this."
     )
 
+    # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+    # --- Notifications (normally entered on the dashboard; these override it) ----
+    telegram_bot_token: SecretStr | None = None
+    discord_webhook_url: SecretStr | None = None
+    notify_timeout_seconds: float = 20
+
     # --- Auth -----------------------------------------------------------------
     session_secret: SecretStr | None = Field(
         None, description="Signs admin session cookies. Generated into DATA_DIR if unset."
@@ -78,7 +84,14 @@ class Settings(BaseSettings):
     def _empty_to_none(cls, v: object) -> object:
         return None if v == "" else v
 
-    @field_validator("session_secret", "admin_setup_token", mode="before")
+    # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+    @field_validator(
+        "session_secret",
+        "admin_setup_token",
+        "telegram_bot_token",
+        "discord_webhook_url",
+        mode="before",
+    )
     @classmethod
     def _empty_secret_to_none(cls, v: object) -> object:
         return None if v == "" else v

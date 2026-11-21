@@ -11,6 +11,8 @@ dependencies = [
     "apscheduler>=3.10,<4",
     "argon2-cffi>=25.1.0",
     "fastapi>=0.154.0",
+    # TM - #{ticket number} - MPriMCP Price Alerts & Notifications (Telegram / Discord calls)
+    "httpx2>=2.15.1",
     "itsdangerous>=2.2.0",
     "jinja2>=3.1.6",
     "mcp>=2.3.0",

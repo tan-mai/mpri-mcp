@@ -199,6 +199,40 @@ class CrawlTask(Base):
     product_url: Mapped[ProductUrl] = relationship()
 
 
+# TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+class PriceAlert(Base):
+    """Tell the user when a product's price drops below target_price (one alert per product)."""
+
+    __tablename__ = "price_alerts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"), unique=True
+    )
+    target_price: Mapped[int] = mapped_column(Integer)
+    # None = every supermarket that sells the product.
+    supermarket_ids: Mapped[list[str] | None] = mapped_column(JSON)
+    # supermarket_id -> price already announced; cleared when the price is back at/above target.
+    notified: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=utcnow, onupdate=utcnow)
+
+    product: Mapped[Product] = relationship()
+
+
+# TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+class NotificationLog(Base):
+    __tablename__ = "notification_log"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    kind: Mapped[str] = mapped_column(String(20))  # alert | summary | test
+    channel: Mapped[str] = mapped_column(String(20))  # telegram | discord
+    status: Mapped[str] = mapped_column(String(20))  # sent | failed
+    message: Mapped[str] = mapped_column(Text)
+    error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(default=utcnow, index=True)
+
+
 # --------------------------------------------------------------------------- Auth
 
 

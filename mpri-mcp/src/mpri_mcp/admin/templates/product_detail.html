@@ -46,6 +46,28 @@
 </div>
 {% endif %}
 
+{# TM - #{ticket number} - MPriMCP Price Alerts & Notifications #}
+<section class="card" id="alert">
+  <header class="card-head">
+    <h2>{{ icon("bell") }}Price alert</h2>
+    {% if alert %}{% if alert.below %}<span class="badge badge-ok">below target now</span>{% else %}<span class="badge badge-off">waiting</span>{% endif %}{% endif %}
+    <p class="card-desc">Get a Telegram / Discord message as soon as a crawl finds this product below your price. <a href="/admin/notifications">Notification channels →</a></p>
+  </header>
+  <form method="post" action="/admin/products/{{ product.id }}/alert">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+    <input type="hidden" name="next" value="/admin/products/{{ product.id }}#alert">
+    <div class="card-body">
+      <label class="field"><span>Notify me when the price is below (VND)</span>
+        <input type="text" name="target_price" inputmode="numeric" value="{{ alert.alert.target_price if alert else '' }}" placeholder="70000" autocomplete="off">
+      </label>
+    </div>
+    <footer class="card-foot">
+      {% if alert %}<button type="submit" class="btn btn-danger" formaction="/admin/alerts/{{ alert.alert.id }}/delete">{{ icon("trash") }}Remove</button>{% endif %}
+      <button type="submit" class="btn btn-primary">{{ "Update alert" if alert else "Set alert" }}</button>
+    </footer>
+  </form>
+</section>
+
 <section id="price-chart" class="card chart-root" data-src="/admin/products/{{ product.id }}/history.json" data-days="90">
   <header class="card-head">
     <h2>{{ icon("activity") }}Price history</h2>

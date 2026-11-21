@@ -26,6 +26,9 @@ from mpri_mcp.db.models import (
     ProductUrl,
     Supermarket,
 )
+
+# TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+from mpri_mcp.services.alerts import SavedPrice
 from mpri_mcp.services.analytics import latest_records
 from mpri_mcp.services.errors import ValidationError
 from mpri_mcp.services.supermarkets import OPEN_TASK_STATUSES, get_supermarket
@@ -116,6 +119,9 @@ class SubmitResult:
     warnings: list[str] = field(default_factory=list)
     finished_runs: list[int] = field(default_factory=list)
     remaining_pending: int = 0
+    # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+    saved: list[SavedPrice] = field(default_factory=list)
+    queue_empty: bool = False  # nothing pending or claimed is left: the crawl round is over
 
 
 def _new_task_id() -> str:
@@ -430,7 +436,11 @@ async def submit_results(
                 await s.scalars(
                     select(CrawlTask)
                     .where(CrawlTask.id.in_({r.task_id for r in results}))
-                    .options(selectinload(CrawlTask.product_url).selectinload(ProductUrl.product))
+                    # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+                    .options(
+                        selectinload(CrawlTask.product_url).selectinload(ProductUrl.product),
+                        selectinload(CrawlTask.product_url).selectinload(ProductUrl.supermarket),
+                    )
                     .execution_options(populate_existing=True)
                 )
             ).all()
@@ -479,6 +489,20 @@ async def submit_results(
                 )
                 _mark_success(row, now, in_stock=True)
                 _end_task(s, task, "done", now, "ok", note)
+                # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+                out.saved.append(
+                    SavedPrice(
+                        product_id=row.product_id,
+                        product_name=row.product.name,
+                        supermarket_id=row.supermarket_id,
+                        supermarket_name=row.supermarket.name,
+                        url=row.url,
+                        price=r.price,
+                        original_price=r.original_price or r.price,
+                        member_price=member,
+                        needs_review=flagged,
+                    )
+                )
                 if flagged and last and change is not None:
                     out.flagged.append(
                         Flagged(
@@ -525,6 +549,13 @@ async def submit_results(
             if await _finish_run_if_done(s, run_id, now):
                 out.finished_runs.append(run_id)
         out.remaining_pending = await _count_pending(s)
+        # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+        open_tasks = await s.scalar(
+            select(func.count())
+            .select_from(CrawlTask)
+            .where(CrawlTask.status.in_(OPEN_TASK_STATUSES))
+        )
+        out.queue_empty = not open_tasks
     log.info(
         "Agent results: %d accepted (%d flagged, %d re-queued), %d rejected; %d pending",
         out.accepted,

@@ -161,6 +161,13 @@ tasks remain."*
 
 Claude Code can use the same server: `claude mcp add --transport http mpri https://mpri.example.com/mcp`.
 
+<!-- TM - #{ticket number} - MPriMCP Price Alerts & Notifications -->
+## 10. Notifications (optional)
+
+Dashboard → **Notifications**: paste a Telegram bot token (from @BotFather) and detect the
+chat ID, and/or a Discord webhook URL, switch the channel on and press **Send test**. No
+server access is needed: the token and URL are stored in the data volume.
+
 ---
 
 ## Operating it

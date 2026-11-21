@@ -9,6 +9,9 @@ from mpri_mcp.scheduler.backup import backup_sqlite
 from mpri_mcp.scheduler.engine import SchedulerEngine
 from mpri_mcp.services import agent_tasks
 
+# TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+from mpri_mcp.services.notifications import Notifier
+
 
 class Container:
     # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
@@ -19,6 +22,8 @@ class Container:
         # The server crawls nothing itself: each supermarket's cron job queues crawl tasks
         # for Claude (see services/agent_tasks.py).
         self.scheduler = SchedulerEngine(settings, self._queue_market, self._housekeeping)
+        # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+        self.notifier = Notifier(settings, self.db)
 
     # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
     async def _queue_market(self, supermarket_id: str, trigger: str) -> None:
@@ -42,5 +47,7 @@ class Container:
 
     async def stop(self) -> None:
         await self.scheduler.shutdown()
+        # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+        await self.notifier.stop()
         # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
         await self.db.dispose()

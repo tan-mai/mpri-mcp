@@ -49,6 +49,10 @@ async def test_tool_list_and_annotations(mcp):
         "get_search_urls",
         "get_pending_crawl_tasks",
         "submit_price_results",
+        # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+        "set_price_alert",
+        "get_price_alerts",
+        "delete_price_alert",
     }
     assert tools["get_supermarkets"].annotations.read_only_hint is True
     assert tools["get_search_urls"].annotations.read_only_hint is True

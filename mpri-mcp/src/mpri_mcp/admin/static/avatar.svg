@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16a34a"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="tag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="420" cy="90" r="140" fill="#fff" opacity="0.06"/>
+  <circle cx="70" cy="460" r="120" fill="#fff" opacity="0.05"/>
+
+  <!-- Cart -->
+  <g fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" filter="url(#sh)">
+    <path d="M70 120 H118 L160 330 H372 L408 180 H136"/>
+  </g>
+  <circle cx="186" cy="388" r="26" fill="#fff" filter="url(#sh)"/>
+  <circle cx="346" cy="388" r="26" fill="#fff" filter="url(#sh)"/>
+
+  <!-- Comparison bars inside cart (3 supermarkets, lowest highlighted) -->
+  <rect x="190" y="210" width="40" height="96" rx="10" fill="#fff" opacity="0.55"/>
+  <rect x="246" y="250" width="40" height="56" rx="10" fill="#fbbf24"/>
+  <rect x="302" y="226" width="40" height="80" rx="10" fill="#fff" opacity="0.55"/>
+
+  <!-- Price tag with down arrow -->
+  <g transform="translate(330 40) rotate(18)" filter="url(#sh)">
+    <path d="M0 30 Q0 0 30 0 H112 Q142 0 142 30 V112 Q142 142 112 142 H30 Q0 142 0 112 Z" fill="url(#tag)"/>
+    <circle cx="71" cy="22" r="9" fill="#0f766e"/>
+    <text x="71" y="88" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-weight="700" font-size="58" fill="#7c2d12">₫</text>
+    <path d="M71 100 V128 M59 116 L71 129 L83 116" stroke="#7c2d12" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

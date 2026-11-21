@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.datastructures import MutableHeaders
 from starlette.exceptions import HTTPException
@@ -24,6 +24,7 @@ from mpri_mcp.admin import (
     routes_auth,
     routes_consent,
     routes_markets,
+    routes_notify,  # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
     routes_pages,
     routes_products,
 )
@@ -48,6 +49,8 @@ from mpri_mcp.services.errors import NotFoundError
 log = logging.getLogger(__name__)
 
 _HTML_PREFIXES = ("/admin", "/oauth")
+# TM - #{ticket number} - MPriMCP Avatar
+_ICON_CACHE = {"Cache-Control": "public, max-age=86400"}
 _CSP = (
     "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; "
     "object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
@@ -202,12 +205,24 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     async def root() -> RedirectResponse:
         return RedirectResponse("/admin", status_code=303)
 
+    # TM - #{ticket number} - MPriMCP Avatar
+    # Browsers and connector UIs look for the icon at these well-known root paths.
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def favicon() -> FileResponse:
+        return FileResponse(STATIC_DIR / "favicon.ico", headers=_ICON_CACHE)
+
+    @app.get("/apple-touch-icon.png", include_in_schema=False)
+    async def touch_icon() -> FileResponse:
+        return FileResponse(STATIC_DIR / "apple-touch-icon.png", headers=_ICON_CACHE)
+
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(routes_auth.router)
     app.include_router(routes_consent.router)
     app.include_router(routes_pages.router)
     app.include_router(routes_markets.router)
     app.include_router(routes_products.router)
+    # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+    app.include_router(routes_notify.router)
     # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search (AI settings page removed)
 
     @app.api_route("/admin/{rest:path}", methods=["GET", "POST"], include_in_schema=False)

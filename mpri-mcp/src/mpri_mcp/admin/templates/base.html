@@ -7,7 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
   <title>{% block title %}Admin{% endblock %} · MPRI</title>
-  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  {# TM - #{ticket number} - MPriMCP Avatar #}
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/static/avatar.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="stylesheet" href="/static/app.css">
   <script src="/static/htmx.min.js" defer></script>
   {% block head_scripts %}{% endblock %}
@@ -24,7 +27,8 @@
   {% endfor %}
 {% endmacro %}
 {% macro brand() %}
-  <a href="/admin" class="brand"><img src="/static/favicon.svg" alt=""><span class="brand-name">MPRI<small>price tracker</small></span></a>
+  {# TM - #{ticket number} - MPriMCP Avatar #}
+  <a href="/admin" class="brand"><img src="/static/avatar.svg" alt=""><span class="brand-name">MPRI<small>price tracker</small></span></a>
 {% endmacro %}
 {% if admin and layout != "auth" %}
 {% set links = [
@@ -34,7 +38,9 @@
   ("runs", "/admin/runs", "activity", "Crawl runs"),
 ] %}
 {# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search (AI settings link removed) #}
+{# TM - #{ticket number} - MPriMCP Price Alerts & Notifications #}
 {% set settings_links = [
+  ("notifications", "/admin/notifications", "bell", "Notifications"),
   ("apps", "/admin/apps", "plug", "Connected apps"),
 ] %}
 <div class="shell">

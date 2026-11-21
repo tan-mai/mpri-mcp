@@ -5,6 +5,7 @@ from __future__ import annotations
 from mcp.server import MCPServer
 from mcp.server.auth.settings import AuthSettings
 from mcp.server.transport_security import TransportSecuritySettings
+from mcp.types import Icon
 from pydantic import AnyHttpUrl
 
 from mpri_mcp import __version__
@@ -13,10 +14,12 @@ from mpri_mcp.auth.oauth_routes import issuer_url
 from mpri_mcp.config import Settings
 from mpri_mcp.container import Container
 from mpri_mcp.tools.agent_tools import register_agent_tools
+from mpri_mcp.tools.alert_tools import register_alert_tools
 from mpri_mcp.tools.analytics_tools import register_analytics_tools
 from mpri_mcp.tools.setup_tools import register_setup_tools
 
 # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+# TM - #{ticket number} - MPriMCP Price Alerts & Notifications (step 5, PRICE ALERTS section)
 INSTRUCTIONS = """\
 Tracks product prices at Vietnamese supermarkets (prices in VND).
 
@@ -50,7 +53,17 @@ WORKFLOW A - AGENT CRAWL (when asked to run the crawl, or when pending_tasks > 0
    Never guess a price. Prices are integers in VND (e.g. "45.900đ" -> 45900).
 4. Call submit_price_results in batches of up to 20, before lease_expires_at.
 5. Repeat until remaining_pending is 0. Then summarise: ok / flagged / failed
-   per supermarket, and list any discounts you saw.
+   per supermarket, and list any discounts you saw. Mention alerts_triggered; the
+   server already messaged the user about them and sent the cheapest-price summary
+   (summary_sent_to), so do not send those again.
+
+PRICE ALERTS AND NOTIFICATIONS
+When the user wants to know when a product gets cheaper than a price ("báo tôi khi
+... dưới 70.000đ"), call set_price_alert(product_name, target_price); confirm the
+matched product name in the answer. get_price_alerts lists alerts, delete_price_alert
+removes one. The server messages the user's Telegram / Discord (set up on the
+dashboard): at once when a saved price is below a target, and after every finished
+agent crawl with where each tracked product is cheapest.
 
 WORKFLOW B - ADD A PRODUCT BY SEARCH (when the user wants to track a product by name)
 1. Call get_supermarkets, then get_search_urls(keyword) for the chosen supermarkets
@@ -76,11 +89,22 @@ WORKFLOW B - ADD A PRODUCT BY SEARCH (when the user wants to track a product by 
 
 def build_mcp_server(container: Container, provider: SqliteOAuthProvider) -> MCPServer:
     settings = container.settings
+    # TM - #{ticket number} - MPriMCP Avatar
+    # MCP clients (claude.ai connectors) show serverInfo.icons; PNG is the format every client
+    # must support, SVG is offered as well.
+    base = settings.public_base_url
+    icons = [
+        Icon(src=f"{base}/static/avatar-512.png", mime_type="image/png", sizes=["512x512"]),
+        Icon(src=f"{base}/static/avatar-192.png", mime_type="image/png", sizes=["192x192"]),
+        Icon(src=f"{base}/static/avatar.svg", mime_type="image/svg+xml", sizes=["any"]),
+    ]
     mcp = MCPServer(
         name="mpri",
         title="MPRI price tracker",
         instructions=INSTRUCTIONS,
         version=__version__,
+        website_url=base,
+        icons=icons,
         token_verifier=DbTokenVerifier(provider),
         auth=AuthSettings(
             issuer_url=issuer_url(settings),
@@ -93,6 +117,8 @@ def build_mcp_server(container: Container, provider: SqliteOAuthProvider) -> MCP
     register_analytics_tools(mcp, container)
     # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
     register_agent_tools(mcp, container)
+    # TM - #{ticket number} - MPriMCP Price Alerts & Notifications
+    register_alert_tools(mcp, container)
     return mcp
 
 
