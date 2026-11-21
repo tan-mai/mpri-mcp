@@ -27,29 +27,28 @@
 {% endif %}
 
 <section class="card">
-  <header class="card-head"><h2>{{ icon("link") }}Pages crawled <span class="count">{{ items | length }}</span></h2></header>
+  {# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search #}
+  <header class="card-head"><h2>{{ icon("link") }}Pages read by Claude <span class="count">{{ items | length }}</span></h2></header>
   {% if items %}
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Status</th><th>URL</th><th class="num">Time</th><th class="hide-sm">AI</th><th class="num hide-sm">Tokens in / out</th></tr></thead>
+      <thead><tr><th>Status</th><th>URL</th><th class="hide-sm">Read at</th></tr></thead>
       <tbody>
       {% for i in items %}
         <tr>
           <td>{{ run_badge(i.status) }}</td>
           <td>
             <a class="mono truncate" href="{{ i.url }}" rel="noopener noreferrer" target="_blank" title="{{ i.url }}">{{ i.url }}</a>
-            {% if i.error %}<span class="sub err">{{ i.error }}</span>{% endif %}
+            {% if i.error %}<span class="sub{% if i.status == 'failed' %} err{% endif %}">{{ i.error }}</span>{% endif %}
           </td>
-          <td class="num">{% if i.duration_ms %}{{ (i.duration_ms / 1000) | round(1) }}s{% endif %}</td>
-          <td class="hide-sm"><span class="mono">{% if i.provider %}{{ i.provider }}/{{ i.model }}{% endif %}</span></td>
-          <td class="num hide-sm">{% if i.input_tokens is not none %}{{ i.input_tokens | num }} / {{ i.output_tokens | num }}{% endif %}</td>
+          <td class="nowrap hide-sm">{{ i.created_at | dt }}</td>
         </tr>
       {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <div class="empty empty-sm"><p>{% if run.status == "running" %}In progress — refresh to see results.{% else %}No URLs were crawled.{% endif %}</p></div>
+  <div class="empty empty-sm"><p>{% if run.status == "queued" %}Waiting for Claude to read the pages — refresh later.{% else %}No pages were read.{% endif %}</p></div>
   {% endif %}
 </section>
 {% endblock %}

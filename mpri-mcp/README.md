@@ -4,12 +4,14 @@ Tracks product prices at Vietnamese supermarkets (MM Mega Market, Winmart, Co.op
 and gives Claude tools to manage the tracking and analyse prices, as a **remote MCP
 connector** secured with OAuth 2.1.
 
-- **9 MCP tools.** Add supermarkets, set each one's independent crawl schedule, track products by URL, crawl on demand, compare prices, find deep discounts, and read price history.
-- **Per-supermarket cron jobs.** One schedule per market (APScheduler, standard cron, Vietnam time). A slow or broken site never holds up the others.
-- **Crawler.** Playwright renders each product page. An AI model reads a compact digest of the page and returns `current_price`, `original_price` and `member_price` as JSON.
-- **Pluggable AI.** Choose Gemini (Vertex AI or AI Studio), any OpenAI-compatible API, or Anthropic Claude, globally or per supermarket, with an optional fallback provider.
-- **Admin dashboard.** The admin account is created on the first visit. Pages: overview, supermarkets, products with price charts, crawl runs, AI settings and usage, and connected apps.
-- **Self-contained.** One process and one SQLite file. GitHub Actions publishes the Docker image to `ghcr.io/tan-mai/mpri-mcp`; the VPS runs it with Docker Compose and Caddy (automatic HTTPS).
+<!-- TM - #{ticket number} - MPriMCP Agent Crawl & Product Search -->
+- **13 MCP tools.** Add supermarkets, set each one's independent crawl schedule, track products by URL, queue crawls, compare prices, find deep discounts, read price history, build search URLs, and run the agent crawl.
+- **Agent crawl, no AI key.** The server never fetches a web page. Each supermarket's cron job (or `trigger_crawl_now`) queues crawl tasks. Claude takes them with `get_pending_crawl_tasks`, reads each product page with Claude in Chrome / Claude Browser, and sends `price`, `original_price` and `member_price` back with `submit_price_results`.
+- **Per-supermarket cron jobs.** One schedule per market (APScheduler, standard cron, Vietnam time).
+- **Product search by name.** `get_search_urls` builds each supermarket's search-results URL from its `search_url_template`; Claude opens them, groups results by identical spec and saves only what you confirm.
+- **Price checks.** Invalid results are rejected per item; a price more than 50% away from the previous one is saved with `needs_review` and left out of deep-discount results until you accept it in the dashboard.
+- **Admin dashboard.** The admin account is created on the first visit. Pages: overview (with prices to review), supermarkets, products with price charts, crawl runs, and connected apps.
+- **Self-contained.** One process and one SQLite file, no browser in the image. GitHub Actions publishes the Docker image to `ghcr.io/tan-mai/mpri-mcp`; the VPS runs it with Docker Compose and Caddy (automatic HTTPS).
 
 Requirements: [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md). Design: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
 Deployment: **[deploy/VPS_SETUP.md](deploy/VPS_SETUP.md)**.
@@ -35,10 +37,19 @@ Claude ──HTTPS──► Caddy ──► mpri-mcp (one process)
                               ├─ /mcp                 MCP tools (OAuth bearer tokens)
                               ├─ /authorize /token …  OAuth 2.1 authorization server
                               ├─ /admin, /oauth/…     dashboard, login, consent screen
-                              ├─ scheduler            crawl:<supermarket> jobs, daily backup
-                              ├─ crawler              Playwright → page digest → AI provider
+                              ├─ scheduler            crawl:<supermarket> jobs queue crawl tasks
                               └─ SQLite               ./data (Docker volume)
+
+Claude (browser) ◄── get_pending_crawl_tasks ── crawl_tasks (pending → claimed → done/failed)
+Claude (browser) ──► submit_price_results ──► price_records (+ needs_review) → crawl run result
 ```
+<!-- TM - #{ticket number} - MPriMCP Agent Crawl & Product Search -->
+
+A claimed task is reserved for 30 minutes (`AGENT_TASK_LEASE_MINUTES`), then returns to the
+queue. A result with status `error` re-queues the task until it has been claimed 3 times
+(`AGENT_TASK_MAX_ATTEMPTS`). Tasks still pending after 48 hours (`AGENT_TASK_EXPIRE_HOURS`)
+are marked expired. When every task of a run has ended, the run gets `trigger = agent` and its
+ok / failed counts, which `get_supermarkets` shows as `last_run`.
 
 When Claude connects:
 1. It registers itself as an OAuth client.
@@ -50,15 +61,24 @@ When Claude connects:
 
 | Tool | What it does |
 |---|---|
-| `get_supermarkets` | Supermarkets with schedule status, next run, last crawl result |
-| `add_supermarket(name, base_url)` | Add a supermarket and return its ID |
+| `get_supermarkets` | Supermarkets with schedule status, next run, last crawl result, `search_url_template`, `pending_tasks`, `needs_review_count` |
+| `add_supermarket(name, base_url, search_url_template?)` | Add a supermarket and return its ID |
+| `update_supermarket(supermarket_id, name?, base_url?, search_url_template?)` | Change only the fields passed (`""` removes the template) |
 | `setup_supermarket_cron_task(supermarket_id, cron_expression)` | Create or replace that supermarket's crawl schedule, effective immediately |
 | `disable_supermarket_cron_task(supermarket_id)` | Pause a schedule (the expression is kept) |
-| `trigger_crawl_now(supermarket_id)` | Crawl now in the background |
+| `trigger_crawl_now(supermarket_id)` | Queue crawl tasks for its tracked pages now (no duplicates) |
+| `get_pending_crawl_tasks(supermarket_id?, limit=20)` | Claim the oldest pending tasks (lease) for Claude to read in the browser |
+| `submit_price_results(results[])` | Send the prices read (`ok` / `out_of_stock` / `not_found` / `error`), up to 50 per call |
+| `get_search_urls(keyword, supermarket_ids?)` | Search-results URL per supermarket (keyword URL-encoded); nothing is fetched |
 | `add_product_with_urls(name, urls[], category?)` | Track a product at one or more supermarkets |
-| `get_product_price_comparison(product_name)` | Latest price everywhere, cheapest first. Fuzzy, accent-insensitive matching |
-| `get_deep_discount_items(min_discount_percentage, days=7, limit=50)` | Products discounted at least N% |
+| `get_product_price_comparison(product_name)` | Latest price everywhere, cheapest first, with `source` and `needs_review`. Fuzzy, accent-insensitive matching |
+| `get_deep_discount_items(min_discount_percentage, days=7, limit=50)` | Products discounted at least N% (prices flagged `needs_review` are left out) |
 | `get_price_history(product_name, days=30, supermarket_id?)` | Daily history with min, max, average and today's price vs. the period's low |
+
+<!-- TM - #{ticket number} - MPriMCP Agent Crawl & Product Search -->
+The MCP server instructions tell Claude the two workflows: **agent crawl** (take tasks, read
+prices, submit until `remaining_pending` is 0) and **add a product by search** (search every
+supermarket, group by identical spec, wait for your confirmation, then `add_product_with_urls`).
 
 Cron expressions are standard 5-field cron in `Asia/Ho_Chi_Minh` time. Weekday 0/7 is Sunday,
 which is converted correctly for APScheduler 3.
@@ -67,25 +87,21 @@ which is converted correctly for APScheduler 3.
 
 Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
+<!-- TM - #{ticket number} - MPriMCP Agent Crawl & Product Search -->
 ```bash
 uv sync
-uv run playwright install --only-shell chromium   # add --with-deps on Linux
-cp .env.example .env                              # set an AI provider (see below)
-uv run mpri-mcp serve                             # http://localhost:8000/admin
+cp .env.example .env          # no API keys needed
+uv run mpri-mcp serve         # http://localhost:8000/admin
 ```
 
 On first start the log prints a **setup token**. Open `http://localhost:8000/admin` to
-create the admin account. Run `uv run pytest` for the test suite. It needs no network or
-API keys: AI providers and the browser are replaced with test doubles.
+create the admin account. Run `uv run pytest` for the test suite. It needs no network.
 
 ### Command line
 
 | Command | Purpose |
 |---|---|
 | `mpri-mcp serve` | Run the server (the default command) |
-| `mpri-mcp digest <url> [--supermarket ID]` | Fetch a page and print exactly what would be sent to the AI. No AI call |
-| `mpri-mcp ai-test <url> [--provider P] [--model M]` | Fetch and extract one page without saving |
-| `mpri-mcp crawl <supermarket-id> [--dry-run]` | Crawl one supermarket now |
 | `mpri-mcp admin reset-password [--username NAME]` | Set a new admin password and sign out all sessions |
 | `python scripts/smoke_test.py <base-url> <admin>` | End-to-end check of a running server (OAuth + MCP) |
 
@@ -97,46 +113,27 @@ full list.
 | Variable | Default | Notes |
 |---|---|---|
 | `PUBLIC_BASE_URL` | `http://localhost:8000` | Public origin. The connector URL is `${PUBLIC_BASE_URL}/mcp` |
-| `AI_PROVIDER` / `AI_MODEL` | `gemini` / `gemini-2.5-flash-lite` | Default extraction model. The dashboard and each supermarket can override it |
-| `AI_FALLBACK_PROVIDER` / `AI_FALLBACK_MODEL` | — | Used when the main provider keeps failing |
-| `GEMINI_BACKEND` | `vertex` | `vertex`: Google Cloud project + service account. `studio`: `GEMINI_API_KEY` |
-| `GOOGLE_CLOUD_PROJECT` / `GOOGLE_CLOUD_LOCATION` | — / `global` | Vertex AI |
-| `OPENAI_API_KEY` / `OPENAI_BASE_URL` | — | OpenAI, or any compatible API (OpenRouter, DeepSeek, Groq, Ollama, vLLM…) |
-| `ANTHROPIC_API_KEY` / `ANTHROPIC_EFFORT` | — / `low` | Claude models, e.g. `claude-opus-5-5`, or `claude-haiku-5-5` for lowest cost |
 | `SCHEDULER_TIMEZONE` | `Asia/Ho_Chi_Minh` | Cron and display timezone |
-| `MAX_CONCURRENT_MARKETS` / `MAX_PAGES_PER_MARKET` | `2` / `3` | Crawl concurrency |
-| `PAGE_TIMEOUT_SECONDS` / `JOB_TIMEOUT_SECONDS` | `45` / `1800` | Per-page and per-crawl limits |
+| `AGENT_TASK_LEASE_MINUTES` | `30` | How long a claimed crawl task stays reserved |
+| `AGENT_TASK_EXPIRE_HOURS` | `48` | Pending tasks older than this are marked expired |
+| `AGENT_TASK_MAX_ATTEMPTS` | `3` | Claims per task before an `error` result fails it |
 | `ADMIN_SETUP_TOKEN` | random, logged | First-run setup token |
 
-API keys are read only from the environment. They are never stored in the database or
-shown in the dashboard.
+### Search URL template
 
-### Per-supermarket crawl settings
+Give each supermarket a `search_url_template` (dashboard or `update_supermarket`): search on
+the site, copy the results page URL and put `{q}` where the keyword is, e.g.
+`https://cooponline.vn/search?router=productListing&query={q}`. It must be an http(s) URL with
+exactly one `{q}`.
 
-Each supermarket has an optional JSON `crawl_config`, edited on its dashboard page. It covers
-sites that need a store to be chosen or a proxy:
+### Database
 
-```json
-{
-  "wait_for_selector": ".price",
-  "text_selector": "main",
-  "cookies": [{"name": "store_id", "value": "10010"}],
-  "setup_actions": [{"action": "click", "selector": "#choose-store"}],
-  "proxy": {"server": "http://vn-proxy.example.com:3128"}
-}
-```
-
-### Wait for API response
-
-By default a page is read once the network goes quiet (at most 10 s). On sites that load the
-price with a script after the page itself, that can be too early. The **Wait for API response**
-switch on a supermarket's dashboard page (off by default, stored in the `supermarkets` table)
-makes the crawler wait for one of the site's own API calls instead. Enter any part of its URL,
-e.g. `/gw/Product/GetProductDetail` for Bách Hóa Xanh. If that call fails or the site blocks
-it, the URL fails at once with the network error. Add `wait_for_selector` to also wait until
-the price is on screen.
-
-New columns are added to an existing database when the server starts; nothing to run by hand.
+Deploying this release needs no commands. On its first start the server finds the database
+of the server-crawler release, copies it to `backups/legacy-before-agent-crawl-<time>.db` in
+the data volume, and resets it: supermarkets, products, prices and crawl history are removed,
+while the admin account and Claude's connector (OAuth clients and tokens) are kept. This
+happens once; later starts leave the data alone. Any other schema mismatch stops the server
+with a clear log message instead of deleting anything.
 
 ## Security notes
 
@@ -159,20 +156,20 @@ New columns are added to an existing database when the server starts; nothing to
 
 ## Project layout
 
+<!-- TM - #{ticket number} - MPriMCP Agent Crawl & Product Search -->
+
 ```
 src/mpri_mcp/
   app.py            ASGI app: dashboard, OAuth server, MCP mount, middleware
   mcp_server.py     MCPServer (resource server) + tool registration
-  container.py      wires db, AI registry, browser, runner, scheduler, OAuth provider
-  tools/            MCP tools
-  services/         business logic shared by tools and dashboard
+  container.py      wires db, scheduler (queues crawl tasks), OAuth provider
+  tools/            MCP tools (setup, analytics, agent crawl)
+  services/         business logic shared by tools and dashboard (agent_tasks: crawl queue)
   scheduler/        APScheduler engine, cron translation, SQLite backups
-  crawler/          Playwright browser, page digest, AI extractor, crawl runner
-  ai/               provider adapters (gemini, openai_compat, anthropic) + registry
   auth/             admin account, OAuth provider/routes, passwords
   admin/            dashboard routes, Jinja2 templates, static assets (vendored)
   db/               SQLAlchemy models + async session
-tests/              pytest suite (fixtures include two real MM Mega Market pages)
+tests/              pytest suite
 deploy/             Caddyfile, VPS guide
 compose.yaml        production: pulls MPRI_IMAGE from ghcr.io, plus Caddy
 compose.build.yml   override to build the image locally instead

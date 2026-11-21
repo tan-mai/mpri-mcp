@@ -11,9 +11,11 @@
 {%- else %}<span class="badge badge-off">no schedule</span>{% endif %}
 {%- endmacro %}
 
+{# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search #}
 {% macro url_status(u) -%}
 {% if not u.is_active %}<span class="badge badge-off">inactive</span>
 {%- elif u.consecutive_failures %}<span class="badge badge-bad" title="{{ u.last_error or '' }}">failing ×{{ u.consecutive_failures }}</span>
+{%- elif u.in_stock == false %}<span class="badge badge-warn">out of stock</span>
 {%- elif u.last_success_at %}<span class="badge badge-ok">ok</span>
 {%- else %}<span class="badge badge-idle">not crawled yet</span>{% endif %}
 {%- endmacro %}

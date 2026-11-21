@@ -39,7 +39,8 @@
     {% else %}
     <div class="price-now muted">—</div>
     {% endif %}
-    <div class="price-meta">{{ icon("clock") }}{% if p.crawled_at %}Checked {{ p.crawled_at | ago }}{% if p.is_stale %} <span class="badge badge-warn">stale</span>{% endif %}{% else %}No data yet{% endif %}</div>
+    {# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search #}
+    <div class="price-meta">{{ icon("clock") }}{% if p.crawled_at %}Checked {{ p.crawled_at | ago }}{% if p.is_stale %} <span class="badge badge-warn">stale</span>{% endif %}{% if p.needs_review %} <a href="/admin#review" class="badge badge-bad">needs review</a>{% endif %}{% if p.in_stock == false %} <span class="badge badge-warn">out of stock</span>{% endif %}{% else %}No data yet{% endif %}</div>
   </article>
   {% endfor %}
 </div>
@@ -85,7 +86,7 @@
           <td class="nowrap hide-sm">{{ u.last_crawled_at | ago }}</td>
           <td class="actions-cell">
             <div class="row-actions">
-              <button type="button" class="btn btn-sm" hx-post="/admin/urls/{{ u.id }}/test" hx-target="#test-result" hx-indicator="#test-dialog" data-dialog-open="test-dialog" data-dialog-title="Re-test · {{ u.supermarket.name }}">{{ icon("refresh") }}Re-test</button>
+              {# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search (Re-test removed) #}
               <button type="button" class="btn btn-sm btn-icon" data-dialog-open="edit-url-{{ u.id }}" title="Edit URL" aria-label="Edit URL at {{ u.supermarket.name }}">{{ icon("pencil") }}</button>
               <form method="post" action="/admin/urls/{{ u.id }}/delete" data-confirm="Stop tracking at {{ u.supermarket.name }}? Its price history is deleted.">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
@@ -172,12 +173,5 @@
   </form>
 </dialog>
 {% endfor %}
-
-<dialog class="modal wide" id="test-dialog" aria-labelledby="test-dialog-title">
-  {{ dialog_head("Re-test URL", "test-dialog-title") }}
-  <div class="modal-body">
-    <div class="loading loading-only"><span class="spinner"></span>Fetching the page and extracting prices…</div>
-    <div id="test-result" class="result-only" aria-live="polite"></div>
-  </div>
-</dialog>
+{# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search (Re-test dialog removed) #}
 {% endblock %}

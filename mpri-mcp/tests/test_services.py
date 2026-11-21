@@ -35,40 +35,48 @@ async def test_add_supermarket_invalid_url(db):
         await supermarkets.add_supermarket(db, "X", "not a url")
 
 
-async def test_update_supermarket_crawl_config_validated(db):
-    mm, _ = await _setup(db)
-    updated = await supermarkets.update_supermarket(
-        db, mm.id, crawl_config={"wait_for_selector": ".price", "wait_ms": 500}
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+async def test_search_url_template_validated_and_clearable(db):
+    coop = await supermarkets.add_supermarket(
+        db, "Coop", "cooponline.vn", " https://cooponline.vn/search?query={q} "
     )
-    assert updated.crawl_config == {"wait_for_selector": ".price", "wait_ms": 500}
-    with pytest.raises(ValidationError):
-        await supermarkets.update_supermarket(db, mm.id, crawl_config={"bogus": 1})
+    assert coop.search_url_template == "https://cooponline.vn/search?query={q}"
+    for bad in (
+        "https://x.vn/search",  # no {q}
+        "https://x.vn/search?q={q}&again={q}",  # twice
+        "ftp://x.vn/search?q={q}",
+        "x.vn/search?q={q}",
+    ):
+        with pytest.raises(ValidationError):
+            await supermarkets.update_supermarket(db, coop.id, search_url_template=bad)
+    with pytest.raises(ValidationError, match=r"\{q\}"):
+        await supermarkets.add_supermarket(db, "Lotte", "lottemart.vn", "https://x.vn/search")
+    kept = await supermarkets.get_supermarket(db, coop.id)
+    assert kept.search_url_template == "https://cooponline.vn/search?query={q}"
+
+    cleared = await supermarkets.update_supermarket(db, coop.id, search_url_template="")
+    assert cleared.search_url_template is None
+    with pytest.raises(ValidationError, match="Cannot edit"):
+        await supermarkets.update_supermarket(db, coop.id, crawl_config={})
 
 
-async def test_wait_for_api_needs_an_api_url(db):
-    mm, wm = await _setup(db)
-    assert (mm.wait_for_api, mm.api_url_contains) == (False, None)
-    await supermarkets.update_supermarket(db, mm.id, crawl_config={"wait_for_selector": ".price"})
-
-    with pytest.raises(ValidationError, match="API URL"):
-        await supermarkets.update_supermarket(db, mm.id, wait_for_api=True, api_url_contains="  ")
-    assert (await supermarkets.get_supermarket(db, mm.id)).wait_for_api is False
-
-    on = await supermarkets.update_supermarket(
-        db, mm.id, wait_for_api=True, api_url_contains=" /gw/Product/GetProductDetail "
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+async def test_search_urls_encode_keyword_and_note_missing_template(db):
+    await supermarkets.add_supermarket(
+        db, "Coop", "cooponline.vn", "https://cooponline.vn/search?query={q}"
     )
-    assert (on.wait_for_api, on.api_url_contains) == (True, "/gw/Product/GetProductDetail")
-    assert on.crawl_config == {"wait_for_selector": ".price"}
-
-    # Switching off keeps the URL for next time; clearing it while on is refused.
-    off = await supermarkets.update_supermarket(db, mm.id, wait_for_api=False)
-    assert (off.wait_for_api, off.api_url_contains) == (False, "/gw/Product/GetProductDetail")
-    await supermarkets.update_supermarket(db, mm.id, wait_for_api=True)
+    await supermarkets.add_supermarket(db, "Lotte", "lottemart.vn")
+    found = {r.supermarket.id: r.url for r in await supermarkets.search_urls(db, "sữa TH ít đường")}
+    assert found["coop"] == (
+        "https://cooponline.vn/search?query=s%E1%BB%AFa%20TH%20%C3%ADt%20%C4%91%C6%B0%E1%BB%9Dng"
+    )
+    assert found["lotte"] is None
+    only = await supermarkets.search_urls(db, "a&b", ["coop"])
+    assert [r.url for r in only] == ["https://cooponline.vn/search?query=a%26b"]
+    with pytest.raises(NotFoundError):
+        await supermarkets.search_urls(db, "x", ["nope"])
     with pytest.raises(ValidationError):
-        await supermarkets.update_supermarket(db, mm.id, api_url_contains="")
-    with pytest.raises(ValidationError, match="too long"):
-        await supermarkets.update_supermarket(db, mm.id, api_url_contains="x" * 301)
-    assert (await supermarkets.get_supermarket(db, wm.id)).wait_for_api is False
+        await supermarkets.search_urls(db, "   ")
 
 
 async def test_add_product_with_urls(db):

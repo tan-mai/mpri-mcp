@@ -7,7 +7,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_LINK_MODE=copy \
     UV_PYTHON_DOWNLOADS=never \
     UV_PROJECT_ENVIRONMENT=/app/.venv \
-    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     PATH="/app/.venv/bin:$PATH"
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.13 /uv /uvx /bin/
@@ -18,9 +17,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
-# Chromium headless shell + the system libraries it needs (requires root).
-RUN playwright install --with-deps --only-shell chromium \
-    && rm -rf /var/lib/apt/lists/*
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+# No browser in the image: Claude reads the prices with its own browser.
 
 COPY README.md ./
 COPY src ./src

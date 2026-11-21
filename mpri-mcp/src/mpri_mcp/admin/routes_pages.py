@@ -7,38 +7,16 @@ from fastapi.responses import RedirectResponse
 from starlette.responses import Response
 
 from mpri_mcp.admin.web import flash, render, require_admin, state, verify_csrf
-from mpri_mcp.services import analytics, products, runs, supermarkets
-from mpri_mcp.services.settings import estimate_cost, get_prices
+from mpri_mcp.services import agent_tasks, products, reviews, runs, supermarkets
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
 
-async def usage_summary(request: Request, days: int = 7) -> dict:
-    st = state(request)
-    rows = await analytics.ai_usage(st.db, days, st.settings.scheduler_timezone)
-    prices = await get_prices(st.db)
-    cost, unpriced, priced_rows = 0.0, set(), []
-    for r in rows:
-        c = estimate_cost(prices, r.model, r.input_tokens, r.output_tokens)
-        priced_rows.append((r, c))
-        if c is None:
-            unpriced.add(r.model)
-        else:
-            cost += c
-    return {
-        "rows": priced_rows,
-        "calls": sum(r.calls for r in rows),
-        "input_tokens": sum(r.input_tokens for r in rows),
-        "output_tokens": sum(r.output_tokens for r in rows),
-        "cost": cost,
-        "unpriced": sorted(unpriced),
-        "prices": prices,
-    }
-
-
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
 @router.get("/admin")
 async def overview(request: Request) -> Response:
     st = state(request)
+    await agent_tasks.maintain(st.db, st.settings)
     summaries = await supermarkets.list_supermarkets(st.db)
     clients = await st.oauth.list_clients()
     return render(
@@ -50,11 +28,31 @@ async def overview(request: Request) -> Response:
         url_count=sum(s.active_url_count for s in summaries),
         failing=await runs.failing_urls(st.db, 10),
         recent=await runs.recent_runs(st.db, 8),
-        usage=await usage_summary(request),
+        pending_tasks=sum(s.pending_tasks for s in summaries),
+        review=await reviews.list_needs_review(st.db, 50),
+        review_count=await reviews.count_needs_review(st.db),
         scheduler=st.container.scheduler,
         connector_url=st.settings.mcp_resource_url,
         connected=[c for c in clients if not c.revoked_at and c.active_grants],
     )
+
+
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+@router.post("/admin/prices/{record_id}/accept")
+async def price_accept(request: Request, record_id: int) -> Response:
+    await verify_csrf(request)
+    await reviews.accept_price(state(request).db, record_id)
+    flash(request, "Price accepted.", "success")
+    return RedirectResponse("/admin#review", status_code=303)
+
+
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+@router.post("/admin/prices/{record_id}/reject")
+async def price_reject(request: Request, record_id: int) -> Response:
+    await verify_csrf(request)
+    await reviews.reject_price(state(request).db, record_id)
+    flash(request, "Price rejected and deleted.", "success")
+    return RedirectResponse("/admin#review", status_code=303)
 
 
 @router.get("/admin/runs")

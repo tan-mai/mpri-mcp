@@ -20,7 +20,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from mpri_mcp import __commit__, __version__
 from mpri_mcp.admin import (
-    routes_ai,
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search (routes_ai removed)
     routes_auth,
     routes_consent,
     routes_markets,
@@ -208,7 +208,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(routes_pages.router)
     app.include_router(routes_markets.router)
     app.include_router(routes_products.router)
-    app.include_router(routes_ai.router)
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search (AI settings page removed)
 
     @app.api_route("/admin/{rest:path}", methods=["GET", "POST"], include_in_schema=False)
     @app.api_route("/oauth/{rest:path}", methods=["GET", "POST"], include_in_schema=False)

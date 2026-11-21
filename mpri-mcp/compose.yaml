@@ -14,15 +14,13 @@ services:
       # The app port is not published — only Caddy can reach it — so trusting its
       # X-Forwarded-* headers is safe (needed for real client IPs and https URLs).
       FORWARDED_ALLOW_IPS: "*"
-      # Vertex AI service-account key (see deploy/VPS_SETUP.md). Ignored by other providers.
-      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp-sa.json
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    # (no AI key mount and no Chromium settings: the server crawler was removed)
     volumes:
       - mpri_data:/app/data          # SQLite DB, backups, generated session secret
-      - ./secrets:/run/secrets:ro
     expose:
       - "8000"
-    init: true                       # reaps Chromium child processes
-    shm_size: "1gb"                  # Chromium needs more than Docker's 64 MB default
+    init: true
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "5" }

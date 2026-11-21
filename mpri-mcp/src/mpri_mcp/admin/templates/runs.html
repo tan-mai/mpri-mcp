@@ -39,7 +39,8 @@
     </table>
   </div>
   {% else %}
-  {{ empty("activity", "No crawl runs yet", "Runs appear here when a schedule fires or you press Crawl now on a supermarket.") }}
+  {# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search #}
+  {{ empty("activity", "No crawl runs yet", "Runs appear here when a schedule fires or you press Queue crawl on a supermarket. Each run is finished once Claude has read all its pages.") }}
   {% endif %}
 </section>
 {% endblock %}

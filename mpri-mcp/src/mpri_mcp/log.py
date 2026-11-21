@@ -36,5 +36,6 @@ def configure_logging(level: str = "INFO", json_format: bool = False) -> None:
     root.handlers[:] = [handler]
     root.setLevel(level.upper())
     # Third-party loggers that are noisy at INFO.
-    for name in ("httpx", "httpcore", "apscheduler.executors.default", "google_genai"):
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search (google_genai removed)
+    for name in ("httpx", "httpcore", "apscheduler.executors.default"):
         logging.getLogger(name).setLevel(logging.WARNING)

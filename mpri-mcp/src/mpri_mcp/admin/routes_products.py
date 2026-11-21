@@ -1,4 +1,4 @@
-"""Dashboard: products, their URLs, price history and single-URL re-tests."""
+"""Dashboard: products, their URLs and price history."""
 
 from __future__ import annotations
 
@@ -155,14 +155,7 @@ async def url_delete(request: Request, url_id: int) -> Response:
     return _detail(row.product_id)
 
 
-@router.post("/admin/urls/{url_id}/test")
-async def url_test(request: Request, url_id: int) -> Response:
-    """htmx fragment: fetch + extract this URL now without saving."""
-    await verify_csrf(request)
-    st = state(request)
-    row = await products.get_url(st.db, url_id)
-    result = await st.container.runner.dry_run(row.url, supermarket_id=row.supermarket_id)
-    return render(request, "_dry_run.html", result=result)
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search (URL re-test removed)
 
 
 @router.get("/admin/products/{product_id}/history.json")

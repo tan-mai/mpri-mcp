@@ -1,8 +1,6 @@
-"""Dashboard: supermarkets, their schedules, crawl config and AI override."""
+"""Dashboard: supermarkets, their schedules and search URL templates."""
 
 from __future__ import annotations
-
-import json
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
@@ -10,7 +8,7 @@ from starlette.responses import Response
 
 from mpri_mcp.admin.web import flash, form_data, render, require_admin, state, verify_csrf
 from mpri_mcp.scheduler.cron import describe_times
-from mpri_mcp.services import runs, schedules, supermarkets
+from mpri_mcp.services import agent_tasks, runs, schedules, supermarkets
 from mpri_mcp.services.errors import ServiceError
 
 router = APIRouter(dependencies=[Depends(require_admin)])
@@ -38,8 +36,12 @@ async def market_add(request: Request) -> Response:
     st = state(request)
     form = await form_data(request)
     try:
+        # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
         market = await supermarkets.add_supermarket(
-            st.db, form.get("name", ""), form.get("base_url", "")
+            st.db,
+            form.get("name", ""),
+            form.get("base_url", ""),
+            form.get("search_url_template", ""),
         )
     except ServiceError as e:
         return render(
@@ -55,35 +57,36 @@ async def market_add(request: Request) -> Response:
     return _detail(market.id)
 
 
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+def _queued_message(r: agent_tasks.QueueResult) -> tuple[str, str]:
+    if r.queued:
+        return (
+            f"Queued {r.queued} crawl task(s) for {r.supermarket.name}. Claude reads them "
+            "with the browser (ask it to run the agent crawl).",
+            "success",
+        )
+    return (
+        f"{r.supermarket.name}: every tracked page already has an open crawl task.",
+        "warning",
+    )
+
+
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
 @router.post("/admin/supermarkets/crawl")
 async def market_crawl_selected(request: Request) -> Response:
-    """Start a background crawl for every ticked supermarket on the list page."""
+    """Queue crawl tasks for every ticked supermarket on the list page."""
     await verify_csrf(request)
     st = state(request)
     ids = list(dict.fromkeys(str(v) for v in (await request.form()).getlist("market_id")))
     if not ids:
         flash(request, "Select at least one supermarket to crawl.", "warning")
         return RedirectResponse("/admin/supermarkets", status_code=303)
-    started: list[str] = []
-    running: list[str] = []
-    failed: list[str] = []
     for market_id in ids:
         try:
-            ok = await schedules.trigger_now(st.db, st.container.scheduler, market_id)
-            (started if ok else running).append(market_id)
+            result = await schedules.trigger_now(st.db, st.settings, market_id)
+            flash(request, *_queued_message(result))
         except ServiceError as e:
-            failed.append(f"{market_id}: {e}")
-    if started:
-        flash(
-            request,
-            f"Crawl started for {len(started)} supermarket(s): {', '.join(started)}. "
-            "Refresh in a minute.",
-            "success",
-        )
-    if running:
-        flash(request, f"Already running: {', '.join(running)}.", "warning")
-    for msg in failed:
-        flash(request, msg, "error")
+            flash(request, f"{market_id}: {e}", "error")
     return RedirectResponse("/admin/supermarkets", status_code=303)
 
 
@@ -91,26 +94,20 @@ async def market_crawl_selected(request: Request) -> Response:
 async def market_detail(request: Request, market_id: str) -> Response:
     st = state(request)
     market = await supermarkets.get_supermarket(st.db, market_id)
-    config_json = json.dumps(market.crawl_config or {}, ensure_ascii=False, indent=2)
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    await agent_tasks.maintain(st.db, st.settings)
+    summary = next(
+        s for s in await supermarkets.list_supermarkets(st.db) if s.supermarket.id == market_id
+    )
     return render(
         request,
         "supermarket_detail.html",
         market=market,
+        summary=summary,
         urls=sorted(await supermarkets.market_urls(st.db, market_id), key=lambda u: u.product.name),
         recent=await runs.recent_runs(st.db, 10, market_id),
         next_run=st.container.scheduler.next_run_time(market_id),
         running=st.container.scheduler.is_running(market_id),
-        config_json=config_json,
-        config_example=json.dumps(
-            {
-                "wait_for_selector": ".price",
-                "text_selector": "main",
-                "cookies": [{"name": "store_id", "value": "10010"}],
-                "setup_actions": [{"action": "click", "selector": "#choose-store"}],
-            },
-            indent=2,
-        ),
-        providers=st.container.registry.statuses(),
     )
 
 
@@ -119,12 +116,11 @@ async def market_edit(request: Request, market_id: str) -> Response:
     await verify_csrf(request)
     form = await form_data(request)
     try:
-        await supermarkets.update_supermarket(
-            state(request).db,
-            market_id,
-            name=form.get("name", ""),
-            base_url=form.get("base_url", ""),
-        )
+        # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+        changes = {"name": form.get("name", ""), "base_url": form.get("base_url", "")}
+        if "search_url_template" in form:
+            changes["search_url_template"] = form["search_url_template"]
+        await supermarkets.update_supermarket(state(request).db, market_id, **changes)
         flash(request, "Saved.", "success")
     except ServiceError as e:
         flash(request, str(e), "error")
@@ -156,78 +152,13 @@ async def market_schedule(request: Request, market_id: str) -> Response:
     return _detail(market_id)
 
 
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
 @router.post("/admin/supermarkets/{market_id}/run")
 async def market_run(request: Request, market_id: str) -> Response:
     await verify_csrf(request)
     st = state(request)
     try:
-        started = await schedules.trigger_now(st.db, st.container.scheduler, market_id)
-        flash(
-            request,
-            "Crawl started in the background — refresh in a minute."
-            if started
-            else "A crawl of this supermarket is already running.",
-            "success" if started else "warning",
-        )
-    except ServiceError as e:
-        flash(request, str(e), "error")
-    return _detail(market_id)
-
-
-@router.post("/admin/supermarkets/{market_id}/crawl-config")
-async def market_crawl_config(request: Request, market_id: str) -> Response:
-    await verify_csrf(request)
-    form = await form_data(request)
-    raw = form.get("crawl_config", "").strip() or "{}"
-    try:
-        parsed = json.loads(raw)
-        if not isinstance(parsed, dict):
-            raise ValueError("crawl_config must be a JSON object")
-        await supermarkets.update_supermarket(state(request).db, market_id, crawl_config=parsed)
-        flash(request, "Crawl settings saved.", "success")
-    except (ValueError, ServiceError) as e:
-        flash(request, f"Not saved: {e}", "error")
-    return _detail(market_id)
-
-
-@router.post("/admin/supermarkets/{market_id}/api-wait")
-async def market_api_wait(request: Request, market_id: str) -> Response:
-    await verify_csrf(request)
-    form = await form_data(request)
-    enabled = form.get("wait_for_api") == "on"
-    try:
-        await supermarkets.update_supermarket(
-            state(request).db,
-            market_id,
-            wait_for_api=enabled,
-            api_url_contains=form.get("api_url_contains", ""),
-        )
-        flash(
-            request,
-            "Waiting for the API response is on." if enabled else "Waiting for the API is off.",
-            "success",
-        )
-    except ServiceError as e:
-        flash(request, f"Not saved: {e}", "error")
-    return _detail(market_id)
-
-
-@router.post("/admin/supermarkets/{market_id}/ai")
-async def market_ai(request: Request, market_id: str) -> Response:
-    await verify_csrf(request)
-    form = await form_data(request)
-    provider = form.get("ai_provider", "").strip()
-    if provider and provider not in state(request).container.registry.names():
-        flash(request, f"Unknown AI provider '{provider}'.", "error")
-        return _detail(market_id)
-    try:
-        await supermarkets.update_supermarket(
-            state(request).db,
-            market_id,
-            ai_provider=provider,
-            ai_model=form.get("ai_model", "").strip(),
-        )
-        flash(request, "AI override saved.", "success")
+        flash(request, *_queued_message(await schedules.trigger_now(st.db, st.settings, market_id)))
     except ServiceError as e:
         flash(request, str(e), "error")
     return _detail(market_id)

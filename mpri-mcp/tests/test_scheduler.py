@@ -89,26 +89,20 @@ async def test_jobs_restored_after_restart(settings, db, engine):
         await fresh.shutdown()
 
 
-async def test_trigger_now_runs_in_background_and_refuses_overlap(db, engine):
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+async def test_trigger_now_queues_tasks_once(settings, db, engine):
     market = await supermarkets.add_supermarket(db, "MM", "online.mmvietnam.com")
     with pytest.raises(ValidationError):  # no URLs yet
-        await schedules.trigger_now(db, engine, market.id)
+        await schedules.trigger_now(db, settings, market.id)
 
     await products.add_product_with_urls(
         db, "Satori 500ml", None, [UrlInput(market.id, "https://online.mmvietnam.com/p.html")]
     )
-    assert await schedules.trigger_now(db, engine, market.id) is True
-    await asyncio.wait_for(engine.crawler.started.wait(), 2)
-    assert engine.is_running(market.id)
-    assert await schedules.trigger_now(db, engine, market.id) is False
-
-    engine.crawler.release.set()
-    for _ in range(50):
-        if not engine.is_running(market.id):
-            break
-        await asyncio.sleep(0.01)
-    assert not engine.is_running(market.id)
-    assert engine.crawler.calls == [(market.id, "manual")]
+    first = await schedules.trigger_now(db, settings, market.id)
+    assert (first.queued, first.already_open, first.open_tasks) == (1, 0, 1)
+    again = await schedules.trigger_now(db, settings, market.id)
+    assert (again.queued, again.already_open, again.run_id) == (0, 1, None)
+    assert engine.crawler.calls == []  # nothing is crawled by the server
 
 
 async def test_cron_job_function_skips_when_already_running(db, engine):

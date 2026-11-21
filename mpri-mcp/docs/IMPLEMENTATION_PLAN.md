@@ -159,9 +159,29 @@ Deviations from the plan, all minor:
 `sha-<commit>`, `latest`, and the version for `v*` git tags. The VPS pulls a pinned tag
 (`MPRI_IMAGE` in `.env`) and deploys manually; `/health` reports the running commit.
 
+<!-- TM - #{ticket number} - MPriMCP Agent Crawl & Product Search -->
+2026-11-18 — **Agent crawl** (BR "MPriMCP Agent Crawl & Product Search"). The project owner
+decided to remove the server crawler entirely (Playwright, the AI provider adapters, the AI
+settings page, the crawler CLI commands) and read prices only with Claude Browser / Claude
+in Chrome:
+- Cron jobs and `trigger_crawl_now` queue rows in a new `crawl_tasks` table (pending →
+  claimed with a 30-minute lease → done / failed; pending > 48 h → expired; an `error`
+  result is retried until 3 claims). Claude uses `get_pending_crawl_tasks` and
+  `submit_price_results`; a run gets `trigger = agent` when all its tasks have ended.
+- New tools `update_supermarket` and `get_search_urls` (from `search_url_template`) support
+  adding products by searching the supermarket sites in the browser.
+- Prices more than 50% away from the previous one are saved with `needs_review` and left
+  out of deep discounts until accepted (or rejected) on the dashboard overview.
+- The BR's `crawl_mode`, `agent_fallback` and deterministic/optional AI extraction (FR-2)
+  were dropped, since there is no server crawler left.
+- No data migration: on its first start the release backs up the server-crawler database
+  (`backups/legacy-before-agent-crawl-*.db`) and resets the business tables, keeping the
+  admin account and OAuth tables, so deploying the image is the only step (the VPS is
+  shared and has no shell access).
+
 ## Risks
 
-- VN supermarket sites may block or geo-price the Malaysian VPS IP → per-market
-  `crawl_config` (cookies, setup actions, proxy); verify early from the VPS.
 - Own OAuth server → covered by end-to-end tests of every rule.
-- Model retirement / trial credit expiry → one setting change; fallback provider.
+<!-- TM - #{ticket number} - MPriMCP Agent Crawl & Product Search -->
+- Prices only update when Claude runs the agent crawl (computer on, Chrome open); queued
+  tasks expire after 48 h and show as failed runs.

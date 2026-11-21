@@ -7,7 +7,8 @@
 <div class="page-head">
   <div>
     <h1>Supermarkets</h1>
-    <p class="page-sub">Each supermarket has its own crawl schedule, so a slow site never holds up the others.</p>
+    {# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search #}
+    <p class="page-sub">Each supermarket has its own crawl schedule. A scheduled crawl queues tasks; Claude reads the prices with the browser.</p>
   </div>
   <div class="page-actions">
     <button type="button" class="btn btn-primary" data-dialog-open="add-market">{{ icon("plus") }}Add supermarket</button>
@@ -16,7 +17,8 @@
 
 <section class="card">
   {% if summaries %}
-  <form method="post" action="/admin/supermarkets/crawl" data-confirm="Start a crawl for the selected supermarkets?">
+  {# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search #}
+  <form method="post" action="/admin/supermarkets/crawl" data-confirm="Queue crawl tasks for the selected supermarkets?">
   <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
   <div class="table-wrap">
     <table>
@@ -31,15 +33,16 @@
           <td>{{ schedule_badge(m, scheduler.is_running(m.id)) }}{% if m.cron_expression %}<span class="sub mono">{{ m.cron_expression }}</span>{% endif %}</td>
           <td class="nowrap hide-sm">{{ scheduler.next_run_time(m.id) | dt }}</td>
           <td>{% if s.last_run %}<a href="/admin/runs/{{ s.last_run.id }}">{{ run_badge(s.last_run.status) }}</a><span class="sub">{{ s.last_run.started_at | ago }}</span>{% else %}<span class="muted">never</span>{% endif %}</td>
-          <td class="num">{{ s.active_url_count }}{% if s.failing_url_count %}<span class="sub text-bad">{{ s.failing_url_count }} failing</span>{% endif %}</td>
+          {# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search #}
+          <td class="num">{{ s.active_url_count }}{% if s.failing_url_count %}<span class="sub text-bad">{{ s.failing_url_count }} failing</span>{% endif %}{% if s.pending_tasks %}<span class="sub">{{ s.pending_tasks }} queued</span>{% endif %}</td>
         </tr>
       {% endfor %}
       </tbody>
     </table>
   </div>
   <footer class="card-foot">
-    <span class="muted">Visits all active URLs of each ticked supermarket in the background.</span>
-    <button type="submit" class="btn">{{ icon("play") }}Crawl selected</button>
+    <span class="muted">Queues a crawl task for every active URL of each ticked supermarket. Claude reads them with the browser.</span>
+    <button type="submit" class="btn">{{ icon("play") }}Queue crawl</button>
   </footer>
   </form>
   {% else %}
@@ -60,6 +63,9 @@
       <label class="field"><span>Name</span><input type="text" name="name" value="{{ form.get('name', '') }}" required placeholder="Lotte Mart" autofocus></label>
       <label class="field"><span>Website</span><input type="text" name="base_url" value="{{ form.get('base_url', '') }}" required placeholder="lottemart.vn">
         <small class="help">The domain or home page. Product URLs are checked against it.</small></label>
+      {# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search #}
+      <label class="field"><span>Search URL template <span class="muted">(optional)</span></span><input type="text" name="search_url_template" value="{{ form.get('search_url_template', '') }}" class="code" placeholder="https://lottemart.vn/search?q={q}">
+        <small class="help">The site's search results URL with <code>{q}</code> in place of the keyword.</small></label>
     </div>
     <footer class="modal-foot">
       <button type="button" class="btn" data-dialog-close>Cancel</button>

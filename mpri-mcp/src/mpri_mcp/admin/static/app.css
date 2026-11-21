@@ -347,6 +347,8 @@ input[type="checkbox"]:disabled { cursor: not-allowed; opacity: .45; }
 .badge-partial, .badge-running, .badge-warn { background: var(--warn-soft); color: var(--warn); }
 .badge-failed, .badge-timeout, .badge-bad { background: var(--bad-soft); color: var(--bad); }
 .badge-off, .badge-idle { background: var(--idle-soft); color: var(--idle); }
+/* TM - #{ticket number} - MPriMCP Agent Crawl & Product Search */
+.badge-queued { background: var(--warn-soft); color: var(--warn); }
 .badge-accent { background: var(--accent-soft); color: var(--accent-text); }
 .badge-accent::before { display: none; }
 .badge-running::before { animation: pulse 1.2s ease-in-out infinite; }

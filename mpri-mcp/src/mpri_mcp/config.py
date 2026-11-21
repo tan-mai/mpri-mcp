@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from functools import cached_property
 from pathlib import Path
-from typing import Literal
 from urllib.parse import urlparse
 
 from pydantic import Field, SecretStr, field_validator
@@ -32,43 +31,22 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     log_json: bool = False
 
-    # --- Scheduler / crawler -----------------------------------------------
+    # --- Scheduler ------------------------------------------------------------
     scheduler_timezone: str = "Asia/Ho_Chi_Minh"
-    max_concurrent_markets: int = 2
-    max_pages_per_market: int = 3
-    page_timeout_seconds: int = 45
-    job_timeout_seconds: int = 1800
     misfire_grace_seconds: int = 3600
     backup_cron: str = "30 4 * * *"
     backup_keep: int = 7
-    browser_headless: bool = True
-    browser_user_agent: str = (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    # --- Agent crawl tasks (Claude reads the prices with the browser) ----------
+    agent_task_lease_minutes: float = Field(
+        30, gt=0, description="How long a claimed task stays reserved for one agent."
     )
-    page_text_max_chars: int = 8000
-
-    # --- AI providers ---------------------------------------------------------
-    ai_provider: str = "gemini"
-    ai_model: str = "gemini-2.5-flash-lite"
-    ai_fallback_provider: str | None = None
-    ai_fallback_model: str | None = None
-    ai_timeout_seconds: float = 60
-    ai_max_retries: int = 3
-
-    gemini_backend: Literal["vertex", "studio"] = "vertex"
-    google_cloud_project: str | None = None
-    google_cloud_location: str = "global"
-    gemini_api_key: SecretStr | None = None
-    gemini_thinking_budget: int | None = None
-
-    openai_api_key: SecretStr | None = None
-    openai_base_url: str | None = None
-    openai_temperature: float | None = None
-
-    anthropic_api_key: SecretStr | None = None
-    anthropic_effort: str | None = Field(
-        "low", description="output_config.effort for Claude models; empty to omit (older models)."
+    agent_task_expire_hours: float = Field(
+        48, gt=0, description="A task still pending after this long is marked expired."
+    )
+    agent_task_max_attempts: int = Field(
+        3, ge=1, description="Claims per task; an 'error' result re-queues it until this."
     )
 
     # --- Auth -----------------------------------------------------------------
@@ -94,29 +72,13 @@ class Settings(BaseSettings):
     def _strip_trailing_slash(cls, v: str) -> str:
         return v.rstrip("/")
 
-    @field_validator(
-        "ai_fallback_provider",
-        "ai_fallback_model",
-        "google_cloud_project",
-        "openai_base_url",
-        "database_url",
-        "anthropic_effort",
-        mode="before",
-    )
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    @field_validator("database_url", mode="before")
     @classmethod
     def _empty_to_none(cls, v: object) -> object:
         return None if v == "" else v
 
-    @field_validator(
-        "gemini_api_key",
-        "openai_api_key",
-        "anthropic_api_key",
-        "session_secret",
-        "admin_setup_token",
-        "gemini_thinking_budget",
-        "openai_temperature",
-        mode="before",
-    )
+    @field_validator("session_secret", "admin_setup_token", mode="before")
     @classmethod
     def _empty_secret_to_none(cls, v: object) -> object:
         return None if v == "" else v

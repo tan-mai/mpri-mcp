@@ -33,6 +33,9 @@ def register_analytics_tools(mcp: MCPServer, c: Container) -> None:
                 "no_data_yet": p.current_price is None or None,
                 "last_error": p.last_error,
                 "url": p.url,
+                # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+                "source": p.source,
+                "needs_review": p.needs_review or None,
             }
         )
 
@@ -46,7 +49,9 @@ def register_analytics_tools(mcp: MCPServer, c: Container) -> None:
     ) -> dict[str, Any]:
         """Latest price of a tracked product at every supermarket, cheapest first, with
         original (pre-discount) and member prices and discount percentages. If the name
-        matches several products closely, other_matches lists them."""
+        matches several products closely, other_matches lists them. A price with
+        needs_review=true is unverified."""
+        # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
         cmp = await analytics.price_comparison(c.db, product_name)
         return {
             "product": {
@@ -70,7 +75,8 @@ def register_analytics_tools(mcp: MCPServer, c: Container) -> None:
         limit: Annotated[int, Field(description="Maximum number of items.")] = 50,
     ) -> dict[str, Any]:
         """Products whose latest price is discounted by at least the given percentage,
-        deepest discount first."""
+        deepest discount first. Prices flagged needs_review are left out."""
+        # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
         items = await analytics.deep_discounts(c.db, min_discount_percentage, days, limit)
         return {
             "currency": "VND",
@@ -125,6 +131,8 @@ def register_analytics_tools(mcp: MCPServer, c: Container) -> None:
                                 "current_price": p.current_price,
                                 "original_price": p.original_price,
                                 "member_price": p.member_price,
+                                # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+                                "needs_review": p.needs_review or None,
                             }
                         )
                         for p in s.points

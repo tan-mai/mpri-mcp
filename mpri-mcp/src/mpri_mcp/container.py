@@ -2,39 +2,33 @@
 
 from __future__ import annotations
 
-from mpri_mcp.ai.registry import ProviderRegistry
 from mpri_mcp.auth.oauth_provider import SqliteOAuthProvider
 from mpri_mcp.config import Settings
-from mpri_mcp.crawler.browser import BrowserManager
-from mpri_mcp.crawler.extractor import PriceExtractor
-from mpri_mcp.crawler.runner import CrawlRunner
 from mpri_mcp.db import Database
 from mpri_mcp.scheduler.backup import backup_sqlite
 from mpri_mcp.scheduler.engine import SchedulerEngine
+from mpri_mcp.services import agent_tasks
 
 
 class Container:
-    def __init__(
-        self,
-        settings: Settings,
-        *,
-        registry: ProviderRegistry | None = None,
-        browser: BrowserManager | None = None,
-    ) -> None:
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.db = Database(settings.resolved_database_url)
-        self.registry = registry or ProviderRegistry(settings)
-        self.browser = browser or BrowserManager(settings)
-        self.extractor = PriceExtractor(self.registry)
-        self.runner = CrawlRunner(settings, self.db, self.browser, self.extractor, self.registry)
         self.oauth = SqliteOAuthProvider(settings, self.db)
-        self.scheduler = SchedulerEngine(
-            settings, self.runner.crawl_supermarket, self._housekeeping
-        )
+        # The server crawls nothing itself: each supermarket's cron job queues crawl tasks
+        # for Claude (see services/agent_tasks.py).
+        self.scheduler = SchedulerEngine(settings, self._queue_market, self._housekeeping)
+
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    async def _queue_market(self, supermarket_id: str, trigger: str) -> None:
+        await agent_tasks.queue_market(self.db, self.settings, supermarket_id, trigger)
 
     async def _housekeeping(self) -> None:
-        """Daily: back up SQLite and purge expired OAuth codes/tokens."""
+        """Daily: back up SQLite, purge expired OAuth codes/tokens, expire stale crawl tasks."""
         await self.oauth.cleanup_expired()
+        # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+        await agent_tasks.maintain(self.db, self.settings)
         if self.db.sqlite_path is not None:
             await backup_sqlite(
                 self.db.sqlite_path, self.settings.data_dir / "backups", self.settings.backup_keep
@@ -48,5 +42,5 @@ class Container:
 
     async def stop(self) -> None:
         await self.scheduler.shutdown()
-        await self.browser.stop()
+        # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
         await self.db.dispose()

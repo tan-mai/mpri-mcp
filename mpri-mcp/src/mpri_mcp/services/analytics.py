@@ -1,4 +1,4 @@
-"""Price analytics: comparison, deep discounts, history, AI usage."""
+"""Price analytics: comparison, deep discounts, history."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from mpri_mcp.db import Database
-from mpri_mcp.db.models import CrawlRunItem, PriceRecord, Product, ProductUrl
+from mpri_mcp.db.models import PriceRecord, Product, ProductUrl
 from mpri_mcp.services.errors import ValidationError
 from mpri_mcp.services.products import resolve_product
 from mpri_mcp.utils.text import FuzzyMatch
@@ -44,6 +44,9 @@ class MarketPrice:
     crawled_at: datetime | None = None
     is_stale: bool = False
     last_error: str | None = None
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    source: str | None = None
+    needs_review: bool = False
 
 
 @dataclass
@@ -76,6 +79,8 @@ class HistoryPoint:
     current_price: int
     original_price: int | None
     member_price: int | None
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    needs_review: bool = False
 
 
 @dataclass
@@ -113,17 +118,8 @@ class History:
     alternatives: list[FuzzyMatch[int]] = field(default_factory=list)
 
 
-@dataclass
-class UsageRow:
-    day: date
-    provider: str
-    model: str
-    calls: int
-    input_tokens: int
-    output_tokens: int
-
-
-async def _latest_records(
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+async def latest_records(
     s: AsyncSession, url_ids: list[int] | None = None, since: datetime | None = None
 ) -> dict[int, PriceRecord]:
     sub = select(PriceRecord.product_url_id, func.max(PriceRecord.crawled_at).label("mx"))
@@ -163,6 +159,12 @@ def _market_price(u: ProductUrl, rec: PriceRecord | None, now: datetime) -> Mark
         mp.in_stock = rec.in_stock
         mp.crawled_at = rec.crawled_at
         mp.is_stale = now - rec.crawled_at > STALE_AFTER
+        # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+        mp.source = rec.source
+        mp.needs_review = rec.needs_review
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    if u.in_stock is False:  # reported out of stock after the last price was read
+        mp.in_stock = False
     return mp
 
 
@@ -170,7 +172,7 @@ async def latest_prices(db: Database, product: Product) -> list[MarketPrice]:
     now = utcnow()
     urls = list(product.urls)
     async with db.session() as s:
-        latest = await _latest_records(s, [u.id for u in urls])
+        latest = await latest_records(s, [u.id for u in urls])
     prices = [_market_price(u, latest.get(u.id), now) for u in urls]
     prices.sort(key=lambda p: (p.current_price is None, p.current_price or 0, p.supermarket_name))
     return prices
@@ -180,7 +182,7 @@ async def cheapest_by_product(db: Database) -> dict[int, MarketPrice]:
     """Cheapest current price per product id across its active URLs (unpriced products absent)."""
     now = utcnow()
     async with db.session() as s:
-        latest = await _latest_records(s)
+        latest = await latest_records(s)
         if not latest:
             return {}
         urls = (
@@ -220,7 +222,7 @@ async def deep_discounts(
         raise ValidationError("days must be between 1 and 365.")
     since = utcnow() - timedelta(days=days)
     async with db.session() as s:
-        latest = await _latest_records(s, since=since)
+        latest = await latest_records(s, since=since)
         if not latest:
             return []
         urls = (
@@ -233,6 +235,9 @@ async def deep_discounts(
     items = []
     for u in urls:
         rec = latest[u.id]
+        # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+        if rec.needs_review:
+            continue
         pct = discount_pct(rec.original_price, rec.current_price)
         if pct is None or pct < min_discount_percentage:
             continue
@@ -291,8 +296,11 @@ async def product_history(
             MarketHistory(
                 supermarket_id=u.supermarket_id,
                 supermarket_name=u.supermarket.name,
+                # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
                 points=[
-                    HistoryPoint(d, r.current_price, r.original_price, r.member_price)
+                    HistoryPoint(
+                        d, r.current_price, r.original_price, r.member_price, r.needs_review
+                    )
                     for d, r in sorted(days_map.items())
                 ],
             )
@@ -311,30 +319,3 @@ async def price_history(
     history = await product_history(db, product, days, supermarket_id, tz)
     history.alternatives = alternatives
     return history
-
-
-async def ai_usage(db: Database, days: int = 7, tz: str = "Asia/Ho_Chi_Minh") -> list[UsageRow]:
-    zone = ZoneInfo(tz)
-    since = utcnow() - timedelta(days=days)
-    async with db.session() as s:
-        rows = (
-            await s.execute(
-                select(
-                    CrawlRunItem.created_at,
-                    CrawlRunItem.provider,
-                    CrawlRunItem.model,
-                    CrawlRunItem.input_tokens,
-                    CrawlRunItem.output_tokens,
-                ).where(CrawlRunItem.created_at >= since, CrawlRunItem.provider.is_not(None))
-            )
-        ).all()
-    agg: dict[tuple[date, str, str], list[int]] = defaultdict(lambda: [0, 0, 0])
-    for created_at, provider, model, tin, tout in rows:
-        key = (created_at.astimezone(zone).date(), provider, model or "?")
-        agg[key][0] += 1
-        agg[key][1] += tin or 0
-        agg[key][2] += tout or 0
-    return [
-        UsageRow(day=d, provider=p, model=m, calls=v[0], input_tokens=v[1], output_tokens=v[2])
-        for (d, p, m), v in sorted(agg.items(), reverse=True)
-    ]

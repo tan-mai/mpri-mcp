@@ -7,14 +7,12 @@ services:
     environment:
       PUBLIC_BASE_URL: http://localhost:8000
       LOG_JSON: "false"
-      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp-sa.json
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
     ports:
       - "8000:8000"
     volumes:
       - mpri_dev_data:/app/data
-      - ./secrets:/run/secrets:ro
     init: true
-    shm_size: "1gb"
 
 volumes:
   mpri_dev_data:

@@ -7,10 +7,12 @@ from datetime import datetime
 
 from sqlalchemy import func, select
 
+from mpri_mcp.config import Settings
 from mpri_mcp.db import Database
 from mpri_mcp.db.models import ProductUrl, Supermarket
 from mpri_mcp.scheduler.cron import CronError, build_trigger, next_fire_times, normalize_expression
 from mpri_mcp.scheduler.engine import SchedulerEngine
+from mpri_mcp.services.agent_tasks import QueueResult, queue_market
 from mpri_mcp.services.errors import ValidationError
 from mpri_mcp.services.supermarkets import get_supermarket, set_schedule_fields
 
@@ -52,8 +54,10 @@ async def disable_cron(db: Database, engine: SchedulerEngine, supermarket_id: st
     return market
 
 
-async def trigger_now(db: Database, engine: SchedulerEngine, supermarket_id: str) -> bool:
-    """Returns False if a crawl of that market is already in progress."""
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+async def trigger_now(db: Database, settings: Settings, supermarket_id: str) -> QueueResult:
+    """Queue crawl tasks for every active URL now (the server fetches nothing itself).
+    URLs that already have an open task are skipped."""
     await get_supermarket(db, supermarket_id)
     async with db.session() as s:
         active = await s.scalar(
@@ -65,4 +69,4 @@ async def trigger_now(db: Database, engine: SchedulerEngine, supermarket_id: str
         raise ValidationError(
             f"Supermarket '{supermarket_id}' has no active product URLs to crawl yet."
         )
-    return engine.run_now(supermarket_id)
+    return await queue_market(db, settings, supermarket_id, "manual")

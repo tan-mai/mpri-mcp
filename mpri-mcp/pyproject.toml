@@ -4,24 +4,20 @@ version = "0.1.0"
 description = "Market Pricing MCP server: tracks supermarket prices and exposes them to Claude"
 readme = "README.md"
 requires-python = ">=3.12"
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+# (playwright, AI SDKs, beautifulsoup4 and tenacity removed with the server crawler)
 dependencies = [
     "aiosqlite>=0.22.1",
-    "anthropic>=1.15.0",
     "apscheduler>=3.10,<4",
     "argon2-cffi>=25.1.0",
-    "beautifulsoup4>=4.15.0",
     "fastapi>=0.154.0",
-    "google-genai>=2.31.0",
     "itsdangerous>=2.2.0",
     "jinja2>=3.1.6",
     "mcp>=2.3.0",
-    "openai>=3.35.1",
-    "playwright>=1.64.0",
     "pydantic-settings>=2.16.1",
     "python-multipart>=0.0.32",
     "rapidfuzz>=3.14.6",
     "sqlalchemy[asyncio]>=2.1.5",
-    "tenacity>=9.1.4",
     "tzdata>=2026.5",
     "uvicorn[standard]>=0.54.0",
 ]

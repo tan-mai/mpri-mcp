@@ -16,7 +16,6 @@ from sqlalchemy import (
     Text,
     TypeDecorator,
     UniqueConstraint,
-    false,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -56,13 +55,8 @@ class Supermarket(Base):
     cron_expression: Mapped[str | None] = mapped_column(String(100))
     cron_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     timezone: Mapped[str] = mapped_column(String(64), default="Asia/Ho_Chi_Minh")
-    crawl_config: Mapped[dict[str, Any]] = mapped_column(default=dict)
-    ai_provider: Mapped[str | None] = mapped_column(String(50))
-    ai_model: Mapped[str | None] = mapped_column(String(100))
-    # Read the page once this API call has answered (e.g. the site's price request) instead of
-    # waiting for the network to go idle. Added later: see ADDED_COLUMNS in db/session.py.
-    wait_for_api: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
-    api_url_contains: Mapped[str | None] = mapped_column(String(300))
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    search_url_template: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=utcnow, onupdate=utcnow)
 
@@ -100,6 +94,8 @@ class ProductUrl(Base):
     last_success_at: Mapped[datetime | None]
     last_error: Mapped[str | None] = mapped_column(Text)
     consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    in_stock: Mapped[bool | None] = mapped_column(Boolean)
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
 
     product: Mapped[Product] = relationship(back_populates="urls")
@@ -120,9 +116,10 @@ class PriceRecord(Base):
     member_price: Mapped[int | None] = mapped_column(Integer)
     in_stock: Mapped[bool | None] = mapped_column(Boolean)
     crawled_at: Mapped[datetime] = mapped_column(default=utcnow, index=True)
-    provider: Mapped[str | None] = mapped_column(String(50))
-    model: Mapped[str | None] = mapped_column(String(100))
-    raw_extraction: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    source: Mapped[str] = mapped_column(String(20), default="agent")
+    needs_review: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    raw_text: Mapped[str | None] = mapped_column(Text)
 
     product_url: Mapped[ProductUrl] = relationship(back_populates="prices")
 
@@ -137,9 +134,10 @@ class CrawlRun(Base):
     supermarket_id: Mapped[str] = mapped_column(
         ForeignKey("supermarkets.id", ondelete="CASCADE"), index=True
     )
-    trigger: Mapped[str] = mapped_column(String(20))  # cron | manual
-    status: Mapped[str] = mapped_column(String(20), default="running")
-    # running | success | partial | failed | timeout
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    trigger: Mapped[str] = mapped_column(String(20))  # cron | manual, then agent when finished
+    status: Mapped[str] = mapped_column(String(20), default="queued")
+    # queued | success | partial | failed
     started_at: Mapped[datetime] = mapped_column(default=utcnow, index=True)
     finished_at: Mapped[datetime | None]
     urls_total: Mapped[int] = mapped_column(Integer, default=0)
@@ -162,15 +160,43 @@ class CrawlRunItem(Base):
     )
     url: Mapped[str] = mapped_column(String(1000))
     status: Mapped[str] = mapped_column(String(20))  # ok | failed
-    error: Mapped[str | None] = mapped_column(Text)
-    duration_ms: Mapped[int | None] = mapped_column(Integer)
-    provider: Mapped[str | None] = mapped_column(String(50))
-    model: Mapped[str | None] = mapped_column(String(100))
-    input_tokens: Mapped[int | None] = mapped_column(Integer)
-    output_tokens: Mapped[int | None] = mapped_column(Integer)
+    # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+    error: Mapped[str | None] = mapped_column(Text)  # error, or a note such as "out of stock"
     created_at: Mapped[datetime] = mapped_column(default=utcnow, index=True)
 
     run: Mapped[CrawlRun] = relationship(back_populates="items")
+
+
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+class CrawlTask(Base):
+    """One product page for Claude to read with the browser.
+
+    pending -> claimed (lease) -> done | failed; pending too long -> expired."""
+
+    __tablename__ = "crawl_tasks"
+    __table_args__ = (Index("ix_crawl_tasks_status_created", "status", "created_at"),)
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    product_url_id: Mapped[int] = mapped_column(
+        ForeignKey("product_urls.id", ondelete="CASCADE"), index=True
+    )
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id", ondelete="CASCADE"))
+    supermarket_id: Mapped[str] = mapped_column(
+        ForeignKey("supermarkets.id", ondelete="CASCADE"), index=True
+    )
+    url: Mapped[str] = mapped_column(String(1000))
+    status: Mapped[str] = mapped_column(String(20), default="pending")
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(default=utcnow)
+    claimed_at: Mapped[datetime | None]
+    lease_expires_at: Mapped[datetime | None]
+    completed_at: Mapped[datetime | None]
+    run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("crawl_runs.id", ondelete="SET NULL"), index=True
+    )
+    last_error: Mapped[str | None] = mapped_column(Text)
+
+    product_url: Mapped[ProductUrl] = relationship()
 
 
 # --------------------------------------------------------------------------- Auth

@@ -1,29 +1,20 @@
 """MCP tools exercised through an in-process MCP client (auth is HTTP-only, tested separately)."""
 
-import asyncio
-
 import pytest
 from mcp import Client
-from tenacity import wait_none
 
-from mpri_mcp.ai.registry import ProviderRegistry
 from mpri_mcp.container import Container
 from mpri_mcp.mcp_server import build_mcp_server
-from tests.fakes import FakeProvider
-from tests.test_crawler import URL_350, URL_500, FakeBrowser, fixture, satori_responder
+
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+URL_500 = "https://online.mmvietnam.com/product/nuoc-tinh-khiet-satori-thung-24-chai-500ml.html"
+URL_350 = "https://online.mmvietnam.com/product/nuoc-tinh-khiet-satori-thung-24-chai-350ml.html"
 
 
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
 @pytest.fixture
 async def container(settings):
-    registry = ProviderRegistry(
-        settings,
-        providers={"fake": FakeProvider(responder=satori_responder)},
-        retry_wait=wait_none(),
-    )
-    browser = FakeBrowser(
-        {URL_500: fixture("mm_satori_500ml")["raw"], URL_350: fixture("mm_satori_350ml")["raw"]}
-    )
-    c = Container(settings, registry=registry, browser=browser)  # type: ignore[arg-type]
+    c = Container(settings)
     await c.start()
     yield c
     await c.stop()
@@ -40,12 +31,14 @@ async def call(client: Client, name: str, args: dict | None = None) -> dict:
     return result.structured_content
 
 
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
 async def test_tool_list_and_annotations(mcp):
     async with Client(mcp) as client:
         tools = {t.name: t for t in (await client.list_tools()).tools}
     assert set(tools) == {
         "get_supermarkets",
         "add_supermarket",
+        "update_supermarket",
         "setup_supermarket_cron_task",
         "disable_supermarket_cron_task",
         "trigger_crawl_now",
@@ -53,11 +46,20 @@ async def test_tool_list_and_annotations(mcp):
         "get_product_price_comparison",
         "get_deep_discount_items",
         "get_price_history",
+        "get_search_urls",
+        "get_pending_crawl_tasks",
+        "submit_price_results",
     }
     assert tools["get_supermarkets"].annotations.read_only_hint is True
+    assert tools["get_search_urls"].annotations.read_only_hint is True
     assert tools["add_supermarket"].annotations.read_only_hint is False
     schema = tools["add_product_with_urls"].input_schema
     assert set(schema["required"]) == {"name", "urls"}
+    # Existing tools keep their required parameters; new ones are optional.
+    assert set(tools["add_supermarket"].input_schema["required"]) == {"name", "base_url"}
+    assert set(tools["trigger_crawl_now"].input_schema["required"]) == {"supermarket_id"}
+    assert set(tools["update_supermarket"].input_schema["required"]) == {"supermarket_id"}
+    assert "before lease_expires_at" in tools["get_pending_crawl_tasks"].description.lower()
     assert (
         "Vietnam time"
         in tools["setup_supermarket_cron_task"].input_schema["properties"]["cron_expression"][
@@ -66,8 +68,9 @@ async def test_tool_list_and_annotations(mcp):
     )
 
 
-async def test_user_story_end_to_end(mcp, container):
-    """The scenario from the requirements, plus a crawl and the analytics tools."""
+# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+async def test_user_story_end_to_end(mcp):
+    """Setup from the requirements, then an agent crawl and the analytics tools."""
     async with Client(mcp) as client:
         added = await call(
             client,
@@ -75,7 +78,7 @@ async def test_user_story_end_to_end(mcp, container):
             {"name": "MM Mega Market", "base_url": "online.mmvietnam.com"},
         )
         market_id = added["id"]
-        assert market_id == "mm-mega-market"
+        assert market_id == "mm-mega-market" and added["search_url_template"] is None
 
         sched = await call(
             client,
@@ -107,16 +110,45 @@ async def test_user_story_end_to_end(mcp, container):
         m = listing["supermarkets"][0]
         assert m["schedule"]["enabled"] and m["schedule"]["next_run"]
         assert m["tracked_urls"] == 2 and m["last_run"] is None
+        assert (m["pending_tasks"], m["needs_review_count"]) == (0, 0)
 
-        started = await call(client, "trigger_crawl_now", {"supermarket_id": market_id})
-        assert started["started"] is True
-        for _ in range(100):
-            if not container.scheduler.is_running(market_id):
-                break
-            await asyncio.sleep(0.02)
+        queued = await call(client, "trigger_crawl_now", {"supermarket_id": market_id})
+        assert queued["started"] is True and queued["queued_tasks"] == 2
+
+        claimed = await call(client, "get_pending_crawl_tasks", {})
+        assert claimed["count"] == 2 and claimed["remaining_pending"] == 0
+        by_url = {t["url"]: t for t in claimed["tasks"]}
+        assert by_url[URL_350]["product_name"].endswith("350ml")
+        assert "last_price" not in by_url[URL_350] and by_url[URL_350]["lease_expires_at"]
+
+        submitted = await call(
+            client,
+            "submit_price_results",
+            {
+                "results": [
+                    {
+                        "task_id": by_url[URL_350]["task_id"],
+                        "status": "ok",
+                        "price": 65000,
+                        "original_price": 89000,
+                        "member_price": 58998,
+                        "raw_text": "65,000 ₫ / Thùng 89,000 ₫ -27% Giá thành viên MCard 58,998 ₫",
+                    },
+                    {"task_id": by_url[URL_500]["task_id"], "status": "ok", "price": 109000},
+                ]
+            },
+        )
+        assert submitted["accepted"] == 2 and submitted["rejected"] == []
+        assert submitted["remaining_pending"] == 0
 
         listing = await call(client, "get_supermarkets")
-        assert listing["supermarkets"][0]["last_run"]["status"] == "success"
+        run = listing["supermarkets"][0]["last_run"]
+        assert (run["status"], run["trigger"], run["urls_ok"], run["urls_failed"]) == (
+            "success",
+            "agent",
+            2,
+            0,
+        )
 
         cmp = await call(client, "get_product_price_comparison", {"product_name": "satori 350"})
         assert cmp["product"]["name"].endswith("350ml")
@@ -126,7 +158,8 @@ async def test_user_story_end_to_end(mcp, container):
             89000,
             58998,
         )
-        assert row["discount_pct"] == 27.0
+        assert row["discount_pct"] == 27.0 and row["source"] == "agent"
+        assert "needs_review" not in row
 
         deals = await call(client, "get_deep_discount_items", {"min_discount_percentage": 20})
         assert deals["count"] == 1 and deals["items"][0]["discount_pct"] == 27.0
@@ -161,3 +194,11 @@ async def test_errors_are_readable(mcp):
 
         bad = await client.call_tool("trigger_crawl_now", {"supermarket_id": "winmart"})
         assert bad.is_error and "no active product URLs" in bad.content[0].text
+
+        # TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
+        bad = await client.call_tool("update_supermarket", {"supermarket_id": "winmart"})
+        assert bad.is_error and "Nothing to update" in bad.content[0].text
+        bad = await client.call_tool("get_pending_crawl_tasks", {"limit": 51})
+        assert bad.is_error and "between 1 and 50" in bad.content[0].text
+        bad = await client.call_tool("get_search_urls", {"keyword": "x", "supermarket_ids": ["?"]})
+        assert bad.is_error and "Unknown supermarket" in bad.content[0].text
