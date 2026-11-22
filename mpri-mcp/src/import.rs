@@ -111,9 +111,11 @@ pub async fn import(target: &Db, from: &Path, secrets_dir: Option<&Path>) -> Res
     if !from.exists() {
         bail!("{} does not exist", from.display());
     }
+    let wal = PathBuf::from(format!("{}-wal", from.display()));
+    let has_wal = std::fs::metadata(&wal).map(|m| m.len() > 0).unwrap_or(false);
     let src = SqlitePoolOptions::new()
         .max_connections(1)
-        .connect_with(SqliteConnectOptions::new().filename(from).read_only(true))
+        .connect_with(SqliteConnectOptions::new().filename(from).read_only(true).immutable(!has_wal))
         .await
         .with_context(|| format!("cannot open {}", from.display()))?;
     if !has_table(&src, "supermarkets").await? {

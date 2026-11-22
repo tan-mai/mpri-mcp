@@ -52,38 +52,75 @@ interactively: `docker compose -f docker-compose.vps.yml run --rm -it mprimcp us
 ## 4. Moving from the Python release (keeps Claude's connector working)
 
 The Rust release keeps the same OAuth endpoints, token format and scope, so after the data is
-imported Claude's existing connector keeps working: **same URL, no reconnect**. Two conditions:
+imported Claude's existing connector keeps working: **same URL, no reconnect**. The import copies
+supermarkets, products, URLs, price history, tasks, alerts, notification settings + Telegram/Discord
+secrets, the account (its argon2id hash is kept, so the password stays the same) and the OAuth
+clients/tokens.
 
-1. `DOMAIN` must give the same public URL as the old `PUBLIC_BASE_URL` (tokens are bound to
-   `https://<domain>/mcp`).
-2. The data must be imported: supermarkets, products, URLs, price history, tasks, alerts,
-   notification settings + Telegram/Discord secrets, the account (its argon2id hash is kept,
-   so the password stays the same) and the OAuth clients/tokens.
+> **Before pushing the Rust code to `main`:** every push to `main` moves the `:latest` image tag.
+> The old `compose.yaml` cannot run the Rust image (different variables and data path), so the
+> VPS's `MPRI_IMAGE` must be pinned to a `sha-…` tag, not `:latest`, until the switch below.
 
-**Option A — automatic, no shell commands needed:** mount the old data volume read-only and set
-`MPRIMCP_IMPORT_FROM`. On the first start, while the new database is still empty, the server imports
-`mpri.db` and the `secrets/` folder next to it, and logs the number of rows per table. On later
-starts the variable is ignored. Add to `docker-compose.vps.yml`:
+Do the switch in the old folder (`~/mpri`), so the Compose project name stays `mpri` and Caddy keeps
+its certificates (`mpri_caddy_data`):
 
-```yaml
-services:
-  mprimcp:
-    environment:
-      MPRIMCP_IMPORT_FROM: /legacy/mpri.db
-    volumes:
-      - legacy_data:/legacy:ro
-volumes:
-  legacy_data:
-    external: true
-    name: mpri_mpri_data        # the old volume: `docker volume ls | grep mpri_data`
-```
+1. Note the old data volume and stop the old stack (volumes are kept):
 
-Stop the old stack first (`docker compose down` in the old folder, volumes are kept), then start
-the new one. The old volume is never written to, so rolling back is: stop the new stack, start the
-old one.
+   ```bash
+   cd ~/mpri
+   docker volume ls | grep mpri_data       # usually mpri_mpri_data
+   docker compose down
+   ```
 
-**Option B — manual:** copy `mpri.db` (and `secrets/`) out of the old volume, then
-`docker compose -f docker-compose.vps.yml run --rm -v /path/to/old:/legacy:ro mprimcp import --from /legacy/mpri.db`.
+2. Copy `deploy/docker-compose.vps.yml` and `deploy/Caddyfile` from this release into `~/mpri/`
+   (next to the old `compose.yaml`, which is no longer used). In `docker-compose.vps.yml` add the
+   one-time import of the old volume (mounted read-only, never modified):
+
+   ```yaml
+   services:
+     mprimcp:
+       environment:
+         MPRIMCP_IMPORT_FROM: /legacy/mpri.db
+       volumes:
+         - legacy_data:/legacy:ro
+   volumes:
+     legacy_data:
+       external: true
+       name: mpri_mpri_data
+   ```
+
+3. Add to `~/mpri/.env` (the old variables can stay; they are ignored):
+
+   ```dotenv
+   MPRIMCP_IMAGE=ghcr.io/<owner>/mpri-mcp:sha-xxxxxxx   # the Rust build from the Actions summary
+   DOMAIN=mpri.example.com                             # must give the same URL as the old PUBLIC_BASE_URL
+   ```
+
+   Do **not** set `MPRIMCP_ADMIN_USER`/`MPRIMCP_ADMIN_PASSWORD` for the switch: the account comes from
+   the import. If the import cannot find the file, the server then refuses to start instead of
+   running with an empty database.
+
+4. Start and check:
+
+   ```bash
+   docker compose -f docker-compose.vps.yml pull
+   docker compose -f docker-compose.vps.yml up -d
+   docker compose -f docker-compose.vps.yml logs mprimcp | grep -E "imported|started|error"
+   curl -s https://mpri.example.com/health        # "version":"0.2.0"
+   ```
+
+   The log lists the rows imported per table. Then sign in to `https://<domain>/admin` with the old
+   password and ask Claude for `get_supermarkets`: it must answer without asking to reconnect.
+
+5. Later starts skip the import (the database is no longer empty). You may remove the
+   `MPRIMCP_IMPORT_FROM` lines after the first successful start.
+
+**Roll back:** `docker compose -f docker-compose.vps.yml down`, then `docker compose up -d` (the old
+`compose.yaml` with its pinned `MPRI_IMAGE`). The old volume was only read, so the Python release
+resumes exactly where it stopped.
+
+**Manual import instead:** with the old stack stopped,
+`docker compose -f docker-compose.vps.yml run --rm -v mpri_mpri_data:/legacy:ro mprimcp import --from /legacy/mpri.db`.
 Running it twice inserts nothing new; the output lists `source / inserted / skipped` per table.
 
 ## Operating it

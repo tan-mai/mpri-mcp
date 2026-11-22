@@ -193,9 +193,14 @@ async fn ac18_two_processes_claim_without_duplicates() {
 }
 
 async fn legacy_db(path: &Path) {
-    let pool = sqlx::SqlitePool::connect_with(SqliteConnectOptions::new().filename(path).create_if_missing(true))
-        .await
-        .unwrap();
+    let pool = sqlx::SqlitePool::connect_with(
+        SqliteConnectOptions::new()
+            .filename(path)
+            .create_if_missing(true)
+            .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal),
+    )
+    .await
+    .unwrap();
     let schema = include_str!("fixtures/legacy_schema.sql");
     sqlx::raw_sql(sqlx::AssertSqlSafe(schema.to_string())).execute(&pool).await.unwrap();
     let data = r#"
@@ -226,6 +231,9 @@ INSERT INTO oauth_clients VALUES ('client-1',NULL,'Claude','{"redirect_uris": ["
             .unwrap();
     }
     pool.close().await;
+    let mut perms = std::fs::metadata(path).unwrap().permissions();
+    perms.set_readonly(true);
+    std::fs::set_permissions(path, perms).unwrap();
 }
 
 #[tokio::test]
@@ -319,4 +327,34 @@ async fn ac13_token_never_in_logs_or_outputs() {
         assert!(!logs.contains(secret), "log leaks {secret}");
     }
     assert!(logs.contains("notification channel saved"), "{logs}");
+}
+
+#[tokio::test]
+async fn ac22_import_reads_uncheckpointed_wal() {
+    let src_dir = tempfile::tempdir().unwrap();
+    let source = src_dir.path().join("mpri.db");
+    legacy_db(&source).await;
+    let mut perms = std::fs::metadata(&source).unwrap().permissions();
+    #[allow(clippy::permissions_set_readonly_false)]
+    perms.set_readonly(false);
+    std::fs::set_permissions(&source, perms).unwrap();
+    let writer = sqlx::SqlitePool::connect_with(
+        SqliteConnectOptions::new().filename(&source).journal_mode(sqlx::sqlite::SqliteJournalMode::Wal),
+    )
+    .await
+    .unwrap();
+    sqlx::query("PRAGMA wal_autocheckpoint = 0").execute(&writer).await.unwrap();
+    sqlx::raw_sql(
+        "INSERT INTO supermarkets VALUES ('lotte','LOTTE Mart','https://lottemart.vn',NULL,0,'Asia/Ho_Chi_Minh',NULL,\
+         '2026-11-21 01:00:00.000000','2026-11-21 01:00:00.000000');",
+    )
+    .execute(&writer)
+    .await
+    .unwrap();
+    assert!(std::fs::metadata(src_dir.path().join("mpri.db-wal")).unwrap().len() > 0);
+    let h = harness().await;
+    let report = import::import(&h.app.db, &source, None).await.unwrap();
+    let markets = report.tables.iter().find(|t| t.table == "supermarkets").unwrap();
+    assert_eq!((markets.source, markets.inserted), (3, 3));
+    writer.close().await;
 }
