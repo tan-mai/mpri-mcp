@@ -1,11 +1,11 @@
+# TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
 # Caddy obtains and renews the TLS certificate for $DOMAIN automatically.
 # The domain's DNS A record must point at this server, and ports 80 + 443 must be open.
 
 {$DOMAIN} {
 	encode zstd gzip
 
-	reverse_proxy mpri-mcp:8000 {
-		# Pass streamed MCP responses through without buffering.
+	reverse_proxy mprimcp:8000 {
 		flush_interval -1
 	}
 

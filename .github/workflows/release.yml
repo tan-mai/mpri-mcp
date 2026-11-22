@@ -1,0 +1,90 @@
+# TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
+# Push a tag such as v0.2.0 to build the binaries for 5 targets and publish a GitHub Release.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: build ${{ matrix.target }}
+    needs: ci
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-22.04, tool: cargo }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-22.04, tool: cross }
+          - { target: x86_64-apple-darwin, os: macos-latest, tool: cargo }
+          - { target: aarch64-apple-darwin, os: macos-latest, tool: cargo }
+          - { target: x86_64-pc-windows-msvc, os: windows-latest, tool: cargo }
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: mpri-mcp
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: mpri-mcp
+          key: ${{ matrix.target }}
+      - if: matrix.tool == 'cross'
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+      - name: Build
+        run: ${{ matrix.tool }} build --release --locked --target ${{ matrix.target }}
+      - name: Package
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          name="mprimcp-${version}-${{ matrix.target }}"
+          mkdir -p "dist/$name"
+          bin=mprimcp
+          [[ "${{ matrix.target }}" == *windows* ]] && bin=mprimcp.exe
+          cp "target/${{ matrix.target }}/release/$bin" "dist/$name/"
+          cp ../README.md ../LICENSE ../AGENTS.md .env.example "dist/$name/"
+          cd dist
+          if [[ "${{ matrix.target }}" == *windows* ]]; then
+            7z a "$name.zip" "$name" >/dev/null
+            sha256sum "$name.zip" > "$name.zip.sha256"
+          else
+            tar czf "$name.tar.gz" "$name"
+            shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mprimcp-${{ matrix.target }}
+          path: |
+            mpri-mcp/dist/*.tar.gz
+            mpri-mcp/dist/*.zip
+            mpri-mcp/dist/*.sha256
+
+  publish:
+    name: publish release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

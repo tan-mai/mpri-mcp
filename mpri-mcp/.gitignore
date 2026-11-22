@@ -1,27 +1,28 @@
-# Secrets — never commit
+# TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
+# Secrets - never commit
 .env
 .env.*
 !.env.example
 secrets/
 *.pem
 *.key
-gcp-sa*.json
 
-# Runtime data (SQLite DB, backups, generated session secret)
+# Runtime data (SQLite database, backups)
 data/
+mprimcp-data/
+*.db
+*.db-shm
+*.db-wal
+!tests/fixtures/*.sql
 
-# Python
-__pycache__/
-*.py[cod]
+# Rust
+target/
+
+# Leftovers of the Python release (local only)
 .venv/
-*.egg-info/
-build/
-dist/
+__pycache__/
 .pytest_cache/
 .ruff_cache/
-.mypy_cache/
-.coverage
-htmlcov/
 
 # Editors / OS
 .vscode/

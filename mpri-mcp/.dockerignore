@@ -1,3 +1,5 @@
+# TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
+target
 .venv
 .git
 .env
@@ -5,11 +7,11 @@
 !.env.example
 data
 secrets
-tests
-docs
+*.db
+*.db-shm
+*.db-wal
 deploy
-**/__pycache__
+docs
+tests
 .pytest_cache
 .ruff_cache
-compose*.yml
-compose*.yaml

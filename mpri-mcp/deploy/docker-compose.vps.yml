@@ -1,0 +1,48 @@
+# TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
+# MPriMCP on a VPS: serve mode with cron, behind Caddy (automatic HTTPS).
+# Guide: deploy/VPS_SETUP.md
+#   docker compose -f docker-compose.vps.yml pull && docker compose -f docker-compose.vps.yml up -d
+services:
+  mprimcp:
+    image: ${MPRIMCP_IMAGE:?Set MPRIMCP_IMAGE in .env, e.g. ghcr.io/<owner>/mpri-mcp:latest}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MPRIMCP_DATA_DIR: /data
+      MPRIMCP_BIND: 0.0.0.0:8000
+      MPRIMCP_PUBLIC_URL: https://${DOMAIN:?Set DOMAIN in .env}
+      MPRIMCP_CRON_ENABLED: "true"
+      # Only Caddy reaches the app port, so its X-Forwarded-For header can be trusted.
+      MPRIMCP_TRUST_PROXY: "true"
+    volumes:
+      - mprimcp_data:/data
+    expose:
+      - "8000"
+    init: true
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - mprimcp
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  mprimcp_data:
+  caddy_data:
+  caddy_config:

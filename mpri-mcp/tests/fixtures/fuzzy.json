@@ -1,0 +1,3147 @@
+{
+ "pairs": [
+  {
+   "q": "sua th it duong",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 50.847457627118644,
+   "ratio": 50.847457627118644
+  },
+  {
+   "q": "sua th it duong",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 88.88888888888889,
+   "token_sort_ratio": 50.0,
+   "ratio": 50.0
+  },
+  {
+   "q": "sua th it duong",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 75.0,
+   "token_sort_ratio": 47.05882352941176,
+   "ratio": 50.98039215686274
+  },
+  {
+   "q": "sua th it duong",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 21.621621621621628,
+   "token_sort_ratio": 21.62162162162162,
+   "ratio": 32.432432432432435
+  },
+  {
+   "q": "sua th it duong",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 40.0,
+   "token_sort_ratio": 40.0,
+   "ratio": 40.0
+  },
+  {
+   "q": "sua th it duong",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 40.0,
+   "token_sort_ratio": 40.0,
+   "ratio": 35.0
+  },
+  {
+   "q": "sua th it duong",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 34.04255319148936,
+   "token_sort_ratio": 31.372549019607842,
+   "ratio": 35.29411764705882
+  },
+  {
+   "q": "sua th it duong",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 21.276595744680847,
+   "token_sort_ratio": 21.276595744680847,
+   "ratio": 25.531914893617024
+  },
+  {
+   "q": "sua th it duong",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 31.372549019607845,
+   "token_sort_ratio": 31.372549019607842,
+   "ratio": 35.29411764705882
+  },
+  {
+   "q": "sua th it duong",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 33.33333333333333,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "sua th it duong",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 54.54545454545455,
+   "token_sort_ratio": 50.0,
+   "ratio": 40.90909090909091
+  },
+  {
+   "q": "sua th it duong",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 35.0,
+   "token_sort_ratio": 35.0,
+   "ratio": 40.0
+  },
+  {
+   "q": "sua th it duong",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 35.71428571428571
+  },
+  {
+   "q": "sua th it duong",
+   "n": "co opmart",
+   "token_set_ratio": 33.33333333333333,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 16.666666666666664
+  },
+  {
+   "q": "sua th it duong",
+   "n": "winmart",
+   "token_set_ratio": 27.272727272727266,
+   "token_sort_ratio": 27.27272727272727,
+   "ratio": 18.181818181818176
+  },
+  {
+   "q": "sua th it duong",
+   "n": "lotte mart",
+   "token_set_ratio": 40.0,
+   "token_sort_ratio": 40.0,
+   "ratio": 24.0
+  },
+  {
+   "q": "sua th it duong",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 41.02564102564103,
+   "token_sort_ratio": 41.02564102564102,
+   "ratio": 46.15384615384615
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 64.61538461538461,
+   "ratio": 64.61538461538461
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 92.3076923076923,
+   "token_sort_ratio": 64.51612903225806,
+   "ratio": 64.51612903225806
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 60.0,
+   "token_sort_ratio": 56.14035087719298,
+   "ratio": 56.14035087719298
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 37.2093023255814,
+   "token_sort_ratio": 37.2093023255814,
+   "ratio": 46.51162790697675
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 39.02439024390244,
+   "token_sort_ratio": 39.02439024390244,
+   "ratio": 39.02439024390244
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 43.47826086956522,
+   "token_sort_ratio": 43.47826086956522,
+   "ratio": 43.47826086956522
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 37.735849056603776,
+   "token_sort_ratio": 35.08771929824561,
+   "ratio": 38.59649122807017
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 33.9622641509434,
+   "token_sort_ratio": 33.9622641509434,
+   "ratio": 30.188679245283023
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 38.59649122807018,
+   "token_sort_ratio": 38.59649122807017,
+   "ratio": 42.10526315789473
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 41.666666666666664,
+   "token_sort_ratio": 41.666666666666664,
+   "ratio": 37.5
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 56.0,
+   "token_sort_ratio": 52.0,
+   "ratio": 40.0
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 39.130434782608695,
+   "token_sort_ratio": 39.13043478260869,
+   "ratio": 39.13043478260869
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 29.411764705882348,
+   "token_sort_ratio": 29.411764705882348,
+   "ratio": 29.411764705882348
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "co opmart",
+   "token_set_ratio": 26.66666666666667,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 19.999999999999996
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "winmart",
+   "token_set_ratio": 21.42857142857143,
+   "token_sort_ratio": 21.42857142857143,
+   "ratio": 21.42857142857143
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "lotte mart",
+   "token_set_ratio": 38.70967741935484,
+   "token_sort_ratio": 38.70967741935484,
+   "ratio": 25.806451612903224
+  },
+  {
+   "q": "sua th it duong 110ml",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 53.333333333333336,
+   "token_sort_ratio": 53.333333333333336,
+   "ratio": 57.77777777777777
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 64.61538461538461,
+   "ratio": 64.61538461538461
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 72.72727272727272,
+   "token_sort_ratio": 54.83870967741935,
+   "ratio": 48.38709677419355
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 49.12280701754386,
+   "token_sort_ratio": 42.10526315789473,
+   "ratio": 49.122807017543856
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 41.86046511627907,
+   "token_sort_ratio": 41.860465116279066,
+   "ratio": 37.2093023255814
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 34.14634146341463,
+   "token_sort_ratio": 34.14634146341463,
+   "ratio": 34.14634146341463
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 43.47826086956522,
+   "token_sort_ratio": 43.47826086956522,
+   "ratio": 34.78260869565217
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 49.056603773584904,
+   "token_sort_ratio": 45.614035087719294,
+   "ratio": 42.10526315789473
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 33.9622641509434,
+   "token_sort_ratio": 33.9622641509434,
+   "ratio": 33.9622641509434
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 52.63157894736842,
+   "token_sort_ratio": 49.122807017543856,
+   "ratio": 52.63157894736843
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 50.0,
+   "token_sort_ratio": 50.0,
+   "ratio": 37.5
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 36.0,
+   "token_sort_ratio": 36.0,
+   "ratio": 36.0
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 34.78260869565217,
+   "token_sort_ratio": 34.78260869565217,
+   "ratio": 34.78260869565217
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 29.411764705882348,
+   "token_sort_ratio": 29.411764705882348,
+   "ratio": 29.411764705882348
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "co opmart",
+   "token_set_ratio": 20.0,
+   "token_sort_ratio": 19.999999999999996,
+   "ratio": 19.999999999999996
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "winmart",
+   "token_set_ratio": 21.42857142857143,
+   "token_sort_ratio": 21.42857142857143,
+   "ratio": 14.28571428571429
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "lotte mart",
+   "token_set_ratio": 25.80645161290323,
+   "token_sort_ratio": 25.806451612903224,
+   "ratio": 25.806451612903224
+  },
+  {
+   "q": "sua th 110ml thung 48",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 35.55555555555556,
+   "token_sort_ratio": 35.55555555555555,
+   "ratio": 40.0
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 43.75,
+   "token_sort_ratio": 43.75,
+   "ratio": 40.625
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 42.622950819672134,
+   "token_sort_ratio": 42.622950819672134,
+   "ratio": 42.622950819672134
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 71.42857142857143,
+   "ratio": 71.42857142857143
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 38.095238095238095
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 35.0,
+   "token_sort_ratio": 35.0,
+   "ratio": 40.0
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 31.111111111111114,
+   "token_sort_ratio": 31.11111111111111,
+   "ratio": 31.11111111111111
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 34.61538461538461,
+   "token_sort_ratio": 32.14285714285714,
+   "ratio": 32.14285714285714
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 26.92307692307692,
+   "token_sort_ratio": 26.923076923076927,
+   "ratio": 26.923076923076927
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 39.28571428571429
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 29.787234042553195,
+   "token_sort_ratio": 29.78723404255319,
+   "ratio": 29.78723404255319
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 53.06122448979592,
+   "token_sort_ratio": 48.97959183673469,
+   "ratio": 32.6530612244898
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 26.66666666666667,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 31.11111111111111
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 30.303030303030297,
+   "token_sort_ratio": 30.303030303030297,
+   "ratio": 36.36363636363637
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "co opmart",
+   "token_set_ratio": 27.58620689655173,
+   "token_sort_ratio": 27.586206896551722,
+   "ratio": 20.68965517241379
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "winmart",
+   "token_set_ratio": 22.22222222222223,
+   "token_sort_ratio": 22.22222222222222,
+   "ratio": 22.22222222222222
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "lotte mart",
+   "token_set_ratio": 20.0,
+   "token_sort_ratio": 19.999999999999996,
+   "ratio": 19.999999999999996
+  },
+  {
+   "q": "vinamilk khong duong",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 45.45454545454545,
+   "token_sort_ratio": 45.45454545454546,
+   "ratio": 40.90909090909091
+  },
+  {
+   "q": "nuoc mam",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 19.230769230769226,
+   "token_sort_ratio": 19.23076923076923,
+   "ratio": 15.384615384615385
+  },
+  {
+   "q": "nuoc mam",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 20.40816326530613,
+   "token_sort_ratio": 20.408163265306122,
+   "ratio": 16.326530612244895
+  },
+  {
+   "q": "nuoc mam",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 18.181818181818187,
+   "token_sort_ratio": 18.181818181818176,
+   "ratio": 22.72727272727273
+  },
+  {
+   "q": "nuoc mam",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 53.333333333333336,
+   "ratio": 53.333333333333336
+  },
+  {
+   "q": "nuoc mam",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 21.42857142857143,
+   "token_sort_ratio": 21.42857142857143,
+   "ratio": 21.42857142857143
+  },
+  {
+   "q": "nuoc mam",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 24.24242424242425,
+   "token_sort_ratio": 24.242424242424242,
+   "ratio": 24.242424242424242
+  },
+  {
+   "q": "nuoc mam",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 25.0,
+   "token_sort_ratio": 22.72727272727273,
+   "ratio": 18.181818181818176
+  },
+  {
+   "q": "nuoc mam",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 66.66666666666666,
+   "token_sort_ratio": 35.0,
+   "ratio": 35.0
+  },
+  {
+   "q": "nuoc mam",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 22.727272727272734,
+   "token_sort_ratio": 22.72727272727273,
+   "ratio": 13.636363636363635
+  },
+  {
+   "q": "nuoc mam",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 22.85714285714286,
+   "token_sort_ratio": 22.857142857142854,
+   "ratio": 28.57142857142857
+  },
+  {
+   "q": "nuoc mam",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 21.621621621621628,
+   "token_sort_ratio": 21.62162162162162,
+   "ratio": 21.62162162162162
+  },
+  {
+   "q": "nuoc mam",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 18.181818181818187,
+   "token_sort_ratio": 18.181818181818176,
+   "ratio": 18.181818181818176
+  },
+  {
+   "q": "nuoc mam",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 28.57142857142857
+  },
+  {
+   "q": "nuoc mam",
+   "n": "co opmart",
+   "token_set_ratio": 23.529411764705884,
+   "token_sort_ratio": 23.529411764705888,
+   "ratio": 47.05882352941176
+  },
+  {
+   "q": "nuoc mam",
+   "n": "winmart",
+   "token_set_ratio": 26.66666666666667,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 40.0
+  },
+  {
+   "q": "nuoc mam",
+   "n": "lotte mart",
+   "token_set_ratio": 22.22222222222223,
+   "token_sort_ratio": 22.22222222222222,
+   "ratio": 44.44444444444444
+  },
+  {
+   "q": "nuoc mam",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 66.66666666666666,
+   "token_sort_ratio": 43.75,
+   "ratio": 43.75
+  },
+  {
+   "q": "gao st25",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 19.230769230769226,
+   "token_sort_ratio": 19.23076923076923,
+   "ratio": 15.384615384615385
+  },
+  {
+   "q": "gao st25",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 20.40816326530613,
+   "token_sort_ratio": 20.408163265306122,
+   "ratio": 12.244897959183676
+  },
+  {
+   "q": "gao st25",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 22.727272727272734,
+   "token_sort_ratio": 22.72727272727273,
+   "ratio": 13.636363636363635
+  },
+  {
+   "q": "gao st25",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 13.333333333333329,
+   "token_sort_ratio": 13.33333333333333,
+   "ratio": 19.999999999999996
+  },
+  {
+   "q": "gao st25",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 57.14285714285714,
+   "ratio": 57.14285714285714
+  },
+  {
+   "q": "gao st25",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 24.24242424242425,
+   "token_sort_ratio": 24.242424242424242,
+   "ratio": 24.242424242424242
+  },
+  {
+   "q": "gao st25",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 25.0,
+   "token_sort_ratio": 22.72727272727273,
+   "ratio": 18.181818181818176
+  },
+  {
+   "q": "gao st25",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 20.0,
+   "token_sort_ratio": 19.999999999999996,
+   "ratio": 19.999999999999996
+  },
+  {
+   "q": "gao st25",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 18.181818181818187,
+   "token_sort_ratio": 18.181818181818176,
+   "ratio": 27.27272727272727
+  },
+  {
+   "q": "gao st25",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 22.857142857142854
+  },
+  {
+   "q": "gao st25",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 21.621621621621628,
+   "token_sort_ratio": 21.62162162162162,
+   "ratio": 16.216216216216218
+  },
+  {
+   "q": "gao st25",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 18.181818181818187,
+   "token_sort_ratio": 18.181818181818176,
+   "ratio": 24.242424242424242
+  },
+  {
+   "q": "gao st25",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 28.57142857142857
+  },
+  {
+   "q": "gao st25",
+   "n": "co opmart",
+   "token_set_ratio": 35.294117647058826,
+   "token_sort_ratio": 35.29411764705882,
+   "ratio": 35.29411764705882
+  },
+  {
+   "q": "gao st25",
+   "n": "winmart",
+   "token_set_ratio": 26.66666666666667,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 26.66666666666667
+  },
+  {
+   "q": "gao st25",
+   "n": "lotte mart",
+   "token_set_ratio": 33.33333333333333,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "gao st25",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 31.25,
+   "token_sort_ratio": 31.25,
+   "ratio": 25.0
+  },
+  {
+   "q": "hao hao",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 8.510638297872347,
+   "token_sort_ratio": 15.686274509803921,
+   "ratio": 19.6078431372549
+  },
+  {
+   "q": "hao hao",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 9.090909090909093,
+   "token_sort_ratio": 16.666666666666664,
+   "ratio": 20.833333333333336
+  },
+  {
+   "q": "hao hao",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 15.384615384615387,
+   "token_sort_ratio": 23.25581395348837,
+   "ratio": 23.25581395348837
+  },
+  {
+   "q": "hao hao",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 16.0,
+   "token_sort_ratio": 27.586206896551722,
+   "ratio": 20.68965517241379
+  },
+  {
+   "q": "hao hao",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 17.391304347826093,
+   "token_sort_ratio": 29.629629629629626,
+   "ratio": 29.629629629629626
+  },
+  {
+   "q": "hao hao",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 14.285714285714292,
+   "token_sort_ratio": 25.0,
+   "ratio": 25.0
+  },
+  {
+   "q": "hao hao",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 32.55813953488372,
+   "ratio": 32.55813953488372
+  },
+  {
+   "q": "hao hao",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 17.14285714285714,
+   "token_sort_ratio": 25.64102564102564,
+   "ratio": 25.64102564102564
+  },
+  {
+   "q": "hao hao",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 10.256410256410263,
+   "token_sort_ratio": 18.6046511627907,
+   "ratio": 18.6046511627907
+  },
+  {
+   "q": "hao hao",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 13.333333333333329,
+   "token_sort_ratio": 29.411764705882348,
+   "ratio": 29.411764705882348
+  },
+  {
+   "q": "hao hao",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 12.5,
+   "token_sort_ratio": 22.22222222222222,
+   "ratio": 22.22222222222222
+  },
+  {
+   "q": "hao hao",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 14.285714285714292,
+   "token_sort_ratio": 31.25,
+   "ratio": 25.0
+  },
+  {
+   "q": "hao hao",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 25.0,
+   "token_sort_ratio": 40.0,
+   "ratio": 40.0
+  },
+  {
+   "q": "hao hao",
+   "n": "co opmart",
+   "token_set_ratio": 16.66666666666667,
+   "token_sort_ratio": 37.5,
+   "ratio": 37.5
+  },
+  {
+   "q": "hao hao",
+   "n": "winmart",
+   "token_set_ratio": 20.0,
+   "token_sort_ratio": 14.28571428571429,
+   "ratio": 14.28571428571429
+  },
+  {
+   "q": "hao hao",
+   "n": "lotte mart",
+   "token_set_ratio": 15.384615384615387,
+   "token_sort_ratio": 35.29411764705882,
+   "ratio": 35.29411764705882
+  },
+  {
+   "q": "hao hao",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 22.22222222222223,
+   "token_sort_ratio": 38.70967741935484,
+   "ratio": 32.25806451612904
+  },
+  {
+   "q": "lavie",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 12.244897959183675,
+   "token_sort_ratio": 12.244897959183676,
+   "ratio": 8.163265306122447
+  },
+  {
+   "q": "lavie",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 13.043478260869563,
+   "token_sort_ratio": 13.043478260869568,
+   "ratio": 8.695652173913048
+  },
+  {
+   "q": "lavie",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 19.512195121951223,
+   "token_sort_ratio": 19.512195121951216,
+   "ratio": 14.634146341463417
+  },
+  {
+   "q": "lavie",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 14.81481481481481,
+   "token_sort_ratio": 14.814814814814813,
+   "ratio": 7.4074074074074066
+  },
+  {
+   "q": "lavie",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 8.0,
+   "token_sort_ratio": 7.9999999999999964,
+   "ratio": 7.9999999999999964
+  },
+  {
+   "q": "lavie",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 20.0,
+   "token_sort_ratio": 19.999999999999996,
+   "ratio": 13.33333333333333
+  },
+  {
+   "q": "lavie",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 10.810810810810807,
+   "token_sort_ratio": 9.756097560975608,
+   "ratio": 9.756097560975608
+  },
+  {
+   "q": "lavie",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 27.027027027027028,
+   "ratio": 27.027027027027028
+  },
+  {
+   "q": "lavie",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 19.512195121951223,
+   "token_sort_ratio": 19.512195121951216,
+   "ratio": 14.634146341463417
+  },
+  {
+   "q": "lavie",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 6.25,
+   "token_sort_ratio": 6.25,
+   "ratio": 6.25
+  },
+  {
+   "q": "lavie",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 11.764705882352942,
+   "token_sort_ratio": 11.764705882352944,
+   "ratio": 17.647058823529417
+  },
+  {
+   "q": "lavie",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 20.0,
+   "token_sort_ratio": 19.999999999999996,
+   "ratio": 13.33333333333333
+  },
+  {
+   "q": "lavie",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 11.111111111111114,
+   "token_sort_ratio": 11.111111111111116,
+   "ratio": 11.111111111111116
+  },
+  {
+   "q": "lavie",
+   "n": "co opmart",
+   "token_set_ratio": 14.285714285714292,
+   "token_sort_ratio": 14.28571428571429,
+   "ratio": 14.28571428571429
+  },
+  {
+   "q": "lavie",
+   "n": "winmart",
+   "token_set_ratio": 16.66666666666667,
+   "token_sort_ratio": 16.666666666666664,
+   "ratio": 16.666666666666664
+  },
+  {
+   "q": "lavie",
+   "n": "lotte mart",
+   "token_set_ratio": 26.66666666666667,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 26.66666666666667
+  },
+  {
+   "q": "lavie",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 20.689655172413794,
+   "token_sort_ratio": 20.68965517241379,
+   "ratio": 13.793103448275868
+  },
+  {
+   "q": "tiger",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 16.326530612244895,
+   "token_sort_ratio": 16.326530612244895,
+   "ratio": 12.244897959183676
+  },
+  {
+   "q": "tiger",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 8.695652173913047,
+   "token_sort_ratio": 8.695652173913048,
+   "ratio": 13.043478260869568
+  },
+  {
+   "q": "tiger",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 9.756097560975604,
+   "token_sort_ratio": 9.756097560975608,
+   "ratio": 14.634146341463417
+  },
+  {
+   "q": "tiger",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 7.407407407407405,
+   "token_sort_ratio": 7.4074074074074066,
+   "ratio": 7.4074074074074066
+  },
+  {
+   "q": "tiger",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 8.0,
+   "token_sort_ratio": 7.9999999999999964,
+   "ratio": 16.000000000000004
+  },
+  {
+   "q": "tiger",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 13.333333333333329,
+   "token_sort_ratio": 13.33333333333333,
+   "ratio": 13.33333333333333
+  },
+  {
+   "q": "tiger",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 10.810810810810807,
+   "token_sort_ratio": 9.756097560975608,
+   "ratio": 9.756097560975608
+  },
+  {
+   "q": "tiger",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 10.810810810810807,
+   "token_sort_ratio": 10.81081081081081,
+   "ratio": 10.81081081081081
+  },
+  {
+   "q": "tiger",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 24.390243902439025,
+   "ratio": 24.390243902439025
+  },
+  {
+   "q": "tiger",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 12.5,
+   "token_sort_ratio": 12.5,
+   "ratio": 12.5
+  },
+  {
+   "q": "tiger",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 17.647058823529406,
+   "token_sort_ratio": 17.647058823529417,
+   "ratio": 17.647058823529417
+  },
+  {
+   "q": "tiger",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 20.0,
+   "token_sort_ratio": 19.999999999999996,
+   "ratio": 13.33333333333333
+  },
+  {
+   "q": "tiger",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "tiger",
+   "n": "co opmart",
+   "token_set_ratio": 14.285714285714292,
+   "token_sort_ratio": 14.28571428571429,
+   "ratio": 14.28571428571429
+  },
+  {
+   "q": "tiger",
+   "n": "winmart",
+   "token_set_ratio": 33.33333333333333,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "tiger",
+   "n": "lotte mart",
+   "token_set_ratio": 40.0,
+   "token_sort_ratio": 40.0,
+   "ratio": 40.0
+  },
+  {
+   "q": "tiger",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 13.793103448275858,
+   "token_sort_ratio": 13.793103448275868,
+   "ratio": 20.68965517241379
+  },
+  {
+   "q": "trung ga",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 26.92307692307692,
+   "token_sort_ratio": 26.923076923076927,
+   "ratio": 26.923076923076927
+  },
+  {
+   "q": "trung ga",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 24.48979591836735,
+   "token_sort_ratio": 24.489795918367353,
+   "ratio": 24.489795918367353
+  },
+  {
+   "q": "trung ga",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 27.272727272727266,
+   "token_sort_ratio": 27.27272727272727,
+   "ratio": 27.27272727272727
+  },
+  {
+   "q": "trung ga",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 26.66666666666667,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 26.66666666666667
+  },
+  {
+   "q": "trung ga",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 35.71428571428571,
+   "token_sort_ratio": 35.71428571428571,
+   "ratio": 35.71428571428571
+  },
+  {
+   "q": "trung ga",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 30.303030303030297,
+   "token_sort_ratio": 30.303030303030297,
+   "ratio": 30.303030303030297
+  },
+  {
+   "q": "trung ga",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 35.0,
+   "token_sort_ratio": 31.818181818181824,
+   "ratio": 27.27272727272727
+  },
+  {
+   "q": "trung ga",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 15.0,
+   "token_sort_ratio": 15.000000000000002,
+   "ratio": 15.000000000000002
+  },
+  {
+   "q": "trung ga",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 27.272727272727266,
+   "token_sort_ratio": 27.27272727272727,
+   "ratio": 27.27272727272727
+  },
+  {
+   "q": "trung ga",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 45.714285714285715,
+   "ratio": 45.714285714285715
+  },
+  {
+   "q": "trung ga",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 27.02702702702703,
+   "token_sort_ratio": 27.027027027027028,
+   "ratio": 27.027027027027028
+  },
+  {
+   "q": "trung ga",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 18.181818181818187,
+   "token_sort_ratio": 18.181818181818176,
+   "ratio": 18.181818181818176
+  },
+  {
+   "q": "trung ga",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 19.047619047619047
+  },
+  {
+   "q": "trung ga",
+   "n": "co opmart",
+   "token_set_ratio": 23.529411764705884,
+   "token_sort_ratio": 23.529411764705888,
+   "ratio": 23.529411764705888
+  },
+  {
+   "q": "trung ga",
+   "n": "winmart",
+   "token_set_ratio": 26.66666666666667,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 26.66666666666667
+  },
+  {
+   "q": "trung ga",
+   "n": "lotte mart",
+   "token_set_ratio": 22.22222222222223,
+   "token_sort_ratio": 22.22222222222222,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "trung ga",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 25.0,
+   "token_sort_ratio": 25.0,
+   "ratio": 37.5
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 52.63157894736842,
+   "token_sort_ratio": 34.48275862068966,
+   "ratio": 34.48275862068966
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 52.63157894736842,
+   "token_sort_ratio": 36.36363636363637,
+   "ratio": 32.72727272727273
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 52.63157894736842,
+   "token_sort_ratio": 40.0,
+   "ratio": 31.999999999999996
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 33.33333333333333,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 35.294117647058826,
+   "token_sort_ratio": 35.29411764705882,
+   "ratio": 29.411764705882348
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 30.769230769230774,
+   "token_sort_ratio": 30.76923076923077,
+   "ratio": 41.02564102564102
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 30.434782608695656,
+   "token_sort_ratio": 28.000000000000004,
+   "ratio": 24.0
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 30.434782608695656,
+   "token_sort_ratio": 30.434782608695656,
+   "ratio": 34.78260869565217
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 32.0,
+   "token_sort_ratio": 31.999999999999996,
+   "ratio": 24.0
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 34.14634146341463,
+   "token_sort_ratio": 34.14634146341463,
+   "ratio": 48.78048780487805
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 65.11627906976744,
+   "ratio": 65.11627906976744
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 35.8974358974359,
+   "token_sort_ratio": 35.89743589743589,
+   "ratio": 35.89743589743589
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 51.851851851851855,
+   "token_sort_ratio": 37.03703703703704,
+   "ratio": 37.03703703703704
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "co opmart",
+   "token_set_ratio": 34.78260869565217,
+   "token_sort_ratio": 34.78260869565217,
+   "ratio": 34.78260869565217
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "winmart",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 28.57142857142857
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "lotte mart",
+   "token_set_ratio": 25.0,
+   "token_sort_ratio": 25.0,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "duong bien hoa",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 36.8421052631579,
+   "token_sort_ratio": 36.8421052631579,
+   "ratio": 36.8421052631579
+  },
+  {
+   "q": "ca phe g7",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 22.64150943396227,
+   "token_sort_ratio": 22.64150943396226,
+   "ratio": 22.64150943396226
+  },
+  {
+   "q": "ca phe g7",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 28.0,
+   "token_sort_ratio": 28.000000000000004,
+   "ratio": 24.0
+  },
+  {
+   "q": "ca phe g7",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 17.77777777777777,
+   "token_sort_ratio": 17.777777777777782,
+   "ratio": 22.22222222222222
+  },
+  {
+   "q": "ca phe g7",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 25.80645161290323,
+   "token_sort_ratio": 25.806451612903224,
+   "ratio": 32.25806451612904
+  },
+  {
+   "q": "ca phe g7",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 34.48275862068965,
+   "token_sort_ratio": 34.48275862068966,
+   "ratio": 27.586206896551722
+  },
+  {
+   "q": "ca phe g7",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 35.294117647058826,
+   "token_sort_ratio": 35.29411764705882,
+   "ratio": 35.29411764705882
+  },
+  {
+   "q": "ca phe g7",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 29.268292682926827,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 26.66666666666667
+  },
+  {
+   "q": "ca phe g7",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 19.512195121951223,
+   "token_sort_ratio": 19.512195121951216,
+   "ratio": 19.512195121951216
+  },
+  {
+   "q": "ca phe g7",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 26.66666666666667,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 22.22222222222222
+  },
+  {
+   "q": "ca phe g7",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 33.33333333333333,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 22.22222222222222
+  },
+  {
+   "q": "ca phe g7",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 26.315789473684205,
+   "token_sort_ratio": 26.315789473684216,
+   "ratio": 26.315789473684216
+  },
+  {
+   "q": "ca phe g7",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 52.94117647058824,
+   "ratio": 52.94117647058824
+  },
+  {
+   "q": "ca phe g7",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 36.36363636363637,
+   "token_sort_ratio": 36.36363636363637,
+   "ratio": 36.36363636363637
+  },
+  {
+   "q": "ca phe g7",
+   "n": "co opmart",
+   "token_set_ratio": 33.33333333333333,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "ca phe g7",
+   "n": "winmart",
+   "token_set_ratio": 12.5,
+   "token_sort_ratio": 12.5,
+   "ratio": 12.5
+  },
+  {
+   "q": "ca phe g7",
+   "n": "lotte mart",
+   "token_set_ratio": 10.526315789473685,
+   "token_sort_ratio": 10.526315789473683,
+   "ratio": 21.052631578947366
+  },
+  {
+   "q": "ca phe g7",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 18.181818181818187,
+   "token_sort_ratio": 18.181818181818176,
+   "ratio": 24.242424242424242
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 21.05263157894737,
+   "token_sort_ratio": 21.052631578947366,
+   "ratio": 24.561403508771928
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 25.925925925925924,
+   "token_sort_ratio": 25.92592592592593,
+   "ratio": 25.92592592592593
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 24.48979591836735,
+   "token_sort_ratio": 24.489795918367353,
+   "ratio": 24.489795918367353
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 34.285714285714285
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 30.303030303030297,
+   "token_sort_ratio": 30.303030303030297,
+   "ratio": 30.303030303030297
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 26.315789473684205,
+   "token_sort_ratio": 26.315789473684216,
+   "ratio": 26.315789473684216
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 35.55555555555556,
+   "token_sort_ratio": 36.73469387755102,
+   "ratio": 32.6530612244898
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 26.66666666666667,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 26.66666666666667
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 28.57142857142857
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 45.0,
+   "token_sort_ratio": 44.99999999999999,
+   "ratio": 40.0
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 38.095238095238095,
+   "token_sort_ratio": 38.095238095238095,
+   "ratio": 28.57142857142857
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 31.578947368421055,
+   "token_sort_ratio": 31.57894736842105,
+   "ratio": 31.57894736842105
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 100.0,
+   "ratio": 100.0
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "co opmart",
+   "token_set_ratio": 36.36363636363637,
+   "token_sort_ratio": 36.36363636363637,
+   "ratio": 36.36363636363637
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "winmart",
+   "token_set_ratio": 10.0,
+   "token_sort_ratio": 9.999999999999998,
+   "ratio": 9.999999999999998
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "lotte mart",
+   "token_set_ratio": 26.086956521739125,
+   "token_sort_ratio": 26.086956521739136,
+   "ratio": 26.086956521739136
+  },
+  {
+   "q": "bach hoa xanh",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 32.432432432432435,
+   "token_sort_ratio": 32.432432432432435,
+   "ratio": 37.83783783783784
+  },
+  {
+   "q": "coop mart",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 26.41509433962264,
+   "token_sort_ratio": 26.415094339622648,
+   "ratio": 15.094339622641506
+  },
+  {
+   "q": "coop mart",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 32.0,
+   "token_sort_ratio": 31.999999999999996,
+   "ratio": 19.999999999999996
+  },
+  {
+   "q": "coop mart",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 22.22222222222223,
+   "token_sort_ratio": 22.22222222222222,
+   "ratio": 13.33333333333333
+  },
+  {
+   "q": "coop mart",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 19.354838709677423,
+   "token_sort_ratio": 19.354838709677423,
+   "ratio": 25.806451612903224
+  },
+  {
+   "q": "coop mart",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 34.48275862068965,
+   "token_sort_ratio": 34.48275862068966,
+   "ratio": 27.586206896551722
+  },
+  {
+   "q": "coop mart",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 17.647058823529406,
+   "token_sort_ratio": 17.647058823529417,
+   "ratio": 17.647058823529417
+  },
+  {
+   "q": "coop mart",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 29.268292682926827,
+   "token_sort_ratio": 26.66666666666667,
+   "ratio": 26.66666666666667
+  },
+  {
+   "q": "coop mart",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 19.512195121951223,
+   "token_sort_ratio": 19.512195121951216,
+   "ratio": 24.390243902439025
+  },
+  {
+   "q": "coop mart",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 22.22222222222223,
+   "token_sort_ratio": 22.22222222222222,
+   "ratio": 22.22222222222222
+  },
+  {
+   "q": "coop mart",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 27.77777777777777,
+   "token_sort_ratio": 27.77777777777778,
+   "ratio": 22.22222222222222
+  },
+  {
+   "q": "coop mart",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 21.05263157894737,
+   "token_sort_ratio": 21.052631578947366,
+   "ratio": 15.789473684210531
+  },
+  {
+   "q": "coop mart",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 29.411764705882348,
+   "token_sort_ratio": 29.411764705882348,
+   "ratio": 23.529411764705888
+  },
+  {
+   "q": "coop mart",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 36.36363636363637,
+   "token_sort_ratio": 36.36363636363637,
+   "ratio": 36.36363636363637
+  },
+  {
+   "q": "coop mart",
+   "n": "co opmart",
+   "token_set_ratio": 88.88888888888889,
+   "token_sort_ratio": 88.88888888888889,
+   "ratio": 88.88888888888889
+  },
+  {
+   "q": "coop mart",
+   "n": "winmart",
+   "token_set_ratio": 50.0,
+   "token_sort_ratio": 50.0,
+   "ratio": 50.0
+  },
+  {
+   "q": "coop mart",
+   "n": "lotte mart",
+   "token_set_ratio": 63.1578947368421,
+   "token_sort_ratio": 63.1578947368421,
+   "ratio": 63.1578947368421
+  },
+  {
+   "q": "coop mart",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 30.303030303030297,
+   "token_sort_ratio": 30.303030303030297,
+   "ratio": 24.242424242424242
+  },
+  {
+   "q": "winmart",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 15.686274509803923,
+   "token_sort_ratio": 15.686274509803921,
+   "ratio": 15.686274509803921
+  },
+  {
+   "q": "winmart",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 16.66666666666667,
+   "token_sort_ratio": 16.666666666666664,
+   "ratio": 12.5
+  },
+  {
+   "q": "winmart",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 13.95348837209302,
+   "token_sort_ratio": 13.953488372093027,
+   "ratio": 13.953488372093027
+  },
+  {
+   "q": "winmart",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 13.793103448275858,
+   "token_sort_ratio": 13.793103448275868,
+   "ratio": 20.68965517241379
+  },
+  {
+   "q": "winmart",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 14.81481481481481,
+   "token_sort_ratio": 14.814814814814813,
+   "ratio": 14.814814814814813
+  },
+  {
+   "q": "winmart",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 18.75,
+   "token_sort_ratio": 18.75,
+   "ratio": 12.5
+  },
+  {
+   "q": "winmart",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 15.384615384615387,
+   "token_sort_ratio": 13.953488372093027,
+   "ratio": 18.6046511627907
+  },
+  {
+   "q": "winmart",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 10.256410256410263,
+   "token_sort_ratio": 10.256410256410254,
+   "ratio": 15.384615384615385
+  },
+  {
+   "q": "winmart",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 18.604651162790702,
+   "token_sort_ratio": 18.6046511627907,
+   "ratio": 18.6046511627907
+  },
+  {
+   "q": "winmart",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 17.647058823529406,
+   "token_sort_ratio": 17.647058823529417,
+   "ratio": 11.764705882352944
+  },
+  {
+   "q": "winmart",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 22.22222222222223,
+   "token_sort_ratio": 22.22222222222222,
+   "ratio": 16.666666666666664
+  },
+  {
+   "q": "winmart",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 18.75,
+   "token_sort_ratio": 18.75,
+   "ratio": 12.5
+  },
+  {
+   "q": "winmart",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 10.0,
+   "token_sort_ratio": 9.999999999999998,
+   "ratio": 9.999999999999998
+  },
+  {
+   "q": "winmart",
+   "n": "co opmart",
+   "token_set_ratio": 50.0,
+   "token_sort_ratio": 50.0,
+   "ratio": 50.0
+  },
+  {
+   "q": "winmart",
+   "n": "winmart",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 100.0,
+   "ratio": 100.0
+  },
+  {
+   "q": "winmart",
+   "n": "lotte mart",
+   "token_set_ratio": 47.05882352941177,
+   "token_sort_ratio": 47.05882352941176,
+   "ratio": 47.05882352941176
+  },
+  {
+   "q": "winmart",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 19.354838709677423,
+   "token_sort_ratio": 19.354838709677423,
+   "ratio": 19.354838709677423
+  },
+  {
+   "q": "satori 500ml",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 32.14285714285714
+  },
+  {
+   "q": "satori 500ml",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 30.188679245283012,
+   "token_sort_ratio": 30.188679245283023,
+   "ratio": 33.9622641509434
+  },
+  {
+   "q": "satori 500ml",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 37.5,
+   "token_sort_ratio": 37.5,
+   "ratio": 37.5
+  },
+  {
+   "q": "satori 500ml",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 58.8235294117647,
+   "token_sort_ratio": 47.05882352941176,
+   "ratio": 41.17647058823529
+  },
+  {
+   "q": "satori 500ml",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 25.0,
+   "token_sort_ratio": 25.0,
+   "ratio": 31.25
+  },
+  {
+   "q": "satori 500ml",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 21.621621621621628,
+   "token_sort_ratio": 21.62162162162162,
+   "ratio": 27.027027027027028
+  },
+  {
+   "q": "satori 500ml",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 22.727272727272734,
+   "token_sort_ratio": 20.833333333333336,
+   "ratio": 20.833333333333336
+  },
+  {
+   "q": "satori 500ml",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 58.8235294117647,
+   "token_sort_ratio": 40.90909090909091,
+   "ratio": 40.90909090909091
+  },
+  {
+   "q": "satori 500ml",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 33.33333333333333,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 29.166666666666664
+  },
+  {
+   "q": "satori 500ml",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 25.641025641025635,
+   "token_sort_ratio": 25.64102564102564,
+   "ratio": 20.512820512820518
+  },
+  {
+   "q": "satori 500ml",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 19.512195121951223,
+   "token_sort_ratio": 19.512195121951216,
+   "ratio": 19.512195121951216
+  },
+  {
+   "q": "satori 500ml",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 21.621621621621628,
+   "token_sort_ratio": 21.62162162162162,
+   "ratio": 16.216216216216218
+  },
+  {
+   "q": "satori 500ml",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 16.0,
+   "token_sort_ratio": 16.000000000000004,
+   "ratio": 24.0
+  },
+  {
+   "q": "satori 500ml",
+   "n": "co opmart",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 28.57142857142857,
+   "ratio": 28.57142857142857
+  },
+  {
+   "q": "satori 500ml",
+   "n": "winmart",
+   "token_set_ratio": 31.578947368421055,
+   "token_sort_ratio": 31.57894736842105,
+   "ratio": 21.052631578947366
+  },
+  {
+   "q": "satori 500ml",
+   "n": "lotte mart",
+   "token_set_ratio": 36.36363636363637,
+   "token_sort_ratio": 36.36363636363637,
+   "ratio": 27.27272727272727
+  },
+  {
+   "q": "satori 500ml",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 66.66666666666667,
+   "ratio": 66.66666666666667
+  },
+  {
+   "q": "th true milk",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 42.85714285714286,
+   "ratio": 42.85714285714286
+  },
+  {
+   "q": "th true milk",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 45.28301886792453,
+   "ratio": 45.28301886792453
+  },
+  {
+   "q": "th true milk",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 25.0,
+   "token_sort_ratio": 25.0,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "th true milk",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 29.411764705882348,
+   "token_sort_ratio": 29.411764705882348,
+   "ratio": 29.411764705882348
+  },
+  {
+   "q": "th true milk",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 25.0,
+   "token_sort_ratio": 25.0,
+   "ratio": 31.25
+  },
+  {
+   "q": "th true milk",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 37.83783783783784,
+   "token_sort_ratio": 37.83783783783784,
+   "ratio": 32.432432432432435
+  },
+  {
+   "q": "th true milk",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 31.818181818181813,
+   "token_sort_ratio": 29.166666666666664,
+   "ratio": 29.166666666666664
+  },
+  {
+   "q": "th true milk",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 27.272727272727266,
+   "token_sort_ratio": 27.27272727272727,
+   "ratio": 27.27272727272727
+  },
+  {
+   "q": "th true milk",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 37.5,
+   "token_sort_ratio": 37.5,
+   "ratio": 25.0
+  },
+  {
+   "q": "th true milk",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 30.769230769230774,
+   "token_sort_ratio": 30.76923076923077,
+   "ratio": 20.512820512820518
+  },
+  {
+   "q": "th true milk",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 29.268292682926827,
+   "token_sort_ratio": 29.268292682926834,
+   "ratio": 39.02439024390244
+  },
+  {
+   "q": "th true milk",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 27.02702702702703,
+   "token_sort_ratio": 27.027027027027028,
+   "ratio": 21.62162162162162
+  },
+  {
+   "q": "th true milk",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 24.0,
+   "token_sort_ratio": 24.0,
+   "ratio": 24.0
+  },
+  {
+   "q": "th true milk",
+   "n": "co opmart",
+   "token_set_ratio": 19.04761904761905,
+   "token_sort_ratio": 19.047619047619047,
+   "ratio": 19.047619047619047
+  },
+  {
+   "q": "th true milk",
+   "n": "winmart",
+   "token_set_ratio": 21.05263157894737,
+   "token_sort_ratio": 21.052631578947366,
+   "ratio": 10.526315789473683
+  },
+  {
+   "q": "th true milk",
+   "n": "lotte mart",
+   "token_set_ratio": 36.36363636363637,
+   "token_sort_ratio": 36.36363636363637,
+   "ratio": 45.45454545454546
+  },
+  {
+   "q": "th true milk",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 38.888888888888886,
+   "token_sort_ratio": 38.888888888888886,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "milk",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 16.666666666666664,
+   "ratio": 16.666666666666664
+  },
+  {
+   "q": "milk",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 17.777777777777782,
+   "ratio": 17.777777777777782
+  },
+  {
+   "q": "milk",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 20.0,
+   "token_sort_ratio": 19.999999999999996,
+   "ratio": 19.999999999999996
+  },
+  {
+   "q": "milk",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 15.384615384615387,
+   "token_sort_ratio": 15.384615384615385,
+   "ratio": 15.384615384615385
+  },
+  {
+   "q": "milk",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 8.333333333333329,
+   "token_sort_ratio": 8.333333333333337,
+   "ratio": 8.333333333333337
+  },
+  {
+   "q": "milk",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 6.896551724137936,
+   "token_sort_ratio": 6.896551724137934,
+   "ratio": 6.896551724137934
+  },
+  {
+   "q": "milk",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 11.111111111111114,
+   "token_sort_ratio": 9.999999999999998,
+   "ratio": 9.999999999999998
+  },
+  {
+   "q": "milk",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 16.66666666666667,
+   "token_sort_ratio": 16.666666666666664,
+   "ratio": 11.111111111111116
+  },
+  {
+   "q": "milk",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 15.0,
+   "token_sort_ratio": 15.000000000000002,
+   "ratio": 9.999999999999998
+  },
+  {
+   "q": "milk",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "milk",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 12.121212121212125,
+   "token_sort_ratio": 12.121212121212121,
+   "ratio": 18.181818181818176
+  },
+  {
+   "q": "milk",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 6.896551724137936,
+   "token_sort_ratio": 6.896551724137934,
+   "ratio": 6.896551724137934
+  },
+  {
+   "q": "milk",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "milk",
+   "n": "co opmart",
+   "token_set_ratio": 15.384615384615387,
+   "token_sort_ratio": 15.384615384615385,
+   "ratio": 15.384615384615385
+  },
+  {
+   "q": "milk",
+   "n": "winmart",
+   "token_set_ratio": 18.181818181818187,
+   "token_sort_ratio": 18.181818181818176,
+   "ratio": 18.181818181818176
+  },
+  {
+   "q": "milk",
+   "n": "lotte mart",
+   "token_set_ratio": 14.285714285714292,
+   "token_sort_ratio": 14.28571428571429,
+   "ratio": 14.28571428571429
+  },
+  {
+   "q": "milk",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 21.42857142857143,
+   "token_sort_ratio": 21.42857142857143,
+   "ratio": 14.28571428571429
+  },
+  {
+   "q": "xyz khong co",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 25.0,
+   "token_sort_ratio": 25.0,
+   "ratio": 25.0
+  },
+  {
+   "q": "xyz khong co",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 28.57142857142857,
+   "token_sort_ratio": 26.415094339622648,
+   "ratio": 30.188679245283023
+  },
+  {
+   "q": "xyz khong co",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 58.8235294117647,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 33.333333333333336
+  },
+  {
+   "q": "xyz khong co",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 23.529411764705884,
+   "token_sort_ratio": 23.529411764705888,
+   "ratio": 23.529411764705888
+  },
+  {
+   "q": "xyz khong co",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 43.75,
+   "token_sort_ratio": 43.75,
+   "ratio": 37.5
+  },
+  {
+   "q": "xyz khong co",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 21.621621621621628,
+   "token_sort_ratio": 21.62162162162162,
+   "ratio": 21.62162162162162
+  },
+  {
+   "q": "xyz khong co",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 36.36363636363637,
+   "token_sort_ratio": 33.333333333333336,
+   "ratio": 29.166666666666664
+  },
+  {
+   "q": "xyz khong co",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 22.727272727272734,
+   "token_sort_ratio": 22.72727272727273,
+   "ratio": 18.181818181818176
+  },
+  {
+   "q": "xyz khong co",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 29.16666666666667,
+   "token_sort_ratio": 29.166666666666664,
+   "ratio": 25.0
+  },
+  {
+   "q": "xyz khong co",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 25.641025641025635,
+   "token_sort_ratio": 25.64102564102564,
+   "ratio": 25.64102564102564
+  },
+  {
+   "q": "xyz khong co",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 29.268292682926827,
+   "token_sort_ratio": 29.268292682926834,
+   "ratio": 24.390243902439025
+  },
+  {
+   "q": "xyz khong co",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 32.432432432432435,
+   "token_sort_ratio": 32.432432432432435,
+   "ratio": 27.027027027027028
+  },
+  {
+   "q": "xyz khong co",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 48.0,
+   "token_sort_ratio": 48.0,
+   "ratio": 31.999999999999996
+  },
+  {
+   "q": "xyz khong co",
+   "n": "co opmart",
+   "token_set_ratio": 38.095238095238095,
+   "token_sort_ratio": 38.095238095238095,
+   "ratio": 28.57142857142857
+  },
+  {
+   "q": "xyz khong co",
+   "n": "winmart",
+   "token_set_ratio": 10.526315789473685,
+   "token_sort_ratio": 10.526315789473683,
+   "ratio": 10.526315789473683
+  },
+  {
+   "q": "xyz khong co",
+   "n": "lotte mart",
+   "token_set_ratio": 18.181818181818187,
+   "token_sort_ratio": 18.181818181818176,
+   "ratio": 18.181818181818176
+  },
+  {
+   "q": "xyz khong co",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 38.888888888888886,
+   "token_sort_ratio": 38.888888888888886,
+   "ratio": 38.888888888888886
+  },
+  {
+   "q": "",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "co opmart",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "winmart",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "lotte mart",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "co opmart",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "winmart",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "lotte mart",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "500ml",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 12.244897959183675,
+   "token_sort_ratio": 12.244897959183676,
+   "ratio": 12.244897959183676
+  },
+  {
+   "q": "500ml",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 13.043478260869563,
+   "token_sort_ratio": 13.043478260869568,
+   "ratio": 13.043478260869568
+  },
+  {
+   "q": "500ml",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 19.512195121951223,
+   "token_sort_ratio": 19.512195121951216,
+   "ratio": 14.634146341463417
+  },
+  {
+   "q": "500ml",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 37.03703703703704,
+   "ratio": 37.03703703703704
+  },
+  {
+   "q": "500ml",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 8.0,
+   "token_sort_ratio": 7.9999999999999964,
+   "ratio": 7.9999999999999964
+  },
+  {
+   "q": "500ml",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 6.666666666666671,
+   "token_sort_ratio": 6.666666666666665,
+   "ratio": 6.666666666666665
+  },
+  {
+   "q": "500ml",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 10.810810810810807,
+   "token_sort_ratio": 9.756097560975608,
+   "ratio": 4.878048780487809
+  },
+  {
+   "q": "500ml",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 27.027027027027028,
+   "ratio": 27.027027027027028
+  },
+  {
+   "q": "500ml",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 14.63414634146342,
+   "token_sort_ratio": 14.634146341463417,
+   "ratio": 14.634146341463417
+  },
+  {
+   "q": "500ml",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 6.25,
+   "token_sort_ratio": 6.25,
+   "ratio": 6.25
+  },
+  {
+   "q": "500ml",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 5.882352941176464,
+   "token_sort_ratio": 5.882352941176472,
+   "ratio": 5.882352941176472
+  },
+  {
+   "q": "500ml",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "500ml",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 0.0,
+   "token_sort_ratio": 0.0,
+   "ratio": 0.0
+  },
+  {
+   "q": "500ml",
+   "n": "co opmart",
+   "token_set_ratio": 14.285714285714292,
+   "token_sort_ratio": 14.28571428571429,
+   "ratio": 14.28571428571429
+  },
+  {
+   "q": "500ml",
+   "n": "winmart",
+   "token_set_ratio": 16.66666666666667,
+   "token_sort_ratio": 16.666666666666664,
+   "ratio": 16.666666666666664
+  },
+  {
+   "q": "500ml",
+   "n": "lotte mart",
+   "token_set_ratio": 13.333333333333329,
+   "token_sort_ratio": 13.33333333333333,
+   "ratio": 13.33333333333333
+  },
+  {
+   "q": "500ml",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 34.48275862068966,
+   "ratio": 34.48275862068966
+  },
+  {
+   "q": "sua",
+   "n": "sua th true milk it duong 110ml thung 48 hop",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 12.765957446808507,
+   "ratio": 12.765957446808507
+  },
+  {
+   "q": "sua",
+   "n": "sua th true milk co duong 110ml loc 4 hop",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 13.636363636363635,
+   "ratio": 13.636363636363635
+  },
+  {
+   "q": "sua",
+   "n": "sua tuoi vinamilk 100 khong duong 1l",
+   "token_set_ratio": 100.0,
+   "token_sort_ratio": 15.384615384615385,
+   "ratio": 15.384615384615385
+  },
+  {
+   "q": "sua",
+   "n": "nuoc mam nam ngu 500ml",
+   "token_set_ratio": 8.0,
+   "token_sort_ratio": 7.9999999999999964,
+   "ratio": 16.000000000000004
+  },
+  {
+   "q": "sua",
+   "n": "gao st25 ong cua 5kg",
+   "token_set_ratio": 17.391304347826093,
+   "token_sort_ratio": 17.391304347826086,
+   "ratio": 26.086956521739136
+  },
+  {
+   "q": "sua",
+   "n": "dau an neptune gold 1 lit",
+   "token_set_ratio": 7.142857142857139,
+   "token_sort_ratio": 7.14285714285714,
+   "ratio": 14.28571428571429
+  },
+  {
+   "q": "sua",
+   "n": "mi hao hao tom chua cay thung 30 goi",
+   "token_set_ratio": 11.42857142857143,
+   "token_sort_ratio": 10.256410256410254,
+   "ratio": 10.256410256410254
+  },
+  {
+   "q": "sua",
+   "n": "nuoc suoi lavie 500ml loc 6 chai",
+   "token_set_ratio": 11.42857142857143,
+   "token_sort_ratio": 11.428571428571432,
+   "ratio": 17.14285714285714
+  },
+  {
+   "q": "sua",
+   "n": "bia tiger crystal lon 330ml thung 24",
+   "token_set_ratio": 10.256410256410263,
+   "token_sort_ratio": 10.256410256410254,
+   "ratio": 10.256410256410254
+  },
+  {
+   "q": "sua",
+   "n": "trung ga ba huan hop 10 qua",
+   "token_set_ratio": 13.333333333333329,
+   "token_sort_ratio": 13.33333333333333,
+   "ratio": 13.33333333333333
+  },
+  {
+   "q": "sua",
+   "n": "duong tinh luyen bien hoa 1kg",
+   "token_set_ratio": 12.5,
+   "token_sort_ratio": 12.5,
+   "ratio": 12.5
+  },
+  {
+   "q": "sua",
+   "n": "ca phe g7 3in1 hop 21 goi",
+   "token_set_ratio": 7.142857142857139,
+   "token_sort_ratio": 7.14285714285714,
+   "ratio": 7.14285714285714
+  },
+  {
+   "q": "sua",
+   "n": "bach hoa xanh",
+   "token_set_ratio": 12.5,
+   "token_sort_ratio": 12.5,
+   "ratio": 12.5
+  },
+  {
+   "q": "sua",
+   "n": "co opmart",
+   "token_set_ratio": 16.66666666666667,
+   "token_sort_ratio": 16.666666666666664,
+   "ratio": 16.666666666666664
+  },
+  {
+   "q": "sua",
+   "n": "winmart",
+   "token_set_ratio": 20.0,
+   "token_sort_ratio": 19.999999999999996,
+   "ratio": 19.999999999999996
+  },
+  {
+   "q": "sua",
+   "n": "lotte mart",
+   "token_set_ratio": 15.384615384615387,
+   "token_sort_ratio": 15.384615384615385,
+   "ratio": 15.384615384615385
+  },
+  {
+   "q": "sua",
+   "n": "satori nuoc khoang 500ml",
+   "token_set_ratio": 14.81481481481481,
+   "token_sort_ratio": 14.814814814814813,
+   "ratio": 22.22222222222222
+  }
+ ],
+ "ranks": [
+  {
+   "query": "sua th it duong",
+   "results": [
+    {
+     "key": 0,
+     "name": "Sữa TH True Milk Ít Đường 110ml Thùng 48 Hộp",
+     "score": 100.0
+    },
+    {
+     "key": 1,
+     "name": "Sữa TH True Milk Có Đường 110ml Lốc 4 Hộp",
+     "score": 88.9
+    },
+    {
+     "key": 2,
+     "name": "Sữa tươi Vinamilk 100% Không Đường 1L",
+     "score": 75.0
+    }
+   ]
+  },
+  {
+   "query": "sữa TH ít đường 110ml",
+   "results": [
+    {
+     "key": 0,
+     "name": "Sữa TH True Milk Ít Đường 110ml Thùng 48 Hộp",
+     "score": 100.0
+    },
+    {
+     "key": 1,
+     "name": "Sữa TH True Milk Có Đường 110ml Lốc 4 Hộp",
+     "score": 92.3
+    },
+    {
+     "key": 2,
+     "name": "Sữa tươi Vinamilk 100% Không Đường 1L",
+     "score": 60.0
+    }
+   ]
+  },
+  {
+   "query": "sua th 110ml thung 48",
+   "results": [
+    {
+     "key": 0,
+     "name": "Sữa TH True Milk Ít Đường 110ml Thùng 48 Hộp",
+     "score": 100.0
+    },
+    {
+     "key": 1,
+     "name": "Sữa TH True Milk Có Đường 110ml Lốc 4 Hộp",
+     "score": 72.7
+    }
+   ]
+  },
+  {
+   "query": "vinamilk khong duong",
+   "results": [
+    {
+     "key": 2,
+     "name": "Sữa tươi Vinamilk 100% Không Đường 1L",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "nuoc mam",
+   "results": [
+    {
+     "key": 3,
+     "name": "Nước mắm Nam Ngư 500ml",
+     "score": 100.0
+    },
+    {
+     "key": 16,
+     "name": "Satori nước khoáng 500ml",
+     "score": 66.7
+    },
+    {
+     "key": 7,
+     "name": "Nước suối Lavie 500ml lốc 6 chai",
+     "score": 66.7
+    }
+   ]
+  },
+  {
+   "query": "gao st25",
+   "results": [
+    {
+     "key": 4,
+     "name": "Gạo ST25 Ông Cua 5kg",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "hao hao",
+   "results": [
+    {
+     "key": 6,
+     "name": "Mì Hảo Hảo tôm chua cay thùng 30 gói",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "lavie",
+   "results": [
+    {
+     "key": 7,
+     "name": "Nước suối Lavie 500ml lốc 6 chai",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "tiger",
+   "results": [
+    {
+     "key": 8,
+     "name": "Bia Tiger Crystal lon 330ml thùng 24",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "trung ga",
+   "results": [
+    {
+     "key": 9,
+     "name": "Trứng gà Ba Huân hộp 10 quả",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "duong bien hoa",
+   "results": [
+    {
+     "key": 10,
+     "name": "Đường tinh luyện Biên Hòa 1kg",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "ca phe g7",
+   "results": [
+    {
+     "key": 11,
+     "name": "Cà phê G7 3in1 hộp 21 gói",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "bach hoa xanh",
+   "results": [
+    {
+     "key": 12,
+     "name": "Bách Hóa Xanh",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "coop mart",
+   "results": [
+    {
+     "key": 13,
+     "name": "Co.opmart",
+     "score": 88.9
+    },
+    {
+     "key": 15,
+     "name": "LOTTE Mart",
+     "score": 63.2
+    }
+   ]
+  },
+  {
+   "query": "winmart",
+   "results": [
+    {
+     "key": 14,
+     "name": "WinMart+",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "satori 500ml",
+   "results": [
+    {
+     "key": 16,
+     "name": "Satori nước khoáng 500ml",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "th true milk",
+   "results": [
+    {
+     "key": 1,
+     "name": "Sữa TH True Milk Có Đường 110ml Lốc 4 Hộp",
+     "score": 100.0
+    },
+    {
+     "key": 0,
+     "name": "Sữa TH True Milk Ít Đường 110ml Thùng 48 Hộp",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "milk",
+   "results": [
+    {
+     "key": 1,
+     "name": "Sữa TH True Milk Có Đường 110ml Lốc 4 Hộp",
+     "score": 100.0
+    },
+    {
+     "key": 0,
+     "name": "Sữa TH True Milk Ít Đường 110ml Thùng 48 Hộp",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "xyz không có",
+   "results": []
+  },
+  {
+   "query": "",
+   "results": []
+  },
+  {
+   "query": "   ",
+   "results": []
+  },
+  {
+   "query": "500ml",
+   "results": [
+    {
+     "key": 3,
+     "name": "Nước mắm Nam Ngư 500ml",
+     "score": 100.0
+    },
+    {
+     "key": 16,
+     "name": "Satori nước khoáng 500ml",
+     "score": 100.0
+    },
+    {
+     "key": 7,
+     "name": "Nước suối Lavie 500ml lốc 6 chai",
+     "score": 100.0
+    }
+   ]
+  },
+  {
+   "query": "sữa",
+   "results": [
+    {
+     "key": 2,
+     "name": "Sữa tươi Vinamilk 100% Không Đường 1L",
+     "score": 100.0
+    },
+    {
+     "key": 1,
+     "name": "Sữa TH True Milk Có Đường 110ml Lốc 4 Hộp",
+     "score": 100.0
+    },
+    {
+     "key": 0,
+     "name": "Sữa TH True Milk Ít Đường 110ml Thùng 48 Hộp",
+     "score": 100.0
+    }
+   ]
+  }
+ ],
+ "normalize": [
+  {
+   "text": "Sữa TH True Milk Ít Đường 110ml Thùng 48 Hộp",
+   "normalize_name": "sua th true milk it duong 110ml thung 48 hop",
+   "slugify": "sua-th-true-milk-it-duong-110ml-thung-48-hop"
+  },
+  {
+   "text": "Sữa TH True Milk Có Đường 110ml Lốc 4 Hộp",
+   "normalize_name": "sua th true milk co duong 110ml loc 4 hop",
+   "slugify": "sua-th-true-milk-co-duong-110ml-loc-4-hop"
+  },
+  {
+   "text": "Sữa tươi Vinamilk 100% Không Đường 1L",
+   "normalize_name": "sua tuoi vinamilk 100 khong duong 1l",
+   "slugify": "sua-tuoi-vinamilk-100-khong-duong-1l"
+  },
+  {
+   "text": "Nước mắm Nam Ngư 500ml",
+   "normalize_name": "nuoc mam nam ngu 500ml",
+   "slugify": "nuoc-mam-nam-ngu-500ml"
+  },
+  {
+   "text": "Gạo ST25 Ông Cua 5kg",
+   "normalize_name": "gao st25 ong cua 5kg",
+   "slugify": "gao-st25-ong-cua-5kg"
+  },
+  {
+   "text": "Dầu ăn Neptune Gold 1 lít",
+   "normalize_name": "dau an neptune gold 1 lit",
+   "slugify": "dau-an-neptune-gold-1-lit"
+  },
+  {
+   "text": "Mì Hảo Hảo tôm chua cay thùng 30 gói",
+   "normalize_name": "mi hao hao tom chua cay thung 30 goi",
+   "slugify": "mi-hao-hao-tom-chua-cay-thung-30-goi"
+  },
+  {
+   "text": "Nước suối Lavie 500ml lốc 6 chai",
+   "normalize_name": "nuoc suoi lavie 500ml loc 6 chai",
+   "slugify": "nuoc-suoi-lavie-500ml-loc-6-chai"
+  },
+  {
+   "text": "Bia Tiger Crystal lon 330ml thùng 24",
+   "normalize_name": "bia tiger crystal lon 330ml thung 24",
+   "slugify": "bia-tiger-crystal-lon-330ml-thung-24"
+  },
+  {
+   "text": "Trứng gà Ba Huân hộp 10 quả",
+   "normalize_name": "trung ga ba huan hop 10 qua",
+   "slugify": "trung-ga-ba-huan-hop-10-qua"
+  },
+  {
+   "text": "Đường tinh luyện Biên Hòa 1kg",
+   "normalize_name": "duong tinh luyen bien hoa 1kg",
+   "slugify": "duong-tinh-luyen-bien-hoa-1kg"
+  },
+  {
+   "text": "Cà phê G7 3in1 hộp 21 gói",
+   "normalize_name": "ca phe g7 3in1 hop 21 goi",
+   "slugify": "ca-phe-g7-3in1-hop-21-goi"
+  },
+  {
+   "text": "Bách Hóa Xanh",
+   "normalize_name": "bach hoa xanh",
+   "slugify": "bach-hoa-xanh"
+  },
+  {
+   "text": "Co.opmart",
+   "normalize_name": "co opmart",
+   "slugify": "co-opmart"
+  },
+  {
+   "text": "WinMart+",
+   "normalize_name": "winmart",
+   "slugify": "winmart"
+  },
+  {
+   "text": "LOTTE Mart",
+   "normalize_name": "lotte mart",
+   "slugify": "lotte-mart"
+  },
+  {
+   "text": "Satori nước khoáng 500ml",
+   "normalize_name": "satori nuoc khoang 500ml",
+   "slugify": "satori-nuoc-khoang-500ml"
+  },
+  {
+   "text": "  Đặc   biệt!! ",
+   "normalize_name": "dac biet",
+   "slugify": "dac-biet"
+  },
+  {
+   "text": "ĐỒNG HỒ",
+   "normalize_name": "dong ho",
+   "slugify": "dong-ho"
+  },
+  {
+   "text": "Ơ ư ă â ê ô",
+   "normalize_name": "o u a a e o",
+   "slugify": "o-u-a-a-e-o"
+  },
+  {
+   "text": "Phở-Bò (Hà Nội)",
+   "normalize_name": "pho bo ha noi",
+   "slugify": "pho-bo-ha-noi"
+  },
+  {
+   "text": "a__b--c",
+   "normalize_name": "a b c",
+   "slugify": "a-b-c"
+  },
+  {
+   "text": "",
+   "normalize_name": "",
+   "slugify": ""
+  },
+  {
+   "text": "!!!",
+   "normalize_name": "",
+   "slugify": ""
+  }
+ ]
+}

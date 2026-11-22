@@ -1,48 +1,30 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.12-slim-bookworm
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=never \
-    UV_PROJECT_ENVIRONMENT=/app/.venv \
-    PATH="/app/.venv/bin:$PATH"
-
-COPY --from=ghcr.io/astral-sh/uv:0.12.13 /uv /uvx /bin/
-
-WORKDIR /app
-
-# Dependencies first so code changes don't invalidate this layer.
-COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
-
-# TM - #{ticket number} - MPriMCP Agent Crawl & Product Search
-# No browser in the image: Claude reads the prices with its own browser.
-
-COPY README.md ./
+# TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
+FROM rust:1-bookworm AS build
+WORKDIR /src
+COPY Cargo.toml Cargo.lock ./
 COPY src ./src
-RUN uv sync --frozen --no-dev
+COPY migrations ./migrations
+COPY assets ./assets
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/src/target \
+    cargo build --release --locked && cp target/release/mprimcp /mprimcp
 
-RUN useradd --create-home --uid 1000 app \
-    && mkdir -p /app/data \
-    && chown -R app:app /app/data
+FROM debian:bookworm-slim
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --uid 1000 --create-home app \
+    && mkdir -p /data \
+    && chown app:app /data
+COPY --from=build /mprimcp /usr/local/bin/mprimcp
 USER app
-
-ENV DATA_DIR=/app/data \
-    HOST=0.0.0.0 \
-    PORT=8000 \
-    LOG_JSON=true
-
-# Commit the image was built from (set by CI as a build arg); reported by /health.
-# Declared last so changing it never invalidates the cached layers above.
-ARG GIT_SHA=dev
-ENV MPRI_COMMIT=$GIT_SHA
-
+ENV MPRIMCP_DATA_DIR=/data \
+    MPRIMCP_BIND=0.0.0.0:8000 \
+    RUST_LOG=info
 EXPOSE 8000
-VOLUME ["/app/data"]
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)" || exit 1
-
-CMD ["mpri-mcp", "serve"]
+VOLUME ["/data"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8000 && printf 'GET /health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '\"ok\"' <&3"]
+ENTRYPOINT ["mprimcp"]
+CMD ["serve"]

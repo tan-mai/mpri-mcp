@@ -1,0 +1,68 @@
+# TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
+[package]
+name = "mprimcp"
+version = "0.2.0"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT"
+description = "Self-hosted MCP server that tracks Vietnamese supermarket prices; your AI reads the prices with its browser tool"
+repository = "https://github.com/tan-mai/mpri-mcp"
+readme = "README.md"
+keywords = ["mcp", "price-tracker", "supermarket", "vietnam"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "mprimcp"
+path = "src/main.rs"
+
+[lib]
+name = "mprimcp"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = "1"
+argon2 = "0.6"
+axum = { version = "0.8", features = ["form", "query"] }
+base64 = "0.22"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std", "serde"] }
+chrono-tz = "0.10"
+clap = { version = "4.6", features = ["derive", "env"] }
+directories = "6"
+dotenvy = "0.15"
+futures = "0.3"
+hex = "0.4"
+hmac = "0.12"
+maud = { version = "0.27", features = ["axum"] }
+percent-encoding = "2"
+rand = "0.9"
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls-no-provider", "http2"] }
+rmcp = { version = "3.11", features = ["server", "macros", "transport-io", "transport-streamable-http-server"] }
+rpassword = "7"
+rust-embed = { version = "8", features = ["mime-guess"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+schemars = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+serde_urlencoded = "0.7"
+sha2 = "0.10"
+sqlx = { version = "0.9", default-features = false, features = ["runtime-tokio", "sqlite", "migrate", "macros", "chrono", "json"] }
+thiserror = "2"
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+tower = "0.5"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+unicode-general-category = "1"
+unicode-normalization = "0.1"
+url = "2"
+uuid = { version = "1", features = ["v4"] }
+
+[dev-dependencies]
+tempfile = "3"
+http-body-util = "0.1"
+rmcp = { version = "3.11", features = ["client"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

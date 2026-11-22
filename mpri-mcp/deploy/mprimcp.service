@@ -1,0 +1,30 @@
+# TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
+# systemd unit for MPriMCP without Docker. Put a reverse proxy with HTTPS (Caddy, nginx) in front.
+#   sudo useradd --system --create-home --home-dir /var/lib/mprimcp mprimcp
+#   sudo install -m 0755 mprimcp /usr/local/bin/mprimcp
+#   sudo install -m 0600 -o mprimcp /dev/null /etc/mprimcp.env   # then fill it in (see .env.example)
+#   sudo cp mprimcp.service /etc/systemd/system/ && sudo systemctl enable --now mprimcp
+[Unit]
+Description=MPriMCP price tracker (MCP server + dashboard)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=mprimcp
+Group=mprimcp
+EnvironmentFile=/etc/mprimcp.env
+Environment=MPRIMCP_DATA_DIR=/var/lib/mprimcp
+Environment=MPRIMCP_BIND=127.0.0.1:8765
+Environment=MPRIMCP_CRON_ENABLED=true
+Environment=MPRIMCP_TRUST_PROXY=true
+ExecStart=/usr/local/bin/mprimcp serve
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/mprimcp
+
+[Install]
+WantedBy=multi-user.target
