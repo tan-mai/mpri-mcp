@@ -217,7 +217,7 @@ async fn run(cli: Cli) -> Result<()> {
 
 #[tokio::main]
 async fn main() -> ExitCode {
-    let _ = rustls::crypto::ring::default_provider().install_default();
+    mprimcp::app::install_crypto_provider();
     let cli = Cli::parse();
     init_logging();
     match run(cli).await {

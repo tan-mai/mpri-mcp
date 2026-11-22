@@ -22,6 +22,7 @@ impl App {
     }
 
     pub fn new(db: Db, config: Config, mode: Mode) -> Self {
+        install_crypto_provider();
         let notifier = Notifier::new(db.clone(), &config.telegram_api);
         Self { db, config: Arc::new(config), mode, notifier }
     }
@@ -29,4 +30,9 @@ impl App {
     pub fn server_cron(&self) -> bool {
         self.mode == Mode::Serve && self.config.cron_enabled
     }
+}
+
+// TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
+pub fn install_crypto_provider() {
+    let _ = rustls::crypto::ring::default_provider().install_default();
 }
