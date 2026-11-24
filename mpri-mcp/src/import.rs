@@ -128,6 +128,10 @@ pub async fn import(target: &Db, from: &Path, secrets_dir: Option<&Path>) -> Res
             bail!("{} is already a Rust MPriMCP database; copy the file instead of importing it", from.display());
         }
     }
+    let currency = crate::prefs::load(target).await?.currency;
+    if currency != crate::locale::Currency::Vnd {
+        bail!("the Python release stored prices in VND but this server uses {}", currency.code());
+    }
     let mut report = ImportReport::default();
     let mut tx = db::begin(target).await?;
 
@@ -146,7 +150,7 @@ pub async fn import(target: &Db, from: &Path, secrets_dir: Option<&Path>) -> Res
             .bind(text(&r, "search_url_template"))
             .bind(text(&r, "cron_expression"))
             .bind(flag(&r, "cron_enabled").unwrap_or(false))
-            .bind(text(&r, "timezone").unwrap_or_else(|| crate::clock::TIMEZONE.into()))
+            .bind(text(&r, "timezone").unwrap_or_else(|| crate::clock::DEFAULT_TIMEZONE.into()))
             .bind(req_ms(&r, "created_at"))
             .bind(req_ms(&r, "updated_at")),
         )

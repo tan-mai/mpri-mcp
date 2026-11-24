@@ -52,6 +52,29 @@ pub fn opt_list<'de, D: Deserializer<'de>, T: DeserializeOwned>(d: D) -> Result<
     }
 }
 
+fn to_f64<E: Error>(v: &Value) -> Result<Option<f64>, E> {
+    match v {
+        Value::Null => Ok(None),
+        Value::Number(n) => n.as_f64().map(Some).ok_or_else(|| E::custom(format!("expected a number, got {n}"))),
+        Value::String(s) => {
+            let t = s.trim();
+            if t.is_empty() {
+                return Ok(None);
+            }
+            t.parse::<f64>().map(Some).map_err(|_| E::custom(format!("expected a number, got '{s}'")))
+        }
+        other => Err(E::custom(format!("expected a number, got {other}"))),
+    }
+}
+
+pub fn opt_num<'de, D: Deserializer<'de>>(d: D) -> Result<Option<f64>, D::Error> {
+    to_f64(&Value::deserialize(d)?)
+}
+
+pub fn req_num<'de, D: Deserializer<'de>>(d: D) -> Result<f64, D::Error> {
+    to_f64(&Value::deserialize(d)?)?.ok_or_else(|| D::Error::custom("expected a number"))
+}
+
 pub fn opt_bool<'de, D: Deserializer<'de>>(d: D) -> Result<Option<bool>, D::Error> {
     match Value::deserialize(d)? {
         Value::Null => Ok(None),

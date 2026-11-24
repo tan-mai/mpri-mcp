@@ -209,13 +209,6 @@ pub fn fmt_thousands(value: i64, sep: char) -> String {
     if value < 0 { format!("-{out}") } else { out }
 }
 
-pub fn vnd(value: Option<i64>) -> String {
-    match value {
-        None => "—".into(),
-        Some(v) => format!("{} ₫", fmt_thousands(v, '.')),
-    }
-}
-
 pub fn fmt_g(value: f64) -> String {
     if value.fract() == 0.0 { format!("{}", value as i64) } else { format!("{value}") }
 }

@@ -14,6 +14,10 @@ services:
       MPRIMCP_CRON_ENABLED: "true"
       # Only Caddy reaches the app port, so its X-Forwarded-For header can be trusted.
       MPRIMCP_TRUST_PROXY: "true"
+      # Optional: fix the currency (VND/USD), the language (en/vi) and the timezone.
+      # MPRIMCP_CURRENCY: VND
+      # MPRIMCP_LANGUAGE: vi
+      # MPRIMCP_TIMEZONE: Asia/Ho_Chi_Minh
     volumes:
       - mprimcp_data:/data
     expose:

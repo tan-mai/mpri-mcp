@@ -18,6 +18,7 @@ pub struct App {
 impl App {
     pub async fn open(config: Config, mode: Mode) -> Result<Self> {
         let db = db::open(&config.db_path()).await?;
+        crate::prefs::init(&db, &config).await?;
         Ok(Self::new(db, config, mode))
     }
 

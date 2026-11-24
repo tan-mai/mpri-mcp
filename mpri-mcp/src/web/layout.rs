@@ -4,24 +4,25 @@ use axum::response::{IntoResponse, Redirect, Response};
 use maud::{DOCTYPE, Markup, html};
 
 use crate::auth::users::User;
+use crate::locale::{Lang, t};
 use crate::web::session::Session;
 
-const NAV: [(&str, &str); 7] = [
-    ("/admin", "Tổng quan"),
-    ("/admin/supermarkets", "Siêu thị"),
-    ("/admin/products", "Sản phẩm"),
-    ("/admin/review", "Cần duyệt"),
-    ("/admin/alerts", "Alert"),
-    ("/admin/notifications", "Thông báo"),
-    ("/admin/account", "Tài khoản"),
+const NAV: [(&str, &str, &str); 7] = [
+    ("/admin", "Overview", "Tổng quan"),
+    ("/admin/supermarkets", "Supermarkets", "Siêu thị"),
+    ("/admin/products", "Products", "Sản phẩm"),
+    ("/admin/review", "Review", "Cần duyệt"),
+    ("/admin/alerts", "Price alerts", "Mốc giá"),
+    ("/admin/notifications", "Notifications", "Thông báo"),
+    ("/admin/account", "Account", "Tài khoản"),
 ];
 
 pub fn csrf_field(session: &Session) -> Markup {
     html! { input type="hidden" name="csrf_token" value=(session.csrf()); }
 }
 
-pub fn page(title: &str, active: &str, session: &Session, user: Option<&User>, body: Markup) -> Response {
-    page_with_status(StatusCode::OK, title, active, session, user, body)
+pub fn page(title: &str, active: &str, session: &Session, user: Option<&User>, lang: Lang, body: Markup) -> Response {
+    page_with_status(StatusCode::OK, title, active, session, user, lang, body)
 }
 
 pub fn page_with_status(
@@ -30,12 +31,13 @@ pub fn page_with_status(
     active: &str,
     session: &Session,
     user: Option<&User>,
+    lang: Lang,
     body: Markup,
 ) -> Response {
     let flashes = session.take_flashes();
     let markup = html! {
         (DOCTYPE)
-        html lang="vi" {
+        html lang=(lang.code()) {
             head {
                 meta charset="utf-8";
                 meta name="viewport" content="width=device-width, initial-scale=1";
@@ -52,11 +54,11 @@ pub fn page_with_status(
                             span.muted { (u.username) }
                             form method="post" action="/admin/logout" {
                                 (csrf_field(session))
-                                button.secondary type="submit" { "Đăng xuất" }
+                                button.secondary type="submit" { (t(lang, "Sign out", "Đăng xuất")) }
                             }
                             nav {
-                                @for (href, label) in NAV {
-                                    a href=(href) class=[(href == active).then_some("on")] { (label) }
+                                @for (href, en, vi) in NAV {
+                                    a href=(href) class=[(href == active).then_some("on")] { (t(lang, en, vi)) }
                                 }
                             }
                         }
@@ -79,6 +81,6 @@ pub fn back(session: &Session, kind: &str, message: impl Into<String>, to: &str)
     Redirect::to(to).into_response()
 }
 
-pub fn yes_no(v: bool) -> &'static str {
-    if v { "Bật" } else { "Tắt" }
+pub fn on_off(lang: Lang, v: bool) -> &'static str {
+    if v { t(lang, "on", "bật") } else { t(lang, "off", "tắt") }
 }

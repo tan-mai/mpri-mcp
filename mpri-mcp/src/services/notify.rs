@@ -284,7 +284,8 @@ impl Notifier {
             .await
             .map_err(|e| e.to_string())?
             .ok_or_else(|| format!("{channel} is not set up yet."))?;
-        let result = self.deliver(&config, "test", &test_lines()).await;
+        let lang = crate::prefs::load(&self.db).await.map(|p| p.language).unwrap_or(crate::prefs::DEFAULT_LANGUAGE);
+        let result = self.deliver(&config, "test", &test_lines(lang)).await;
         let error = result.as_ref().err().cloned();
         let _ = sqlx::query(
             "UPDATE notification_channels SET last_test_ok = ?, last_test_at = ?, last_test_error = ? WHERE channel = ?",
@@ -315,15 +316,16 @@ impl Notifier {
         let mut out = AfterSubmit::default();
         let result: SResult<()> = async {
             out.channels = self.active_channels().await?.into_iter().map(|c| c.channel).collect();
+            let prefs = crate::prefs::load(&self.db).await?;
             out.alerts = alerts::evaluate(&self.db, saved).await?;
             for hit in &out.alerts {
-                self.notify("alert", alert_lines(hit)).await?;
+                self.notify("alert", alert_lines(hit, &prefs)).await?;
             }
             if queue_empty && accepted > 0 {
                 let settings = get_settings(&self.db).await?;
                 let now = now_ms();
                 if settings.summary_enabled {
-                    let lines = summary_lines(&self.db, settings.last_summary_at, now).await?;
+                    let lines = summary_lines(&self.db, settings.last_summary_at, now, &prefs).await?;
                     out.summary_sent_to = self.notify("summary", lines).await?;
                 }
                 set_last_summary(&self.db, now).await?;

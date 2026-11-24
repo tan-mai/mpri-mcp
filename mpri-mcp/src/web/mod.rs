@@ -60,7 +60,11 @@ pub fn check_csrf(session: &Session, form: &HashMap<String, String>) -> Result<(
     if session.verify_csrf(form.get("csrf_token").map(String::as_str)) {
         Ok(())
     } else {
-        Err((StatusCode::FORBIDDEN, "Biểu mẫu đã hết hạn hoặc không hợp lệ. Hãy tải lại trang.").into_response())
+        Err((
+            StatusCode::FORBIDDEN,
+            "Form expired or invalid: reload the page. / Biểu mẫu đã hết hạn hoặc không hợp lệ: hãy tải lại trang.",
+        )
+            .into_response())
     }
 }
 
@@ -113,6 +117,7 @@ fn dashboard_routes(with_consent: bool) -> Router<AppState> {
         .route("/admin/logout", post(auth_pages::logout))
         .route("/admin/account", get(auth_pages::account))
         .route("/admin/account/password", post(auth_pages::change_password))
+        .route("/admin/settings", post(auth_pages::save_settings))
         .route("/admin", get(overview::overview))
         .route("/admin/supermarkets", get(markets::list).post(markets::create))
         .route("/admin/supermarkets/{id}", get(markets::detail).post(markets::update))

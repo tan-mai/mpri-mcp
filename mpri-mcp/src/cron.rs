@@ -298,7 +298,7 @@ mod tests {
         for case in cases {
             let expr = case["expr"].as_str().unwrap();
             let now: DateTime<Utc> = case["now"].as_str().unwrap().parse().unwrap();
-            let got = parse(expr, crate::clock::TIMEZONE);
+            let got = parse(expr, crate::clock::DEFAULT_TIMEZONE);
             if let Some(expected) = case["error"].as_str() {
                 assert_eq!(got.err().map(|e| e.0).as_deref(), Some(expected), "{expr}");
                 continue;

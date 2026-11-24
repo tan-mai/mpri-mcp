@@ -291,6 +291,7 @@ pub async fn deep_discounts(db: &Db, min_pct: f64, days: i64, limit: i64) -> SRe
 }
 
 pub async fn product_history(db: &Db, product: Product, days: i64, supermarket_id: Option<&str>) -> SResult<History> {
+    let tz = crate::prefs::load(db).await?.timezone;
     if !(1..=730).contains(&days) {
         return validation("days must be between 1 and 730.");
     }
@@ -319,7 +320,7 @@ pub async fn product_history(db: &Db, product: Product, days: i64, supermarket_i
     .await?;
     let mut by_url: HashMap<i64, BTreeMap<NaiveDate, PriceRecord>> = HashMap::new();
     for rec in records {
-        by_url.entry(rec.product_url_id).or_default().insert(local_date(rec.crawled_at), rec);
+        by_url.entry(rec.product_url_id).or_default().insert(local_date(rec.crawled_at, tz), rec);
     }
     let series = urls
         .iter()

@@ -2,10 +2,12 @@
 use rmcp::handler::server::wrapper::{Json, Parameters};
 use rmcp::{tool, tool_router};
 
-use crate::clock::{TIMEZONE, human};
+use crate::clock::human;
 use crate::error::{SResult, ServiceError};
+use crate::locale::{Currency, Lang, Money};
 use crate::mcp::MprServer;
 use crate::mcp::types::*;
+use crate::prefs::{self, Prefs};
 use crate::services::agent_tasks::{self, PriceResult};
 use crate::services::alerts::{self, AlertView};
 use crate::services::analytics::{self, MarketPrice};
@@ -14,7 +16,7 @@ use crate::services::products::{self, UrlInput};
 use crate::services::schedules::{self, CRON_OFF_HINT};
 use crate::services::setup_status;
 use crate::services::supermarkets::{self, Changes, SEARCH_NOTE};
-use crate::text::{fmt_thousands, round1};
+use crate::text::round1;
 
 fn out<T>(r: SResult<T>) -> Result<Json<T>, String> {
     match r {
@@ -27,17 +29,25 @@ fn out<T>(r: SResult<T>) -> Result<Json<T>, String> {
     }
 }
 
-fn price_row(p: &MarketPrice) -> PriceRowOut {
+fn money(pr: &Prefs, minor: Option<i64>) -> Option<Money> {
+    minor.map(|m| pr.currency.money(m))
+}
+
+fn to_minor(currency: Currency, field: &str, value: Option<f64>) -> Result<Option<i64>, String> {
+    value.map(|v| currency.to_minor(v).map_err(|e| format!("{field}: {e}"))).transpose()
+}
+
+fn price_row(p: &MarketPrice, pr: &Prefs) -> PriceRowOut {
     PriceRowOut {
         supermarket_id: p.supermarket_id.clone(),
         supermarket_name: p.supermarket_name.clone(),
-        current_price: p.current_price,
-        original_price: p.original_price,
-        member_price: p.member_price,
+        current_price: money(pr, p.current_price),
+        original_price: money(pr, p.original_price),
+        member_price: money(pr, p.member_price),
         discount_pct: p.discount_pct,
         member_discount_pct: p.member_discount_pct,
         in_stock: p.in_stock,
-        checked_at: human(p.crawled_at),
+        checked_at: human(p.crawled_at, pr.timezone),
         stale: p.is_stale.then_some(true),
         no_data_yet: p.current_price.is_none().then_some(true),
         last_error: p.last_error.clone(),
@@ -47,17 +57,17 @@ fn price_row(p: &MarketPrice) -> PriceRowOut {
     }
 }
 
-fn alert_view(v: &AlertView) -> AlertOut {
+fn alert_view(v: &AlertView, pr: &Prefs) -> AlertOut {
     AlertOut {
         product_name: v.product.name.clone(),
-        target_price: v.alert.target_price,
+        target_price: pr.currency.money(v.alert.target_price),
         supermarket_ids: v.alert.supermarket_ids.clone(),
         below_target_now: v.below(),
         cheapest: v.best.as_ref().map(|b| CheapestOut {
             supermarket_id: b.supermarket_id.clone(),
             supermarket_name: b.supermarket_name.clone(),
-            current_price: b.current_price,
-            checked_at: human(b.crawled_at),
+            current_price: money(pr, b.current_price),
+            checked_at: human(b.crawled_at, pr.timezone),
             needs_review: b.needs_review.then_some(true),
             url: b.url.clone(),
         }),
@@ -78,6 +88,7 @@ for you (pending_tasks) and prices flagged for review (needs_review_count).",
     async fn get_supermarkets(&self) -> Result<Json<SupermarketsOut>, String> {
         out(async {
             agent_tasks::maintain(&self.app.db).await?;
+            let pr = prefs::load(&self.app.db).await?;
             let server_cron = self.app.server_cron();
             let summaries = supermarkets::list_summaries(&self.app.db).await?;
             let items = summaries
@@ -92,7 +103,10 @@ for you (pending_tasks) and prices flagged for review (needs_review_count).",
                             cron_expression: m.cron_expression.clone(),
                             enabled: m.cron_enabled,
                             timezone: m.timezone.clone(),
-                            next_run: human(schedules::next_run(m, server_cron).map(|t| t.timestamp_millis())),
+                            next_run: human(
+                                schedules::next_run(m, server_cron).map(|t| t.timestamp_millis()),
+                                pr.timezone,
+                            ),
                             crawl_in_progress: false,
                         },
                         tracked_urls: item.active_url_count,
@@ -103,7 +117,7 @@ for you (pending_tasks) and prices flagged for review (needs_review_count).",
                         last_run: item.last_run.as_ref().map(|r| LastRunOut {
                             status: r.status.clone(),
                             trigger: r.trigger.clone(),
-                            started_at: human(Some(r.started_at)),
+                            started_at: human(Some(r.started_at), pr.timezone),
                             urls_ok: r.urls_ok,
                             urls_failed: r.urls_failed,
                             error: r.error.clone(),
@@ -111,7 +125,7 @@ for you (pending_tasks) and prices flagged for review (needs_review_count).",
                     }
                 })
                 .collect();
-            Ok(SupermarketsOut { supermarkets: items, timezone: TIMEZONE.into() })
+            Ok(SupermarketsOut { supermarkets: items, timezone: pr.tz_name().into() })
         }
         .await)
     }
@@ -240,6 +254,7 @@ schedules (see hint).",
     ) -> Result<Json<CronOut>, String> {
         out(async {
             let r = schedules::set_cron(&self.app.db, &p.supermarket_id, &p.cron_expression).await?;
+            let pr = prefs::load(&self.app.db).await?;
             let cron_enabled = self.app.server_cron();
             Ok(CronOut {
                 message: format!("Crawl schedule for {} set to '{}'.", r.supermarket.name, r.cron_expression),
@@ -247,7 +262,7 @@ schedules (see hint).",
                 supermarket_name: r.supermarket.name,
                 cron_expression: r.cron_expression,
                 timezone: r.timezone,
-                next_runs: r.next_runs.iter().filter_map(|t| human(Some(t.timestamp_millis()))).collect(),
+                next_runs: r.next_runs.iter().filter_map(|t| human(Some(t.timestamp_millis()), pr.timezone)).collect(),
                 cron_enabled,
                 hint: (!cron_enabled).then(|| CRON_OFF_HINT.to_string()),
             })
@@ -380,11 +395,12 @@ other_matches lists them. A price with needs_review=true is unverified.",
     ) -> Result<Json<ComparisonOut>, String> {
         out(async {
             let cmp = analytics::price_comparison(&self.app.db, &p.product_name).await?;
+            let pr = prefs::load(&self.app.db).await?;
             Ok(ComparisonOut {
                 product: ProductRef { id: cmp.product.id, name: cmp.product.name, category: cmp.product.category },
-                currency: "VND".into(),
-                prices: cmp.prices.iter().map(price_row).collect(),
-                cheapest: cmp.cheapest.as_ref().map(price_row),
+                currency: pr.currency.code().into(),
+                prices: cmp.prices.iter().map(|x| price_row(x, &pr)).collect(),
+                cheapest: cmp.cheapest.as_ref().map(|x| price_row(x, &pr)),
                 other_matches: cmp.alternatives.into_iter().map(|m| m.name).collect(),
             })
         }
@@ -406,8 +422,9 @@ first. Prices flagged needs_review are left out.",
         out(async {
             let items =
                 analytics::deep_discounts(&self.app.db, p.min_discount_percentage as f64, p.days, p.limit).await?;
+            let pr = prefs::load(&self.app.db).await?;
             Ok(DiscountsOut {
-                currency: "VND".into(),
+                currency: pr.currency.code().into(),
                 count: items.len(),
                 items: items
                     .into_iter()
@@ -416,12 +433,12 @@ first. Prices flagged needs_review are left out.",
                         category: i.category,
                         supermarket_id: i.supermarket_id,
                         supermarket_name: i.supermarket_name,
-                        current_price: i.current_price,
-                        original_price: i.original_price,
+                        current_price: pr.currency.money(i.current_price),
+                        original_price: money(&pr, i.original_price),
                         discount_pct: i.discount_pct,
-                        member_price: i.member_price,
+                        member_price: money(&pr, i.member_price),
                         member_discount_pct: i.member_discount_pct,
-                        checked_at: human(Some(i.crawled_at)),
+                        checked_at: human(Some(i.crawled_at), pr.timezone),
                         url: i.url,
                     })
                     .collect(),
@@ -442,6 +459,7 @@ average and how today's price compares with the period's lowest.",
         out(async {
             let h =
                 analytics::price_history(&self.app.db, &p.product_name, p.days, p.supermarket_id.as_deref()).await?;
+            let pr = prefs::load(&self.app.db).await?;
             let series = h
                 .series
                 .iter()
@@ -456,18 +474,18 @@ average and how today's price compares with the period's lowest.",
                             .iter()
                             .map(|pt| HistoryPointOut {
                                 date: pt.day.format("%Y-%m-%d").to_string(),
-                                current_price: pt.current_price,
-                                original_price: pt.original_price,
-                                member_price: pt.member_price,
+                                current_price: pr.currency.money(pt.current_price),
+                                original_price: money(&pr, pt.original_price),
+                                member_price: money(&pr, pt.member_price),
                                 needs_review: pt.needs_review.then_some(true),
                             })
                             .collect(),
                         stats: HistoryStatsOut {
-                            min_price: low.map(|l| l.current_price),
+                            min_price: money(&pr, low.map(|l| l.current_price)),
                             min_date: low.map(|l| l.day.format("%Y-%m-%d").to_string()),
-                            max_price: s.max_price(),
-                            avg_price: s.avg_price(),
-                            latest_price: latest.map(|l| l.current_price),
+                            max_price: money(&pr, s.max_price()),
+                            avg_price: money(&pr, s.avg_price()),
+                            latest_price: money(&pr, latest.map(|l| l.current_price)),
                             latest_vs_min_pct: match (latest, low) {
                                 (Some(l), Some(m)) => Some(round1(
                                     (l.current_price - m.current_price) as f64 / m.current_price as f64 * 100.0,
@@ -481,7 +499,7 @@ average and how today's price compares with the period's lowest.",
             Ok(HistoryOut {
                 product: HistoryProductRef { id: h.product.id, name: h.product.name },
                 days: h.days,
-                currency: "VND".into(),
+                currency: pr.currency.code().into(),
                 series,
                 other_matches: h.alternatives.into_iter().map(|m| m.name).collect(),
             })
@@ -502,6 +520,7 @@ many tasks are still waiting after these.",
     async fn get_pending_crawl_tasks(&self, Parameters(p): Parameters<ClaimParams>) -> Result<Json<TasksOut>, String> {
         out(async {
             let r = agent_tasks::claim_tasks(&self.app.db, p.supermarket_id.as_deref(), p.limit).await?;
+            let pr = prefs::load(&self.app.db).await?;
             let tasks: Vec<TaskOut> = r
                 .tasks
                 .into_iter()
@@ -512,18 +531,18 @@ many tasks are still waiting after these.",
                     supermarket_id: t.task.supermarket_id,
                     supermarket_name: t.supermarket_name,
                     url: t.task.url,
-                    last_price: t.last_price,
-                    last_original_price: t.last_original_price,
-                    last_checked_at: human(t.last_checked_at),
-                    lease_expires_at: human(t.task.lease_expires_at),
+                    last_price: money(&pr, t.last_price),
+                    last_original_price: money(&pr, t.last_original_price),
+                    last_checked_at: human(t.last_checked_at, pr.timezone),
+                    lease_expires_at: human(t.task.lease_expires_at, pr.timezone),
                 })
                 .collect();
             Ok(TasksOut {
                 count: tasks.len(),
                 tasks,
                 remaining_pending: r.remaining_pending,
-                currency: "VND".into(),
-                timezone: TIMEZONE.into(),
+                currency: pr.currency.code().into(),
+                timezone: pr.tz_name().into(),
             })
         }
         .await)
@@ -542,17 +561,33 @@ the user about alerts_triggered and, once nothing is pending, a summary of where
     )]
     async fn submit_price_results(&self, Parameters(p): Parameters<SubmitParams>) -> Result<Json<SubmitOut>, String> {
         out(async {
+            let pr = prefs::load(&self.app.db).await?;
+            let c = pr.currency;
             let inputs: Vec<PriceResult> = p
                 .results
                 .iter()
-                .map(|i| PriceResult {
-                    task_id: i.task_id.clone(),
-                    status: i.status.as_str().into(),
-                    price: i.price,
-                    original_price: i.original_price,
-                    member_price: i.member_price,
-                    raw_text: i.raw_text.clone(),
-                    note: i.note.clone(),
+                .map(|i| {
+                    let amounts = (|| -> Result<_, String> {
+                        Ok((
+                            to_minor(c, "price", i.price)?,
+                            to_minor(c, "original_price", i.original_price)?,
+                            to_minor(c, "member_price", i.member_price)?,
+                        ))
+                    })();
+                    let (price, original_price, member_price, amount_error) = match amounts {
+                        Ok((a, b, m)) => (a, b, m, None),
+                        Err(e) => (None, None, None, Some(e)),
+                    };
+                    PriceResult {
+                        task_id: i.task_id.clone(),
+                        status: i.status.as_str().into(),
+                        price,
+                        original_price,
+                        member_price,
+                        raw_text: i.raw_text.clone(),
+                        note: i.note.clone(),
+                        amount_error,
+                    }
                 })
                 .collect();
             let r = agent_tasks::submit_results(&self.app.db, &inputs).await?;
@@ -560,8 +595,8 @@ the user about alerts_triggered and, once nothing is pending, a summary of where
             let notifications = ((!sent.alerts.is_empty() || (r.queue_empty && r.accepted > 0))
                 && sent.channels.is_empty())
             .then(|| {
-                "No Telegram/Discord channel is set up (set_notification_channel or dashboard → Thông báo), so the \
-                 user was not messaged: tell them in your summary."
+                "No Telegram/Discord channel is set up (set_notification_channel or the dashboard), so the user was \
+                 not messaged: tell them in your summary."
                     .to_string()
             });
             let alerts_triggered: Vec<AlertTriggeredOut> = sent
@@ -569,11 +604,11 @@ the user about alerts_triggered and, once nothing is pending, a summary of where
                 .iter()
                 .map(|h| AlertTriggeredOut {
                     product_name: h.product_name.clone(),
-                    target_price: h.target_price,
+                    target_price: c.money(h.target_price),
                     prices: h
                         .prices
                         .iter()
-                        .map(|p| AlertPriceOut { supermarket_id: p.supermarket_id.clone(), price: p.price })
+                        .map(|x| AlertPriceOut { supermarket_id: x.supermarket_id.clone(), price: c.money(x.price) })
                         .collect(),
                 })
                 .collect();
@@ -590,8 +625,8 @@ the user about alerts_triggered and, once nothing is pending, a summary of where
                         task_id: f.task_id,
                         product_name: f.product_name,
                         supermarket_id: f.supermarket_id,
-                        price: f.price,
-                        last_price: f.last_price,
+                        price: c.money(f.price),
+                        last_price: c.money(f.last_price),
                         change_pct: f.change_pct,
                     })
                     .collect(),
@@ -618,18 +653,23 @@ Check product_name in the answer: it is the matched product.",
     )]
     async fn set_price_alert(&self, Parameters(p): Parameters<SetAlertParams>) -> Result<Json<SetAlertOut>, String> {
         out(async {
+            let pr = prefs::load(&self.app.db).await?;
+            let target = pr
+                .currency
+                .to_minor(p.target_price)
+                .map_err(|e| ServiceError::Validation(format!("target_price: {e}")))?;
             let (v, created) =
-                alerts::set_alert(&self.app.db, &p.product_name, p.target_price, p.supermarket_ids.as_deref()).await?;
+                alerts::set_alert(&self.app.db, &p.product_name, target, p.supermarket_ids.as_deref()).await?;
             let mut message = format!(
-                "{} the alert: {} below {} VND.",
+                "{} the alert: {} below {}.",
                 if created { "Set" } else { "Updated" },
                 v.product.name,
-                fmt_thousands(p.target_price, ',')
+                pr.currency.format_code(target)
             );
             if v.below() {
                 message.push_str(" It is already below that now.");
             }
-            Ok(SetAlertOut { alert: alert_view(&v), created, message })
+            Ok(SetAlertOut { alert: alert_view(&v, &pr), created, message })
         }
         .await)
     }
@@ -644,7 +684,12 @@ Check product_name in the answer: it is the matched product.",
     async fn get_price_alerts(&self) -> Result<Json<AlertsOut>, String> {
         out(async {
             let found = alerts::list_alerts(&self.app.db).await?;
-            Ok(AlertsOut { count: found.len(), alerts: found.iter().map(alert_view).collect(), currency: "VND".into() })
+            let pr = prefs::load(&self.app.db).await?;
+            Ok(AlertsOut {
+                count: found.len(),
+                alerts: found.iter().map(|v| alert_view(v, &pr)).collect(),
+                currency: pr.currency.code().into(),
+            })
         }
         .await)
     }
@@ -672,13 +717,14 @@ Check product_name in the answer: it is the matched product.",
         name = "get_setup_status",
         title = "Setup status",
         description = "What is already set up (supermarkets, products, price alerts, notification channels, schedules, \
-prices) and the suggested next onboarding step (next_step). Call it first in Workflow 0 (ONBOARDING); optional steps \
-(set_alerts, notifications) never block the later ones.",
+prices), the server's currency, language and timezone, and the suggested next onboarding step (next_step). Call it \
+first in Workflow 0 (ONBOARDING); optional steps (set_alerts, notifications) never block the later ones.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn get_setup_status(&self) -> Result<Json<SetupStatusOut>, String> {
         out(async {
             let s = setup_status::status(&self.app.db).await?;
+            let pr = prefs::load(&self.app.db).await?;
             Ok(SetupStatusOut {
                 supermarkets: SetupMarketsOut {
                     count: s.supermarkets.len(),
@@ -704,12 +750,15 @@ prices) and the suggested next onboarding step (next_step). Call it first in Wor
                         enabled: c.enabled,
                         target_masked: c.target_masked,
                         last_test_ok: c.last_test_ok,
-                        last_test_at: human(c.last_test_at),
+                        last_test_at: human(c.last_test_at, pr.timezone),
                     })
                     .collect(),
                 cron_enabled: self.app.server_cron(),
                 mode: self.app.mode.as_str().into(),
                 has_any_price: s.has_any_price,
+                currency: pr.currency.code().into(),
+                language: pr.language.code().into(),
+                timezone: pr.tz_name().into(),
                 next_step: s.next_step.into(),
             })
         }
@@ -757,6 +806,50 @@ channel.",
                 error: r.error,
                 removed: r.removed,
                 message,
+            })
+        }
+        .await)
+    }
+
+    // TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
+    #[tool(
+        name = "set_preferences",
+        title = "Set preferences",
+        description = "Set the server's currency (VND or USD), the language of the dashboard and of the Telegram/Discord \
+messages (en or vi) and the timezone used for schedules and displayed times (IANA name). Only the fields you pass \
+change. The currency can only change while no price is stored. Settings fixed by the server's environment cannot be \
+changed here.",
+        annotations(read_only_hint = false, destructive_hint = false, idempotent_hint = true, open_world_hint = false)
+    )]
+    async fn set_preferences(
+        &self,
+        Parameters(p): Parameters<SetPreferencesParams>,
+    ) -> Result<Json<PreferencesOut>, String> {
+        out(async {
+            let changes = prefs::Changes {
+                currency: p.currency.map(|c| match c {
+                    CurrencyCode::VND => Currency::Vnd,
+                    CurrencyCode::USD => Currency::Usd,
+                }),
+                language: p.language.map(|l| match l {
+                    LanguageCode::En => Lang::En,
+                    LanguageCode::Vi => Lang::Vi,
+                }),
+                timezone: p.timezone,
+            };
+            let pr = prefs::update(&self.app.db, &self.app.config, changes).await?;
+            let locked = analytics::has_any_price(&self.app.db).await? || self.app.config.currency.is_some();
+            Ok(PreferencesOut {
+                message: format!(
+                    "Currency {}, language {}, timezone {}.",
+                    pr.currency.code(),
+                    pr.language.code(),
+                    pr.tz_name()
+                ),
+                currency: pr.currency.code().into(),
+                language: pr.language.code().into(),
+                timezone: pr.tz_name().into(),
+                currency_locked: locked,
             })
         }
         .await)

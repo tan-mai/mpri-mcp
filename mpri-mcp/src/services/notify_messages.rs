@@ -1,12 +1,14 @@
 // TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
 use std::collections::HashMap;
 
-use crate::clock::local;
+use crate::clock::{local, short_date, short_datetime};
 use crate::db::Db;
 use crate::error::SResult;
+use crate::locale::{Lang, t, tf};
+use crate::prefs::Prefs;
 use crate::services::alerts::{self, AlertHit, AlertView};
 use crate::services::analytics::{cheapest_by_product, discount_pct};
-use crate::text::{fmt_g, vnd};
+use crate::text::fmt_g;
 
 #[derive(Debug, Clone)]
 pub struct Seg {
@@ -33,41 +35,59 @@ pub fn plain(lines: &[Line]) -> String {
     lines.iter().map(|l| l.iter().map(|seg| seg.text.as_str()).collect::<String>()).collect::<Vec<_>>().join("\n")
 }
 
-fn discount(original: Option<i64>, price: i64) -> Vec<Seg> {
+fn discount(p: &Prefs, original: Option<i64>, price: i64) -> Vec<Seg> {
     match discount_pct(original, Some(price)) {
-        Some(pct) if pct != 0.0 => vec![s(format!(" (gốc {}, −{}%)", vnd(original), fmt_g(pct)))],
+        Some(pct) if pct != 0.0 => {
+            let was = p.currency.format_opt(original);
+            let pct = fmt_g(pct);
+            vec![s(tf(p.language, format!(" (was {was}, −{pct}%)"), format!(" (gốc {was}, −{pct}%)")))]
+        }
         _ => Vec::new(),
     }
 }
 
-pub fn alert_lines(hit: &AlertHit) -> Vec<Line> {
-    let mut lines =
-        vec![vec![s("🔔 Giá dưới mốc: "), b(&hit.product_name), s(format!(" (mốc {})", vnd(Some(hit.target_price))))]];
-    for p in &hit.prices {
-        let mut line = vec![s("• "), b(vnd(Some(p.price))), s(format!(" tại {}", p.supermarket_name))];
-        line.extend(discount(p.original_price, p.price));
-        if let Some(m) = p.member_price.filter(|m| *m != 0) {
-            line.push(s(format!(" · thành viên {}", vnd(Some(m)))));
+pub fn alert_lines(hit: &AlertHit, p: &Prefs) -> Vec<Line> {
+    let lang = p.language;
+    let money = |v: i64| p.currency.format(v);
+    let target = money(hit.target_price);
+    let mut lines = vec![vec![
+        s(t(lang, "🔔 Price below target: ", "🔔 Giá dưới mốc: ")),
+        b(&hit.product_name),
+        s(tf(lang, format!(" (target {target})"), format!(" (mốc {target})"))),
+    ]];
+    for sp in &hit.prices {
+        let at = tf(lang, format!(" at {}", sp.supermarket_name), format!(" tại {}", sp.supermarket_name));
+        let mut line = vec![s("• "), b(money(sp.price)), s(at)];
+        line.extend(discount(p, sp.original_price, sp.price));
+        if let Some(m) = sp.member_price.filter(|m| *m != 0) {
+            let member = money(m);
+            line.push(s(tf(lang, format!(" · member {member}"), format!(" · thành viên {member}"))));
         }
         line.push(s(" · "));
-        line.push(link("Xem sản phẩm", &p.url));
-        if p.needs_review {
-            line.push(s(" ⚠ chưa xác minh"));
+        line.push(link(t(lang, "View product", "Xem sản phẩm"), &sp.url));
+        if sp.needs_review {
+            line.push(s(t(lang, " ⚠ unverified", " ⚠ chưa xác minh")));
         }
         lines.push(line);
     }
-    if hit.prices.iter().any(|p| p.needs_review) {
-        lines.push(vec![s("⚠ Giá lệch hơn 50% so với lần trước: hãy kiểm tra lại trước khi mua.")]);
+    if hit.prices.iter().any(|sp| sp.needs_review) {
+        lines.push(vec![s(t(
+            lang,
+            "⚠ The price moved more than 50% since last time: check it before buying.",
+            "⚠ Giá lệch hơn 50% so với lần trước: hãy kiểm tra lại trước khi mua.",
+        ))]);
     }
     lines
 }
 
 // TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
-pub fn test_lines() -> Vec<Line> {
-    vec![vec![b("✅ MPriMCP: kết nối thông báo thành công")]]
+pub fn test_lines(lang: Lang) -> Vec<Line> {
+    vec![vec![b(t(lang, "✅ MPriMCP: notifications are working", "✅ MPriMCP: kết nối thông báo thành công"))]]
 }
 
-pub async fn summary_lines(db: &Db, since: Option<i64>, now: i64) -> SResult<Vec<Line>> {
+pub async fn summary_lines(db: &Db, since: Option<i64>, now: i64, p: &Prefs) -> SResult<Vec<Line>> {
+    let (lang, tz) = (p.language, p.timezone);
+    let money = |v: Option<i64>| p.currency.format_opt(v);
     let products: Vec<(i64, String)> = sqlx::query_as(
         "SELECT id, name FROM products WHERE id IN (SELECT product_id FROM product_urls WHERE is_active = 1) \
          ORDER BY name",
@@ -86,64 +106,73 @@ pub async fn summary_lines(db: &Db, since: Option<i64>, now: i64) -> SResult<Vec
     let cheapest = cheapest_by_product(db).await?;
     let alert_views: HashMap<i64, AlertView> =
         alerts::list_alerts(db).await?.into_iter().map(|v| (v.product.id, v)).collect();
+    let at = |name: &str| tf(lang, format!(" at {name}"), format!(" tại {name}"));
 
-    let mut lines: Vec<Line> =
-        vec![vec![b(format!("🛒 Giá rẻ nhất — lượt quét {}", local(now).format("%d/%m %H:%M")))]];
+    let when = local(now, tz).format(short_datetime(lang)).to_string();
+    let mut lines: Vec<Line> = vec![vec![b(tf(
+        lang,
+        format!("🛒 Cheapest prices — crawl {when}"),
+        format!("🛒 Giá rẻ nhất — lượt quét {when}"),
+    ))]];
     let plain_products: Vec<&(i64, String)> = products.iter().filter(|(id, _)| !alert_views.contains_key(id)).collect();
     for (id, name) in &plain_products {
         let Some(mp) = cheapest.get(id).filter(|m| m.current_price.is_some()) else {
-            lines.push(vec![s(format!("• {name} — chưa có giá"))]);
+            lines.push(vec![s(tf(lang, format!("• {name} — no price yet"), format!("• {name} — chưa có giá")))]);
             continue;
         };
         let price = mp.current_price.unwrap_or_default();
-        let mut line = vec![
-            s("• "),
-            link(name.clone(), &mp.url),
-            s(" — "),
-            b(vnd(Some(price))),
-            s(format!(" tại {}", mp.supermarket_name)),
-        ];
-        line.extend(discount(mp.original_price, price));
+        let mut line =
+            vec![s("• "), link(name.clone(), &mp.url), s(" — "), b(money(Some(price))), s(at(&mp.supermarket_name))];
+        line.extend(discount(p, mp.original_price, price));
         if mp.needs_review {
-            line.push(s(" ⚠ chưa xác minh"));
+            line.push(s(t(lang, " ⚠ unverified", " ⚠ chưa xác minh")));
         }
-        if let (Some(since), Some(at)) = (since, mp.crawled_at)
-            && at < since
+        if let (Some(since), Some(crawled)) = (since, mp.crawled_at)
+            && crawled < since
         {
-            line.push(s(format!(" · giá ngày {}", local(at).format("%d/%m"))));
+            let day = local(crawled, tz).format(short_date(lang)).to_string();
+            line.push(s(tf(lang, format!(" · price from {day}"), format!(" · giá ngày {day}"))));
         }
         lines.push(line);
     }
     if plain_products.is_empty() && alert_views.is_empty() {
-        lines.push(vec![s("Chưa theo dõi sản phẩm nào.")]);
+        lines.push(vec![s(t(lang, "No product is tracked yet.", "Chưa theo dõi sản phẩm nào."))]);
     }
     if !alert_views.is_empty() {
-        lines.push(vec![b("🎯 Mốc giá")]);
+        lines.push(vec![b(t(lang, "🎯 Price targets", "🎯 Mốc giá"))]);
         let mut views: Vec<&AlertView> = alert_views.values().collect();
         views.sort_by(|a, b| a.product.name.cmp(&b.product.name));
         for v in views {
-            let mut line = vec![s("• "), s(&v.product.name), s(format!(" < {}: ", vnd(Some(v.alert.target_price))))];
+            let mut line = vec![s("• "), s(&v.product.name), s(format!(" < {}: ", money(Some(v.alert.target_price))))];
             match v.best.as_ref().filter(|best| best.current_price.is_some()) {
-                None => line.push(s("chưa có giá")),
+                None => line.push(s(t(lang, "no price yet", "chưa có giá"))),
                 Some(best) if v.below() => line.extend([
-                    s("✅ đạt — "),
-                    b(vnd(best.current_price)),
-                    s(format!(" tại {}", best.supermarket_name)),
+                    s(t(lang, "✅ reached — ", "✅ đạt — ")),
+                    b(money(best.current_price)),
+                    s(at(&best.supermarket_name)),
                     s(" · "),
-                    link("Xem", &best.url),
+                    link(t(lang, "View", "Xem"), &best.url),
                 ]),
-                Some(best) => line.extend([
-                    s(format!("chưa đạt — rẻ nhất {}", vnd(best.current_price))),
-                    s(format!(" tại {}", best.supermarket_name)),
-                ]),
+                Some(best) => {
+                    let cheapest = money(best.current_price);
+                    line.extend([
+                        s(tf(lang, format!("not yet — cheapest {cheapest}"), format!("chưa đạt — rẻ nhất {cheapest}"))),
+                        s(at(&best.supermarket_name)),
+                    ])
+                }
             }
             lines.push(line);
         }
     }
     if !failed.is_empty() {
-        lines.push(vec![b("⛔ Không đọc được lượt này")]);
+        lines.push(vec![b(t(lang, "⛔ Could not read this round", "⛔ Không đọc được lượt này"))]);
         for (product, market, error) in failed {
-            lines.push(vec![s(format!("• {product} tại {market}: {}", error.as_deref().unwrap_or("lỗi")))]);
+            let reason = error.unwrap_or_else(|| t(lang, "error", "lỗi").to_string());
+            lines.push(vec![s(tf(
+                lang,
+                format!("• {product} at {market}: {reason}"),
+                format!("• {product} tại {market}: {reason}"),
+            ))]);
         }
     }
     Ok(lines)
@@ -213,4 +242,42 @@ pub fn split_messages(lines: &[Line], render: fn(&Line) -> String, limit: usize)
         messages.push(current);
     }
     messages
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::locale::Currency;
+    use crate::services::alerts::SavedPrice;
+
+    fn hit() -> AlertHit {
+        AlertHit {
+            product_id: 1,
+            product_name: "Milk".into(),
+            target_price: 400,
+            prices: vec![SavedPrice {
+                product_id: 1,
+                product_name: "Milk".into(),
+                supermarket_id: "s".into(),
+                supermarket_name: "Store".into(),
+                url: "https://x.example/p".into(),
+                price: 399,
+                original_price: Some(499),
+                member_price: None,
+                needs_review: false,
+            }],
+        }
+    }
+
+    #[test]
+    fn alert_message_follows_language_and_currency() {
+        let en = Prefs { currency: Currency::Usd, language: Lang::En, timezone: chrono_tz::America::New_York };
+        let text = plain(&alert_lines(&hit(), &en));
+        assert!(text.contains("Price below target: Milk (target $4.00)"), "{text}");
+        assert!(text.contains("$3.99 at Store (was $4.99, −20%)"), "{text}");
+        let vi = Prefs { currency: Currency::Vnd, language: Lang::Vi, timezone: chrono_tz::Asia::Ho_Chi_Minh };
+        let text = plain(&alert_lines(&hit(), &vi));
+        assert!(text.contains("Giá dưới mốc: Milk (mốc 400 ₫)"), "{text}");
+        assert_eq!(plain(&test_lines(Lang::En)), "✅ MPriMCP: notifications are working");
+    }
 }

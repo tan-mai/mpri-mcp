@@ -74,6 +74,7 @@ pub struct PriceResult {
     pub member_price: Option<i64>,
     pub raw_text: Option<String>,
     pub note: Option<String>,
+    pub amount_error: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -362,6 +363,9 @@ fn problem(r: &PriceResult, task: Option<&CrawlTask>, seen: &HashSet<String>) ->
     }
     if r.status != "ok" {
         return None;
+    }
+    if let Some(e) = &r.amount_error {
+        return Some(e.clone());
     }
     let price = match r.price {
         Some(p) if p > 0 => p,

@@ -388,6 +388,7 @@ async fn ac03_tool_list_matches_parity_table() {
         "get_setup_status",
         "get_supermarkets",
         "set_notification_channel",
+        "set_preferences",
         "set_price_alert",
         "setup_supermarket_cron_task",
         "submit_price_results",
@@ -416,4 +417,101 @@ async fn lenient_arguments_like_python_sdk() {
     assert_eq!(out["urls"][0]["status"], "added");
     let alert = h.call("set_price_alert", json!({"product_name": "sua th", "target_price": "70000"})).await;
     assert_eq!(alert["target_price"], 70000);
+}
+
+#[tokio::test]
+async fn usd_prices_end_to_end() {
+    let h = harness().await;
+    let prefs =
+        h.call("set_preferences", json!({"currency": "USD", "language": "en", "timezone": "America/New_York"})).await;
+    assert_eq!(prefs["currency"], "USD");
+    assert_eq!(prefs["currency_locked"], false);
+    let status = h.call("get_setup_status", json!({})).await;
+    assert_eq!((status["currency"].as_str(), status["language"].as_str()), (Some("USD"), Some("en")));
+    assert_eq!(status["timezone"], "America/New_York");
+
+    let id = h.seed_market("Kroger", "kroger.com", 1).await;
+    h.call("trigger_crawl_now", json!({"supermarket_id": id})).await;
+    let tasks = claim_all(&h).await;
+    let task = tasks[0]["task_id"].as_str().unwrap().to_string();
+    let bad =
+        h.call("submit_price_results", json!({"results": [{"task_id": task, "status": "ok", "price": 3.999}]})).await;
+    assert!(bad["rejected"][0]["reason"].as_str().unwrap().contains("more than 2 decimals"), "{bad}");
+    let out = h
+        .call(
+            "submit_price_results",
+            json!({"results": [{"task_id": task, "status": "ok", "price": 3.99, "original_price": "4.99"}]}),
+        )
+        .await;
+    assert_eq!(out["accepted"], 1);
+    assert_eq!(h.sql_i64("SELECT current_price FROM price_records").await, 399);
+
+    let cmp = h.call("get_product_price_comparison", json!({"product_name": "san pham 0"})).await;
+    assert_eq!(cmp["currency"], "USD");
+    assert_eq!(cmp["prices"][0]["current_price"], 3.99);
+    assert_eq!(cmp["prices"][0]["original_price"], 4.99);
+    assert_eq!(cmp["prices"][0]["discount_pct"], 20.0);
+    let history = h.call("get_price_history", json!({"product_name": "san pham 0"})).await;
+    assert_eq!(history["series"][0]["stats"]["latest_price"], 3.99);
+
+    let alert = h.call("set_price_alert", json!({"product_name": "san pham 0", "target_price": 4})).await;
+    assert_eq!(alert["target_price"], 4.0);
+    assert_eq!(alert["below_target_now"], true);
+    assert_eq!(alert["message"], "Set the alert: Sản phẩm 0 below $4.00. It is already below that now.");
+    let err = h.call_err("set_price_alert", json!({"product_name": "san pham 0", "target_price": 3.001})).await;
+    assert!(err.contains("more than 2 decimals"), "{err}");
+
+    let locked = h.call_err("set_preferences", json!({"currency": "VND"})).await;
+    assert!(locked.contains("prices are already stored in USD"), "{locked}");
+}
+
+#[tokio::test]
+async fn vnd_rejects_decimals_and_keeps_integers() {
+    let h = harness().await;
+    let id = h.seed_market("WinMart", "winmart.vn", 1).await;
+    h.call("trigger_crawl_now", json!({"supermarket_id": id})).await;
+    let task = claim_all(&h).await[0]["task_id"].as_str().unwrap().to_string();
+    let out =
+        h.call("submit_price_results", json!({"results": [{"task_id": task, "status": "ok", "price": 45.9}]})).await;
+    assert!(out["rejected"][0]["reason"].as_str().unwrap().contains("whole number of VND"), "{out}");
+    h.call("submit_price_results", json!({"results": [{"task_id": task, "status": "ok", "price": 45900}]})).await;
+    let cmp = h.call("get_product_price_comparison", json!({"product_name": "san pham 0"})).await;
+    assert_eq!(cmp["prices"][0]["current_price"].to_string(), "45900");
+    assert_eq!(cmp["currency"], "VND");
+    let still = h.call("set_preferences", json!({"language": "vi"})).await;
+    assert_eq!((still["language"].as_str(), still["currency_locked"].as_bool()), (Some("vi"), Some(true)));
+}
+
+#[tokio::test]
+async fn timezone_preference_moves_schedules() {
+    let h = harness().await;
+    let id = h.seed_market("WinMart", "winmart.vn", 0).await;
+    h.call("set_preferences", json!({"timezone": "America/New_York"})).await;
+    let markets = h.call("get_supermarkets", json!({})).await;
+    assert_eq!(markets["timezone"], "America/New_York");
+    assert_eq!(markets["supermarkets"][0]["schedule"]["timezone"], "America/New_York");
+    let cron =
+        h.call("setup_supermarket_cron_task", json!({"supermarket_id": id, "cron_expression": "0 8 * * *"})).await;
+    assert_eq!(cron["timezone"], "America/New_York");
+    let err = h.call_err("set_preferences", json!({"timezone": "Mars/Olympus"})).await;
+    assert!(err.contains("Unknown timezone"), "{err}");
+}
+
+#[tokio::test]
+async fn currency_env_cannot_contradict_stored_prices() {
+    let h = harness().await;
+    let id = h.seed_market("WinMart", "winmart.vn", 1).await;
+    h.call("trigger_crawl_now", json!({"supermarket_id": id})).await;
+    let task = claim_all(&h).await[0]["task_id"].as_str().unwrap().to_string();
+    h.call("submit_price_results", json!({"results": [{"task_id": task, "status": "ok", "price": 45900}]})).await;
+    let mut cfg = config(h.dir.path(), false, "http://127.0.0.1:9");
+    cfg.currency = Some(mprimcp::locale::Currency::Usd);
+    let err = mprimcp::app::App::open(cfg.clone(), Mode::Stdio).await.err().unwrap().to_string();
+    assert!(err.contains("MPRIMCP_CURRENCY=USD") && err.contains("VND"), "{err}");
+    cfg.currency = None;
+    cfg.language = Some(mprimcp::locale::Lang::Vi);
+    let app = mprimcp::app::App::open(cfg.clone(), Mode::Stdio).await.unwrap();
+    let c2 = connect(app).await;
+    let (err, _, text) = call_raw(&c2, "set_preferences", json!({"language": "en"})).await;
+    assert!(err && text.contains("MPRIMCP_LANGUAGE"), "{text}");
 }

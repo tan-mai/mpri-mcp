@@ -8,21 +8,25 @@ use axum::response::{IntoResponse, Redirect, Response};
 use maud::html;
 
 use crate::auth::oauth::{self, Pending};
+use crate::locale::{Lang, t};
+use crate::prefs::load_or_default;
 use crate::web::layout::{csrf_field, page, page_with_status};
 use crate::web::session::Session;
 use crate::web::{AppState, Page, check_csrf, require_user};
 
-fn expired(session: &Session) -> Response {
+fn expired(session: &Session, lang: Lang) -> Response {
     page_with_status(
         StatusCode::BAD_REQUEST,
-        "Yêu cầu đã hết hạn",
+        t(lang, "Request expired", "Yêu cầu đã hết hạn"),
         "",
         session,
         None,
+        lang,
         html! {
             div.narrow {
-                h1 { "Yêu cầu kết nối đã hết hạn" }
-                p { "Yêu cầu này không còn hiệu lực. Hãy kết nối lại từ AI client." }
+                h1 { (t(lang, "The connection request has expired", "Yêu cầu kết nối đã hết hạn")) }
+                p { (t(lang, "This request is no longer valid. Connect again from your AI client.",
+                    "Yêu cầu này không còn hiệu lực. Hãy kết nối lại từ AI client.")) }
             }
         },
     )
@@ -46,29 +50,33 @@ pub async fn form(
 ) -> Page {
     let req = q.get("req").cloned().unwrap_or_default();
     let user = require_user(&st, &session, &format!("/oauth/consent?req={req}")).await?;
+    let lang = load_or_default(&st.app.db).await.language;
     let Ok(Some((pending, client))) = oauth::get_pending(&st.app.db, &req).await else {
-        return Ok(expired(&session));
+        return Ok(expired(&session, lang));
     };
-    let name = client.client_name.clone().unwrap_or_else(|| "Một ứng dụng không tên".into());
+    let name = client
+        .client_name
+        .clone()
+        .unwrap_or_else(|| t(lang, "An unnamed application", "Một ứng dụng không tên").into());
     let body = html! {
         div.narrow {
-            h1 { "Cho phép truy cập MPriMCP?" }
+            h1 { (t(lang, "Allow access to MPriMCP?", "Cho phép truy cập MPriMCP?")) }
             div.card {
-                p { b { (name) } " muốn dùng các tool MPriMCP thay mặt " b { (user.username) } "." }
-                p.muted { "Sau khi đồng ý, trình duyệt sẽ quay về " code { (host_of(&pending.redirect_uri)) } "." }
-                p.muted { "Phạm vi: " code { (pending.scopes) } }
+                p { b { (name) } (t(lang, " wants to use the MPriMCP tools on behalf of ", " muốn dùng các tool MPriMCP thay mặt ")) b { (user.username) } "." }
+                p.muted { (t(lang, "After you allow it, the browser returns to ", "Sau khi đồng ý, trình duyệt sẽ quay về ")) code { (host_of(&pending.redirect_uri)) } "." }
+                p.muted { (t(lang, "Scope: ", "Phạm vi: ")) code { (pending.scopes) } }
                 form method="post" action="/oauth/consent" {
                     (csrf_field(&session))
                     input type="hidden" name="req" value=(pending.id);
                     div.actions {
-                        button type="submit" name="decision" value="allow" { "Cho phép" }
-                        button.secondary type="submit" name="decision" value="deny" { "Từ chối" }
+                        button type="submit" name="decision" value="allow" { (t(lang, "Allow", "Cho phép")) }
+                        button.secondary type="submit" name="decision" value="deny" { (t(lang, "Deny", "Từ chối")) }
                     }
                 }
             }
         }
     };
-    Ok(page("Cho phép truy cập", "", &session, Some(&user), body))
+    Ok(page(t(lang, "Allow access", "Cho phép truy cập"), "", &session, Some(&user), lang, body))
 }
 
 fn finish(pending: &Pending, issuer: &str, code: Option<String>) -> Response {
@@ -86,7 +94,8 @@ pub async fn submit(
     let req = form.get("req").cloned().unwrap_or_default();
     let user = require_user(&st, &session, &format!("/oauth/consent?req={req}")).await?;
     let Ok(Some((pending, client))) = oauth::get_pending(&st.app.db, &req).await else {
-        return Ok(expired(&session));
+        let lang = load_or_default(&st.app.db).await.language;
+        return Ok(expired(&session, lang));
     };
     let approve = form.get("decision").map(String::as_str) == Some("allow");
     match oauth::complete_pending(&st.app.db, &pending, approve, &user.username).await {

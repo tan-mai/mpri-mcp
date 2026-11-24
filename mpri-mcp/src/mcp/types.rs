@@ -2,6 +2,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+use crate::locale::Money;
 use crate::mcp::de;
 
 fn default_limit() -> i64 {
@@ -68,7 +69,7 @@ pub struct SupermarketParams {
 pub struct CronParams {
     /// Supermarket ID (or name) from get_supermarkets.
     pub supermarket_id: String,
-    /// Standard 5-field cron (minute hour day month weekday) in Vietnam time (Asia/Ho_Chi_Minh). '0 3 * * *' = 03:00
+    /// Standard 5-field cron (minute hour day month weekday) in the server's timezone (get_setup_status.timezone). '0 3 * * *' = 03:00
     /// daily; '30 6 * * 1-5' = 06:30 Mon–Fri; weekday 0 or 7 = Sunday. Macros like @daily also work.
     pub cron_expression: String,
 }
@@ -166,19 +167,20 @@ pub struct PriceResultInput {
     /// ok = price read; out_of_stock = page says sold out / 'hết hàng'; not_found = page is gone (404) or shows a
     /// different product; error = the page did not load or no price could be read (the task is retried later).
     pub status: ResultStatus,
-    /// Required when status is ok: what a regular customer pays now for this exact item, integer VND
-    /// ('45.900đ' -> 45900).
-    #[serde(default, deserialize_with = "de::opt_i64")]
-    #[schemars(with = "Option<i64>")]
-    pub price: Option<i64>,
+    /// Required when status is ok: what a regular customer pays now for this exact item, as a number in the
+    /// server's currency (get_setup_status.currency): VND has no decimals ('45.900đ' -> 45900), USD has cents
+    /// ('$3.99' -> 3.99).
+    #[serde(default, deserialize_with = "de::opt_num")]
+    #[schemars(with = "Option<f64>")]
+    pub price: Option<f64>,
     /// Struck-through / pre-discount price, if shown. Must be >= price.
-    #[serde(default, deserialize_with = "de::opt_i64")]
-    #[schemars(with = "Option<i64>")]
-    pub original_price: Option<i64>,
+    #[serde(default, deserialize_with = "de::opt_num")]
+    #[schemars(with = "Option<f64>")]
+    pub original_price: Option<f64>,
     /// Separate member/loyalty-card price, if shown.
-    #[serde(default, deserialize_with = "de::opt_i64")]
-    #[schemars(with = "Option<i64>")]
-    pub member_price: Option<i64>,
+    #[serde(default, deserialize_with = "de::opt_num")]
+    #[schemars(with = "Option<f64>")]
+    pub member_price: Option<f64>,
     /// Short page text the price was read from (max 500 characters).
     #[serde(default)]
     pub raw_text: Option<String>,
@@ -198,10 +200,10 @@ pub struct SubmitParams {
 pub struct SetAlertParams {
     /// Tracked product; fuzzy, accent-insensitive.
     pub product_name: String,
-    /// Notify when the price is BELOW this, in VND (e.g. 70000).
-    #[serde(deserialize_with = "de::req_i64")]
-    #[schemars(with = "i64")]
-    pub target_price: i64,
+    /// Notify when the price is BELOW this, as a number in the server's currency (e.g. 70000 VND or 3.50 USD).
+    #[serde(deserialize_with = "de::req_num")]
+    #[schemars(with = "f64")]
+    pub target_price: f64,
     /// Only these supermarkets (IDs or names from get_supermarkets); default all.
     #[serde(default, deserialize_with = "de::opt_list")]
     pub supermarket_ids: Option<Vec<String>>,
@@ -247,6 +249,34 @@ pub struct SetChannelParams {
 
 fn default_true_opt() -> Option<bool> {
     Some(true)
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, JsonSchema)]
+pub enum CurrencyCode {
+    #[serde(alias = "vnd")]
+    VND,
+    #[serde(alias = "usd")]
+    USD,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum LanguageCode {
+    En,
+    Vi,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct SetPreferencesParams {
+    /// Currency of every price: VND or USD. Can only change while no price is stored.
+    #[serde(default)]
+    pub currency: Option<CurrencyCode>,
+    /// Language of the dashboard and of the Telegram/Discord messages: en or vi.
+    #[serde(default)]
+    pub language: Option<LanguageCode>,
+    /// IANA timezone for schedules and displayed times, e.g. Asia/Ho_Chi_Minh or America/New_York.
+    #[serde(default)]
+    pub timezone: Option<String>,
 }
 
 // ------------------------------------------------------------------ outputs
@@ -390,11 +420,11 @@ pub struct PriceRowOut {
     pub supermarket_id: String,
     pub supermarket_name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub current_price: Option<i64>,
+    pub current_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub original_price: Option<i64>,
+    pub original_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub member_price: Option<i64>,
+    pub member_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub discount_pct: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -432,12 +462,12 @@ pub struct DiscountOut {
     pub category: Option<String>,
     pub supermarket_id: String,
     pub supermarket_name: String,
-    pub current_price: i64,
+    pub current_price: Money,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub original_price: Option<i64>,
+    pub original_price: Option<Money>,
     pub discount_pct: f64,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub member_price: Option<i64>,
+    pub member_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub member_discount_pct: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -455,11 +485,11 @@ pub struct DiscountsOut {
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct HistoryPointOut {
     pub date: String,
-    pub current_price: i64,
+    pub current_price: Money,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub original_price: Option<i64>,
+    pub original_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub member_price: Option<i64>,
+    pub member_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub needs_review: Option<bool>,
 }
@@ -467,15 +497,15 @@ pub struct HistoryPointOut {
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct HistoryStatsOut {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub min_price: Option<i64>,
+    pub min_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub min_date: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub max_price: Option<i64>,
+    pub max_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub avg_price: Option<i64>,
+    pub avg_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub latest_price: Option<i64>,
+    pub latest_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub latest_vs_min_pct: Option<f64>,
 }
@@ -513,9 +543,9 @@ pub struct TaskOut {
     pub supermarket_name: String,
     pub url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub last_price: Option<i64>,
+    pub last_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub last_original_price: Option<i64>,
+    pub last_original_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last_checked_at: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -534,13 +564,13 @@ pub struct TasksOut {
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct AlertPriceOut {
     pub supermarket_id: String,
-    pub price: i64,
+    pub price: Money,
 }
 
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct AlertTriggeredOut {
     pub product_name: String,
-    pub target_price: i64,
+    pub target_price: Money,
     pub prices: Vec<AlertPriceOut>,
 }
 
@@ -549,8 +579,8 @@ pub struct FlaggedOut {
     pub task_id: String,
     pub product_name: String,
     pub supermarket_id: String,
-    pub price: i64,
-    pub last_price: i64,
+    pub price: Money,
+    pub last_price: Money,
     pub change_pct: f64,
 }
 
@@ -583,7 +613,7 @@ pub struct CheapestOut {
     pub supermarket_id: String,
     pub supermarket_name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub current_price: Option<i64>,
+    pub current_price: Option<Money>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub checked_at: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -594,7 +624,7 @@ pub struct CheapestOut {
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct AlertOut {
     pub product_name: String,
-    pub target_price: i64,
+    pub target_price: Money,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub supermarket_ids: Option<Vec<String>>,
     pub below_target_now: bool,
@@ -657,7 +687,19 @@ pub struct SetupStatusOut {
     pub cron_enabled: bool,
     pub mode: String,
     pub has_any_price: bool,
+    pub currency: String,
+    pub language: String,
+    pub timezone: String,
     pub next_step: String,
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct PreferencesOut {
+    pub currency: String,
+    pub language: String,
+    pub timezone: String,
+    pub currency_locked: bool,
+    pub message: String,
 }
 
 #[derive(Debug, Serialize, JsonSchema)]

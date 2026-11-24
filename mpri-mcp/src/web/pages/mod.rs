@@ -34,11 +34,3 @@ pub fn safe_next(next: Option<&str>) -> String {
         _ => "/admin".into(),
     }
 }
-
-pub fn parse_vnd(raw: &str) -> Option<i64> {
-    let digits: String = raw.chars().filter(|c| !matches!(c, '.' | ',' | ' ' | '₫' | 'đ' | 'Đ')).collect();
-    if digits.is_empty() || !digits.chars().all(|c| c.is_ascii_digit()) {
-        return None;
-    }
-    digits.parse().ok()
-}

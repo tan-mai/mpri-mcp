@@ -13,7 +13,7 @@ use mprimcp::config::{Config, Mode};
 use mprimcp::{db, import, mcp, scheduler, web};
 
 #[derive(Parser)]
-#[command(name = "mprimcp", version, about = "Self-hosted MCP server that tracks Vietnamese supermarket prices")]
+#[command(name = "mprimcp", version, about = "Self-hosted MCP server that tracks supermarket prices (VND or USD)")]
 struct Cli {
     #[command(subcommand)]
     command: Command,

@@ -20,6 +20,8 @@ are omitted when empty, exactly like Python's `drop_none`.
 | D8 | invalid argument types | pydantic error inside the tool result | JSON-RPC `invalid_params` error (rmcp); numbers given as strings and lists given as JSON strings are still accepted, like the Python SDK |
 | D9 | `outputSchema` | generic object | typed schema per tool (schemars) |
 | D10 | new tools | — | `get_setup_status`, `set_notification_channel` (FR-6, FR-7); prompt `init` (FR-8) |
+| D11 | money in inputs/outputs | integer VND | number in the server currency: VND stays an integer (unchanged output), USD has 2 decimals; stored as integer minor units. `currency` field reports VND or USD |
+| D12 | preferences | — | `set_preferences` tool; `get_setup_status` adds `currency`, `language`, `timezone`; times follow the configured timezone (default `Asia/Ho_Chi_Minh`) |
 
 ## Setup and schedule
 

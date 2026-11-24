@@ -25,6 +25,9 @@ pub fn config(dir: &Path, cron: bool, telegram_api: &str) -> Config {
         extra_redirect_uris: Vec::new(),
         telegram_api: telegram_api.into(),
         import_from: None,
+        currency: None,
+        language: None,
+        timezone: None,
     }
 }
 

@@ -3,6 +3,9 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result, anyhow};
+use chrono_tz::Tz;
+
+use crate::locale::{Currency, Lang};
 
 pub const DEFAULT_BIND: &str = "127.0.0.1:8765";
 pub const DB_FILE: &str = "mprimcp.db";
@@ -38,6 +41,9 @@ pub struct Config {
     pub extra_redirect_uris: Vec<String>,
     pub telegram_api: String,
     pub import_from: Option<PathBuf>,
+    pub currency: Option<Currency>,
+    pub language: Option<Lang>,
+    pub timezone: Option<Tz>,
 }
 
 fn env(name: &str) -> Option<String> {
@@ -95,6 +101,19 @@ impl Config {
             extra_redirect_uris,
             telegram_api: env("MPRIMCP_TELEGRAM_API").unwrap_or_else(|| "https://api.telegram.org".into()),
             import_from: env("MPRIMCP_IMPORT_FROM").map(PathBuf::from),
+            currency: env("MPRIMCP_CURRENCY")
+                .map(|v| Currency::parse(&v).ok_or_else(|| anyhow!("MPRIMCP_CURRENCY must be VND or USD, got '{v}'")))
+                .transpose()?,
+            language: env("MPRIMCP_LANGUAGE")
+                .map(|v| Lang::parse(&v).ok_or_else(|| anyhow!("MPRIMCP_LANGUAGE must be en or vi, got '{v}'")))
+                .transpose()?,
+            timezone: env("MPRIMCP_TIMEZONE")
+                .map(|v| {
+                    v.parse::<Tz>().map_err(|_| {
+                        anyhow!("MPRIMCP_TIMEZONE must be an IANA timezone such as America/New_York, got '{v}'")
+                    })
+                })
+                .transpose()?,
         })
     }
 

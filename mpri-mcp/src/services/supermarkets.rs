@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use percent_encoding::{AsciiSet, NON_ALPHANUMERIC, utf8_percent_encode};
 use sqlx::FromRow;
 
-use crate::clock::{TIMEZONE, now_ms};
+use crate::clock::now_ms;
 use crate::db::{self, Db};
 use crate::error::{SResult, ServiceError, conflict, not_found, validation};
 use crate::text::{collapse_spaces, name_key, normalize_base_url, normalize_name, slugify};
@@ -259,6 +259,7 @@ pub async fn add(db: &Db, name: &str, base_url: &str, search_url_template: Optio
     let base = normalize_base_url(base_url).map_err(ServiceError::Validation)?;
     let template = clean_search_url_template(search_url_template)?;
     let key = name_key(&name);
+    let timezone = crate::prefs::load(db).await?.tz_name();
     let mut tx = db::begin(db).await?;
     let existing: Vec<(String, String, String)> =
         sqlx::query_as("SELECT id, name, name_key FROM supermarkets").fetch_all(&mut *tx).await?;
@@ -286,7 +287,7 @@ pub async fn add(db: &Db, name: &str, base_url: &str, search_url_template: Optio
     .bind(&key)
     .bind(&base)
     .bind(&template)
-    .bind(TIMEZONE)
+    .bind(timezone)
     .bind(now)
     .bind(now)
     .execute(&mut *tx)

@@ -124,7 +124,12 @@ async fn save(
     supermarket_ids: Option<&[String]>,
 ) -> SResult<(AlertView, bool)> {
     if !(target_price > 0 && target_price <= MAX_TARGET) {
-        return validation("target_price must be a positive price in VND, e.g. 70000.");
+        let currency = crate::prefs::load(db).await?.currency;
+        return validation(format!(
+            "target_price must be a positive price in {}, e.g. {}.",
+            currency.code(),
+            currency.example()
+        ));
     }
     let urls = products::urls_of(db, product.id).await?;
     let mut tracked: Vec<String> = urls.iter().map(|u| u.supermarket_id.clone()).collect();

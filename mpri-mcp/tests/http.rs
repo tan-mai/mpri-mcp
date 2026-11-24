@@ -10,6 +10,7 @@ use http_body_util::BodyExt;
 use mprimcp::app::App;
 use mprimcp::auth::users;
 use mprimcp::config::Mode;
+use mprimcp::locale::Lang;
 use mprimcp::web::{self, AppState};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
@@ -26,9 +27,14 @@ struct Server {
 }
 
 async fn server(mode: Mode) -> Server {
-    let _ = rustls::crypto::ring::default_provider().install_default();
+    server_lang(mode, None).await
+}
+
+async fn server_lang(mode: Mode, language: Option<Lang>) -> Server {
     let dir = tempfile::tempdir().unwrap();
-    let app = App::open(common::config(dir.path(), false, "http://127.0.0.1:9"), mode).await.unwrap();
+    let mut config = common::config(dir.path(), false, "http://127.0.0.1:9");
+    config.language = language;
+    let app = App::open(config, mode).await.unwrap();
     users::create(&app.db, "tan", PASSWORD).await.unwrap();
     let state = AppState::new(app.clone()).await.unwrap();
     let router = web::router(state, mode == Mode::Serve, CancellationToken::new());
@@ -294,7 +300,7 @@ async fn ac17c_ac23_oauth_flow_and_bearer_protected_mcp() {
 
 #[tokio::test]
 async fn ac17c_dashboard_requires_login_and_ac25_uses_service_logic() {
-    let s = server(Mode::Dashboard).await;
+    let s = server_lang(Mode::Dashboard, Some(Lang::Vi)).await;
     let mut browser = Browser::default();
     let r = browser.get(&s.router, "/admin").await;
     assert_eq!(r.status, StatusCode::SEE_OTHER);
@@ -359,7 +365,7 @@ async fn ac27_form_without_csrf_rejected() {
 
 #[tokio::test]
 async fn ac17d_too_many_failed_logins_blocked() {
-    let s = server(Mode::Dashboard).await;
+    let s = server_lang(Mode::Dashboard, Some(Lang::Vi)).await;
     let mut browser = Browser::default();
     for _ in 0..5 {
         assert_eq!(browser.login(&s.router, "wrong-password-123").await.status, StatusCode::UNAUTHORIZED);
@@ -393,7 +399,7 @@ async fn ac17e_only_argon2id_hashes_stored() {
 #[tokio::test]
 async fn ac25_ac26_every_dashboard_screen_renders_with_data() {
     use mprimcp::services::{agent_tasks, alerts, products, supermarkets};
-    let s = server(Mode::Serve).await;
+    let s = server_lang(Mode::Serve, Some(Lang::Vi)).await;
     let db = &s.app.db;
     let m =
         supermarkets::add(db, "Bách Hóa Xanh", "bachhoaxanh.com", Some("https://www.bachhoaxanh.com/tim-kiem?key={q}"))
@@ -442,7 +448,7 @@ async fn ac25_ac26_every_dashboard_screen_renders_with_data() {
     let products = browser.get(&s.router, "/admin/products").await.body;
     assert!(products.contains("399.000 ₫"), "{products}");
     let review = browser.get(&s.router, "/admin/review").await.body;
-    assert!(review.contains("Accept") && review.contains("Reject"));
+    assert!(review.contains("Chấp nhận") && review.contains("Loại bỏ"));
     let css = send(&s.router, Request::get("/static/app.css").body(Body::empty()).unwrap()).await;
     assert_eq!(css.status, StatusCode::OK);
     assert!(css.body.contains("overflow-wrap: anywhere") && css.body.contains("width: 100%"));
@@ -472,4 +478,34 @@ async fn ac25_ac26_every_dashboard_screen_renders_with_data() {
     let cron: Option<String> =
         sqlx::query_scalar("SELECT cron_expression FROM supermarkets").fetch_one(db).await.unwrap();
     assert_eq!(cron.as_deref(), Some("0 8 * * 6,0"));
+}
+
+#[tokio::test]
+async fn dashboard_is_english_by_default_and_settings_switch_language() {
+    let s = server(Mode::Dashboard).await;
+    let mut browser = Browser::default();
+    browser.login(&s.router, PASSWORD).await;
+    let page = browser.get(&s.router, "/admin").await;
+    assert!(page.body.contains("lang=\"en\""), "{}", page.body);
+    assert!(page.body.contains("Overview") && page.body.contains("Next step: Add a supermarket"), "{}", page.body);
+    let account = browser.get(&s.router, "/admin/account").await;
+    assert!(account.body.contains("Settings") && account.body.contains("Asia/Ho_Chi_Minh"), "{}", account.body);
+
+    let csrf = browser.csrf(&s.router, "/admin/account").await;
+    let r = browser
+        .post(
+            &s.router,
+            "/admin/settings",
+            &[("csrf_token", &csrf), ("currency", "USD"), ("language", "vi"), ("timezone", "America/New_York")],
+        )
+        .await;
+    assert_eq!(r.status, StatusCode::SEE_OTHER);
+    let page = browser.get(&s.router, "/admin").await;
+    assert!(page.body.contains("lang=\"vi\"") && page.body.contains("Tổng quan"), "{}", page.body);
+    assert!(page.body.contains("USD · America/New_York"), "{}", page.body);
+
+    let r = browser.post(&s.router, "/admin/settings", &[("csrf_token", &csrf), ("timezone", "Mars/Olympus")]).await;
+    assert_eq!(r.status, StatusCode::SEE_OTHER);
+    let account = browser.get(&s.router, "/admin/account").await;
+    assert!(account.body.contains("Unknown timezone"), "{}", account.body);
 }

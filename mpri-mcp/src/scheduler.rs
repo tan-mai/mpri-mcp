@@ -7,7 +7,6 @@ use tokio_util::sync::CancellationToken;
 
 use crate::app::App;
 use crate::auth::oauth;
-use crate::clock::TIMEZONE;
 use crate::cron::{self, Schedule};
 use crate::services::{agent_tasks, supermarkets};
 
@@ -126,7 +125,8 @@ impl CronJobs {
 // TM - #{ticket number} - MPriMCP Rust Rewrite & Self-host
 pub async fn run(app: App, cancel: CancellationToken) {
     let crawl = app.server_cron();
-    let housekeeping_schedule = cron::parse(HOUSEKEEPING_CRON, TIMEZONE).ok();
+    let tz = crate::prefs::load(&app.db).await.map(|p| p.tz_name()).unwrap_or(crate::clock::DEFAULT_TIMEZONE);
+    let housekeeping_schedule = cron::parse(HOUSEKEEPING_CRON, tz).ok();
     let mut next_housekeeping = housekeeping_schedule.as_ref().and_then(|s| s.next_from(Utc::now()));
     let mut jobs = CronJobs::default();
     tracing::info!(crawl_cron = crawl, "scheduler started");

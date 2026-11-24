@@ -123,6 +123,12 @@ resumes exactly where it stopped.
 `docker compose -f docker-compose.vps.yml run --rm -v mpri_mpri_data:/legacy:ro mprimcp import --from /legacy/mpri.db`.
 Running it twice inserts nothing new; the output lists `source / inserted / skipped` per table.
 
+## Language after upgrading
+
+Releases with English/Vietnamese support start in English. To keep the dashboard and the
+Telegram/Discord messages in Vietnamese, set `MPRIMCP_LANGUAGE: vi` in the service's environment, or
+pick *Tiếng Việt* on the dashboard's account page.
+
 ## Operating it
 
 | Task | How |
